@@ -1,0 +1,33 @@
+//- extends base.pug를 명시한 pug파일들에 html 기본 구성 골격을 리턴해줌
+
+doctype html 
+//- html(lang="en")
+html(lang="ko")
+  head 
+    //- Controller 파트의 res.render 파라미터 값으로 {pageTitle : 'Home'} 오브젝트를 코딩해 놓았기에 pug파일의 #{pageTitle} 자리에 값이 담겨지게 됨
+    //- [Pug 문법] #{} 문법 사용하면 한 html 태그에 대해 variable를 다른 text (예: | WeTube)와 섞어서 쓸 수 있음
+    title #{pageTitle} | WeTube
+
+    //- (용어 약자 풀이 주의: MVP 디자인 패턴이 아님. Model View Presenter) Minimum Viable Product (MVP CSS) 
+    //- Mobile friendly / Works out of the box / Easy to customize / Only semantic HTML / No class names / Perfect for an MVP
+    link(rel="stylesheet" href="https://unpkg.com/mvp.css")
+
+  body
+    header
+      nav
+        ul
+          li
+            //- YD자체 변형 코드 에러 if checkLogin
+            if fakeUser.loggedIn
+              a(href="/logout") Logout 
+            else
+              a(href="/login") Login 
+                        
+      //- [Pug 문법] 태그= 문법은 #{} 문법과 달리 한 html 태그 자리에 오직 변수 자신의 값으로만 채우려는 경우에 사용 가능
+      h1=pageTitle
+    
+    main
+      block content
+
+      //- [Pug 문법] include를 통해 모든 pug 페이지(extends)에 동일한 footer 태그를 생성함
+      include partials/footer.pug

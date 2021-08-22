@@ -17,13 +17,23 @@ const logger = morgan("dev");
 // app.use는 어느 URL에도 작동하는 Global Middleware (코드 순서: use코드 먼저 get코드 나중)
 // 함수가 next()를 호출하면 Middleware 맞음, send()를 호출하면 연결이 중단되므로 Middleware 역할 아님
 
+// express 호환 view engine 종류 (put로 설치)
+app.set('view engine', 'pug');
+
+// express 호환 템플리트가 있는 디렉토리
+// package.json 파일이 있는 폴더 위치가 pug 템플릿 동작시 인식하는 cwd 기준점
+// 따라서 초기 기본값으로 지정된 ./views 경로를 src/views 경로로 변경 (s자 빠진 view로 폴더명 생성시 오류발생함)
+
+// app.set('views', 'src/views');
+app.set('views', process.cwd() + '/src/views');
+
 app.use(logger);
 
 app.use('/', globalRouter);
-app.use('/video', videoRouter)
-app.use('/user', userRouter);
+app.use('/videos', videoRouter)
+app.use('/users', userRouter);
 
-const PORT = 5500;
+const PORT = 4000;
 const handleListening = (PORT) => console.log(`Server listening on port ${PORT}`);
 app.listen(PORT, handleListening(PORT));
 
