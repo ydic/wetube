@@ -4,4 +4,12 @@
 extends base.pug
 
 block content
-  h1 edit Video pug
+  h4 Change Title of video
+  
+  //- submit 클릭시 데이터를 똑같은 url에 보내고 싶기 때문에 form(action="") 속성 설정 안하고, method를 POST로 설정함
+  //- form(method="GET") 요청은 구글과 같은 검색엔진에서 활용
+  //- form(method="POST") 요청은 웹사이트 로그인 / DB에 들어있는 값을 바꾸는 data를 보내거나 file을 보낼 때 사용
+  
+  form(method="POST")
+    input(name="titleVideoInput", placeholder="Video Title", value=video.title, required)
+    input(type="submit", value="Save")

@@ -15,8 +15,8 @@ block content
   //- [Pug 문법] mixin을 통해 각 페이지마다 같은 형태의 HTML을 보여주면서 다른 데이터를 제공할 수 있도록 해줌 ("똑똑한 partial")
   //- YouTube.com 사이트는 동영상 리스트 component 구조가 페이지 성격에 맞춰 재사용됨 (복붙 최소화, 동일 구조 재사용)
   //- [Pug 문법] 주의사항: mixin 기능 모듈화 시킨 pug파일은 include 통해서 연결해줘야 함. 그러나 기본적으로 include는 내용 변동 없는 html 페이지 연동(예- footer)에 적합
-  each videoItem in videosObjInArr
-    //- [Pug 문법] videoMixin이라고 명명한 mixin을 호출해서 각각의 videoItem 정보 객체를 보냄 (그러면 views/mixins/video.pug의 mixin videoMixin(info) 파라미터로 그 값이 들어옴)
+  each videoItem in fakeArrayVideos
+    //- [Pug 문법] videoMixin이라고 명명한 mixin을 호출(include 하고 +)해서 각각의 videoItem 정보 객체를 보냄 (그러면 views/mixins/video.pug의 mixin videoMixin(info) 파라미터로 그 값이 들어옴)
     +videoMixin(videoItem)
   else 
     //- [Pug 문법] 사용자가 요청한 내용에 대해서 현재 빈 ARRAY 상태임(또는 length가 0)을 사용자에게 알려줌

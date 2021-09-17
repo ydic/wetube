@@ -1,7 +1,7 @@
 import express from "express";
 
 // import 하기 전에 export 처리 먼저 해주어야 함
-import {trending, search} from "../controllers/videoController.js"
+import {trending} from "../controllers/videoController.js"
 import {join, login} from "../controllers/userController.js"
 
 const globalRouter = express.Router();
@@ -26,6 +26,6 @@ globalRouter.get("/", trending);
 globalRouter.get("/join", join);
 
 globalRouter.get("/login", login);
-globalRouter.get("/search", search);
+
 
 export default globalRouter;

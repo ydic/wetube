@@ -17,12 +17,15 @@ html(lang="ko")
       nav
         ul
           li
-            //- YD자체 변형 코드 에러 if checkLogin
-            if fakeUser.loggedIn
-              a(href="/logout") Logout 
-            else
-              a(href="/login") Login 
-                        
+
+            //- [ 질문 ] Cannot read property 'loggedIn' of undefined ??? 오류 해결방법 재확인요(그때까지 로그인/아웃 판별기능 주석처리함)
+            
+            //- if fakeUser.loggedIn
+            //-   a(href="/logout") Logout 
+            //- else
+            //-   a(href="/login") Login 
+
+
       //- [Pug 문법] 태그= 문법은 #{} 문법과 달리 한 html 태그 자리에 오직 변수 자신의 값으로만 채우려는 경우에 사용 가능
       h1=pageTitle
     

@@ -1,5 +1,5 @@
 /* NodeJS 문법 require, ES6 문법 import from */
-import express from "express";
+import express, { urlencoded } from "express";
 import morgan from "morgan";
 
 // 하기 코드 형태로 import 가능한 이유는 각 라우터 js파일에서 export default 했기 때문임
@@ -27,8 +27,16 @@ app.set('view engine', 'pug');
 // app.set('views', 'src/views');
 app.set('views', process.cwd() + '/src/views');
 
+
+// route들을 사용하기 전에 middleware를 사용해야 함
 app.use(logger);
 
+// [ Express 문법 ] express 스스로는 form의 body(즉, value)를 처리할 줄 모름. 
+// [ Express 문법 ] route들을 사용하기 전에 middleware를 사용해야 함
+// [ Express 문법 ] server.js에서 express.urlencode() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
+app.use(express.urlencoded({extended: true}));
+
+// route들을 사용하기 전에 middleware를 사용해야 함
 app.use('/', globalRouter);
 app.use('/videos', videoRouter)
 app.use('/users', userRouter);

@@ -1,9 +1,15 @@
 //- [Pug 문법] mixin을 통해 각 페이지마다 같은 형태의 HTML을 보여주면서 다른 데이터를 제공할 수 있도록 해줌
-mixin videoMixin(info)
+mixin videoMixin(videoItem)
   div 
-    h4=info.title
+    
+    h4
+      //- [ Pug 문법 ] 비디오 목록의 비디오 타이틀을 클릭하면 해당 비디오 상세페이지로 이동하도록 함
+      //- [ Pug 문법 ] ${ } 기호 사용하는 Pug 문법은 attribute에는 사용가능. variable과 텍스트를 섞어서 표현할 때는 사용불가 (즉, #{ })
+      a(href=`/videos/${videoItem.id}`)=videoItem.title
+
     ul
-      li #{info.rating}/5
-      li #{info.comments} comments.
-      li Posted #{info.createdAt}
-      li #{info.views} views.
+      //- [ Pug 문법 ] #{ } 기호 사용하는 Pug 문법은 attribute에는 사용불가(즉, ${ }). variable과 텍스트를 섞어서 표현할 때는 사용가능
+      li #{videoItem.rating}/5
+      li #{videoItem.comments} comments.
+      li Posted #{videoItem.createdAt}
+      li #{videoItem.views} views.
