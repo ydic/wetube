@@ -32,23 +32,23 @@ export const trending = (req, res) => res.render("home", {pageTitle: 'Home'}, ch
 let fakeArrayVideos = [
   { title: "First Video",
     rating:5,
-    comments:2,
+    comments:1,
     createdAt: "2 minutes ago",
-    views: 1,
+    views: 0,
     id: 1,
   },
   { title: "Second Video",
     rating:4,
     comments:22,
     createdAt: "22 minutes ago", 
-    views: 259,
+    views: 1,
     id: 2,
   },
   { title: "Third Video",
     rating:3,
     comments:32,
     createdAt: "32 minutes ago",
-    views: 359,
+    views: 2,
     id: 3,
   },
 ];
@@ -80,7 +80,7 @@ export const watch = (req, res) => {
   
   // [ 질문 ] ??? res 응답할 때 return 붙이고 안붙이고 실행결과 차이? 어떤 것이 옳은 문법? 왜?
 
-  return res.render('watch', { pageTitle: `Watching: ${video.title}`, video});  
+  return res.render('watch', { pageTitle: `Watching ${video.title}`, video});  
 }
 
 // getEdit 함수는 브라우저에 form을 보여줌
@@ -88,7 +88,7 @@ export const getEdit = (req, res) => {
   const idVideo = req.params.id;
   const video = fakeArrayVideos[idVideo -1];
 
-  return res.render('edit', { pageTitle: `Editing: ${video.title}`, video});
+  return res.render('edit', { pageTitle: `Editing ${video.title}`, video});
 };
 
 // postEdit 함수는 변경사항을 저장해줌
@@ -97,7 +97,7 @@ export const postEdit = (req, res) => {
   
   // [ Express 문법 ] express 스스로는 form의 body(즉, value)를 처리할 줄 모름. 
   // [ Express 문법 ] route들을 사용하기 전에 middleware를 사용해야 함
-  // [ Express 문법 ] server.js에서 express.urlencode() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
+  // [ Express 문법 ] server.js에서 express.urlencoded() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
   const titleVideo = req.body.titleVideoInput;
   
   // [ 주의 : mutation, Javascript, object 작동원리 ] Javascript에서 가짜 DB가 실제로 업데이트되지는 않음(즉, 서버 재시작하면 메모리 휘발). 단지, 코드 논리로는 아래 코드와 같이 작성하면 가짜 DB인 fakeArrayVideos에 사용자가 바꾼 제목으로 title이 바뀌어짐
@@ -114,4 +114,29 @@ export const postEdit = (req, res) => {
 
 // videoControllers.js에서 videoRouter.js로 export 해야할 함수가 2개 이상이므로 export default 적용 불가
 //export default trending;
+
+export const getUpload = (req, res) => {
+  return res.render('upload', { pageTitle: "Upload Video"})
+}
+
+export const postUpload = (req, res) => {
+  // here we will add a video to the videos array
+  console.log(req.body);
+
+  // Pug 코드의 form 태그 내의 input 태그에 name 속성으로 명명해 주어야 POST submit한 값이 key: value 형태로 req.body에서 포착 가능함
+  const titleVideoUpload = req.body.titleVideoUploadInput;
+
+  const fakeNewVideo = {
+    title: titleVideoUpload,
+    rating:0,
+    comments:0,
+    createdAt: "just now",
+    views: 0,
+    id: fakeArrayVideos.length +1,
+  }
+
+  fakeArrayVideos.push(fakeNewVideo);
+
+  return res.redirect('/');
+}
 

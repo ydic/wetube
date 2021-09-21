@@ -9,7 +9,7 @@ block content
   //- ??? mvp.css 패딩 마진 속성 문제로 추정
 
   //- [ Pug 문법 + JavaScript문법 ] 삼항연산자를 활용해 영문법 단수view / 복수views 단위 구분함
-  h3 #{video.views} #{video.views === 1 ? "view" : "views"}
+  h3 #{video.views} #{video.views < 2 ? "view" : "views"}
 
   
   //- videoRouter에서 edit 페이지 라우트 경로는 동영상 개별 id의 하위 경로로 설정했었음

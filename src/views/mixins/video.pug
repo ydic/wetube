@@ -10,6 +10,6 @@ mixin videoMixin(videoItem)
     ul
       //- [ Pug 문법 ] #{ } 기호 사용하는 Pug 문법은 attribute에는 사용불가(즉, ${ }). variable과 텍스트를 섞어서 표현할 때는 사용가능
       li #{videoItem.rating}/5
-      li #{videoItem.comments} comments.
+      li #{videoItem.comments} #{videoItem.comments < 2 ? "comment" : "comments"}
       li Posted #{videoItem.createdAt}
-      li #{videoItem.views} views.
+      li #{videoItem.views} #{videoItem.views < 2 ? "view" : "views"}

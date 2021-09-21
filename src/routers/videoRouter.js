@@ -1,7 +1,7 @@
 import express from "express";
 
 // import 하기 전에 export 처리 먼저 해주어야 함
-import {watch, getEdit, postEdit} from "../controllers/videoController.js"
+import {watch, getEdit, postEdit, getUpload, postUpload} from "../controllers/videoController.js"
 
 export const videoRouter = express.Router();
 
@@ -43,5 +43,6 @@ videoRouter.get('/:id(\\d+)/edit', getEdit);
 videoRouter.post('/:id(\\d+)/edit', postEdit);
 */
 
+videoRouter.route('/upload').get(getUpload).post(postUpload);
 
 export default videoRouter;
