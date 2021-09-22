@@ -4,12 +4,13 @@
   "description": "wetube clone",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec babel-node src/server.js"
+    "dev": "nodemon --exec babel-node src/init.js"
   },
   "author": "ydic",
   "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
+    "mongoose": "^6.0.7",
     "morgan": "^1.10.0",
     "pug": "^3.0.2"
   },

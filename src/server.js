@@ -1,3 +1,5 @@
+// server.js는 express 관련, server 환경설정(configuration) 관련 코드만 처리하도록 모듈화
+
 /* NodeJS 문법 require, ES6 문법 import from */
 import express, { urlencoded } from "express";
 import morgan from "morgan";
@@ -33,7 +35,7 @@ app.use(logger);
 
 // [ Express 문법 ] express 스스로는 form의 body(즉, value)를 처리할 줄 모름. 
 // [ Express 문법 ] route들을 사용하기 전에 middleware를 사용해야 함
-// [ Express 문법 ] server.js에서 express.urlencode() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
+// [ Express 문법 ] server.js에서 express.urlencoded() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
 app.use(express.urlencoded({extended: true}));
 
 // route들을 사용하기 전에 middleware를 사용해야 함
@@ -41,7 +43,5 @@ app.use('/', globalRouter);
 app.use('/videos', videoRouter)
 app.use('/users', userRouter);
 
-const PORT = 4000;
-const handleListening = (PORT) => console.log(`Server listening on port ${PORT}`);
-app.listen(PORT, handleListening(PORT));
-
+//  초기화 담당하는 init.js에서 express 라이브러리 액세스 할 수 있도록 export 해줌
+export default app;
