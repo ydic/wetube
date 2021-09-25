@@ -17,13 +17,22 @@ export const videoRouter = express.Router();
 // 숫자 값만 받도록 하는 정규표현식 \d+ 앞에 Javascript 문법 \ 기호를 붙이고 소괄호 쳐서 완성
 // 주소에 문자 값 입력해 요청하면 Cannot GET 에러 발생시켜 줌
 
-videoRouter.get('/:id(\\d+)', watch);
+// [ MongoDB 문법 ] ObjectID()는 24 byte hex string(24바이트 16진수)로 정의되어 있음
+// 정규표현식 테스트 사이트 https://regexr.com/
+// [0-9a-f]{24} 정규표현식의 의미는 0부터 9, a부터 f까지의 24자(24바이트 16진수) string을 찾아내는 것
+
+                // videoRouter.get('/:id(\\d+)', watch);
+videoRouter.get('/:id([0-9a-f]{24})', watch);
 
 // [ Express 문법 ] express 스스로는 form의 body(즉, value)를 처리할 줄 모름. 
 // [ Express 문법 ] route들을 사용하기 전에 middleware를 사용해야 함
 // [ Express 문법 ] server.js에서 express.urlencode() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
-videoRouter.route('/:id(\\d+)/edit').get(getEdit).post(postEdit);
+
+                // videoRouter.route('/:id(\\d+)/edit').get(getEdit).post(postEdit);
+videoRouter.route('/:id([0-9a-f]{24})/edit').get(getEdit).post(postEdit);
 
 videoRouter.route('/upload').get(getUpload).post(postUpload);
+
+                
 
 export default videoRouter;

@@ -9,8 +9,10 @@ block content
   //- ??? mvp.css 패딩 마진 속성 문제로 추정
 
   //- [ Pug 문법 + JavaScript문법 ] 삼항연산자를 활용해 영문법 단수view / 복수views 단위 구분함
-  h3 #{video.views} #{video.views < 2 ? "view" : "views"}
-
+            //- h3 #{video.views} #{video.views < 2 ? "view" : "views"}
+  div
+    p=video.description
+    small=video.createdAt
   
   //- videoRouter에서 edit 페이지 라우트 경로는 동영상 개별 id의 하위 경로로 설정했었음
   //- absolute & relative URL 개념: 경로 설정시 앞머리에 슬래쉬(/) 표기 여부에 따라 절대주소 또는 상대주소 성격을 부여할 수 있음

@@ -1,6 +1,18 @@
 extends base.pug
 
 block content
+  //- videoController.js 코드 내의 postUpload 컨트롤러에서 try {} catch {} 문법으로 잡아낸 오류가 있을 경우, upload.pug 템플릿에서 에러 메시지를 받을 수 있도록 { errorMessage: error._message } 형태로 보내줌
+  if errorMessage
+    span=errorMessage
+    //- span All fields are required
+
   form(method="POST")
-    input(name="titleVideoUploadInput", type="text", placeholder="Please put(?) the video title", required)
+    //- HTML input reference 안에 minlength, maxlength 기능이 있음
+    //- maxlength 속성을 가진 input 태그는 maxlength 값 이상의 글자수는 타이핑 불가
+    //- form에서도 minlength, maxlength 설정할 수 있는데 굳이 왜 db 스키마에서도 설정해야 할까? 
+    //- 정답은 둘 다 해야함(upload.pug 페이지는 사용자가 개발자 도구로 HTML 재편집해 글자 수 제한이 풀릴 수 있음 / 이런 사용자로부터 사이트를 보호해야 하므로 db 스키마에도 글자 수 제한을 설정해야 함)
+    input(name="titleVideoUploadInput", type="text", placeholder="Title", maxlength=80, required)
+    input(name="description", type="text", placeholder="Description", minlength=20, required)
+    input(name="hashtags", type="text", placeholder="Hashtags, separated by comma.", required)
+    
     input(type="submit" value="Upload Video")
