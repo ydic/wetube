@@ -4,13 +4,21 @@
 extends base.pug
 
 block content
-  h4 Change Title of video
+  h4 Update Video
   
   //- submit 클릭시 데이터를 똑같은 url에 보내고 싶기 때문에 form(action="") 속성 설정 안하고, method를 POST로 설정함
   //- form(method="GET") 요청은 구글과 같은 검색엔진에서 활용
   //- form(method="POST") 요청은 웹사이트 로그인 / DB에 들어있는 값을 바꾸는 data를 보내거나 file을 보낼 때 사용
   
   form(method="POST")
-    //- 왜???? Cannot read property 'title' of undefined
-    input(name="titleVideoInput", placeholder="Video Title", value=video.title, required)
+    //- 왜???? Cannot read property 'title' of undefined --- videoController.js에서 return res.render('edit', 여기) 코드의 '여기'에 { video }와 같이 video 오브젝트를 넘겨주겠다고 표기하지 않아서 발생하는 에러임
+    //- videoController.js의 getEdit 함수로부터 video 오브젝트를 받아와서 기존에 저장되어 있는 입력값을 input 태그의 value 속성에 불러와서 사용자에게 보여줌
+    input(name="title", placeholder="Video Title", value=video.title, required)
+    input(name="description", type="text", placeholder="Description", minlength=10, value=video.description, required)
+    
+    //- [ Javascript 문법 ] video 오브젝트의 hashtags 데이터를 input 태그의 value 속성에 불러왔을 때, 원형 데이터(Video.js의 schema)인 array 형태 그대로 사용자에게 노출되는 문제가 있음.
+    //- [ Javascript 문법 ] .join() 내장함수를 통해 array 형태 데이터가 string 형태로 보이도록 함 -- 즉, input(value=video.hashtags.join())
+
+    input(name="hashtags", type="text", placeholder="Hashtags, separated by comma.", value=video.hashtags.join(), required)
+
     input(type="submit", value="Save")

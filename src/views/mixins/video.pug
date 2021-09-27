@@ -8,7 +8,13 @@ mixin videoMixin(videoItem)
       a(href=`/videos/${videoItem.id}`)=videoItem.title
 
       p=videoItem.description
+
+      ul
+        each hashtag in videoItem.hashtags
+          li=hashtag
+      
       small=videoItem.createdAt
+      
       hr
 
                 //- ul
