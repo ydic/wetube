@@ -1,0 +1,19 @@
+//- [Pug 문법] extends를 통해 html 레이아웃을 base.pug 코드로부터 상속받음
+//- [Pug 문법] block을 통해 base.pug 레이아웃 기반으로 html 내용 재구성
+
+extends base.pug
+
+//- [Pug 문법] mixin 기능 모듈화 시킨 pug파일은 include 통해서 연결해줘야 함
+include mixins/video
+
+block content
+  //- 검색을 위한 input form 이므로 GET 요청으로 지정
+  form(method='GET')
+    input(name='keyword', type='text', placeholder='Search by title', required)
+    input(type='submit' value='Search now')
+
+  //- videoController.js의 search 함수 코드에서 keyword 검색결과가 searchResults에 담겨 search.pug로 render 되도록 함
+  //- [Pug 문법] array (즉, searchResults)에 담긴 검색결과를 mixin 지정해 놓은 템플릿 코드에 넣어서 페이지에 보여줌
+  div
+    each searchedVideoItem in searchResults
+      +videoMixin(searchedVideoItem)

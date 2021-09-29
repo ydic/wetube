@@ -43,9 +43,10 @@ export const home = async (req, res) => {
       Video.find({}, handleSearch);
     */
 
-      // [ Mongoose 문법 ] await 표시한 .find() 내장함수는 callback을 필요로 하지 않는다는 것을 알고, 찾아낸 비디오를 바로 출력함. await가 db로부터 결과값을 받을 때까지 기다려 줌. (주의: error 처리는 try {} catch {} 문으로 보완)
       try {
-        const videos = await Video.find({})
+        // [ Mongoose 문법 ] await 표시한 .find() 내장함수는 callback을 필요로 하지 않는다는 것을 알고, 찾아낸 비디오를 바로 출력함. await가 db로부터 결과값을 받을 때까지 기다려 줌. (주의: error 처리는 try {} catch {} 문으로 보완)
+        // [ Mongoose 문법 ] .sort({ key : value }) 내장함수를 통해 데이터(즉, db model)를 정렬할 수 있음
+        const videos = await Video.find({}).sort({ createdAt: 'desc'});
         // console.log(videos)
 
         return res.render("home", {pageTitle: 'Home', realArrayVideos: videos})
@@ -54,7 +55,27 @@ export const home = async (req, res) => {
       }
 };
 
-export const search = (req, res) => res.send('search video ctrl')
+export const search = async (req, res) => {
+  // [ Express 문법 ] req.query 내장함수를 통해 input 태그에서 입력한 검색 키워드(GET 요청)를 받아올 수 있음
+  
+  const { keyword } = req.query;
+
+  // search.pug 페이지의 keyword 초기값은 사용자 검색키워드 submit 이전이므로 undefined 상태임
+  // keyword가 undefined 상태가 아니라면 해당 값으로 검색 작업 시행해서 searchResults 배열에 담기도록 함
+  let searchResults = [];
+  if(keyword) {
+    searchResults = await Video.find({
+      title: {
+        // [ 정규표현식 문법 MongoDB ] $regex는 MongoDB가 제공하는 여러 operator 중에 한 가지임 / 예- { <field> : { $regex: 정규표현 관련 설정(문서 재참고요) } }
+        // [ 정규표현식 문법 Javascript ] new RegExp(PATTERN, FLAGS)
+        // [ 정규표현식 문법 Javascript ] i는 ignore case이며 영문 대소문자 구분하지 않는 속성임
+        $regex: new RegExp(keyword,'i')
+      }
+    });
+  }
+  return res.render('search', { pageTitle: 'Search', searchResults});
+}
+
 
 // pug js 맞물림 재확인요: const see? render watch? 이름 통일요?
 // videoRouter.js 파일에서 import하여 사용함
@@ -212,4 +233,14 @@ export const postUpload = async (req, res) => {
 
     return res.render('upload', { pageTitle: "Upload Video", errorMessage: error._message},)
   }
+}
+
+export const deleteVideo = async (req, res) => {
+  const idVideo = req.params.id;
+
+  // [ Mongoose 문법 ] findByIdAndDelete(id) 내장함수는 findOneAndDelete({_id:id}) 함수의 간략화 버전
+  // [ Mongoose 문법 ] findByIdAndDelete(), findOneAndDelete() 사용 권장 (즉, findByIdAndRemove, findOneAndRemove() 사용 비권장)
+  await Video.findOneAndDelete(idVideo);
+
+  return res.redirect('/');
 }
