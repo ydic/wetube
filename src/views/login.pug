@@ -1,0 +1,25 @@
+//- [Pug 문법] extends를 통해 html 레이아웃을 base.pug 코드로부터 상속받음
+//- [Pug 문법] block을 통해 base.pug 레이아웃 기반으로 html 내용 재구성
+
+extends base.pug
+
+//- VS Code 단축키 : 변경하려는 단어를 선택하고 Ctrl + Shift + L 
+//- 단축키를 누르면, 선택한 단어와 같은 단어가 모두 선택됩니다.
+//- 이 때, 단어를 수정하면, 동시에 수정이 됩니다.
+
+block content
+  //- userController.js 코드 내의  postLogin컨트롤러에서 try {} catch {} 문법으로 잡아낸 오류가 있을 경우, login.pug 템플릿에서 에러 메시지를 받을 수 있도록 { errorMessage: error._message } 형태로 보내줌    
+  if errorMessage
+    span=errorMessage
+
+  form(method='POST')
+    // 혼자 해볼 것들: 정규표현식으로 입력값 유효성 검사(즉, validation) 적용요
+    input(name='username', type='text', placeholder='Username', required)
+    input(name='password', type='password', placeholder='Password', required)
+    input(type='submit', value='Log in')
+
+  hr
+  div 
+    span Don't have an account? 
+    a(href='/join') Create one now &rarr;
+

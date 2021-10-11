@@ -6,7 +6,6 @@
 // Video.js에서 export default Video; 한 것을 import 함
 import Video from '../models/video'; 
 
-
 // Controller 모듈 코드 내의 res.render를 통해 views 폴더 이하의 pug파일을 html 코드로 render하여 받아옴
 // express 엔진은 NodeJS를 실행시켜주는 package.json 파일 위치(cwd) 기준으로 views 폴더(src/views)를 바라보기 때문에 별도의 import, export 불필요
 
@@ -18,7 +17,6 @@ import Video from '../models/video';
 
 // fake ver #6.0 수업영상에서 자료형을 const에서 let으로 변경함
 // fake ver trending(신 home) 내부에 있던 array 데이터 코드를 밖으로 빼내어 적었으므로 모든 Controller에서 Array 데이터를 사용할 수 있음
-
 
 // export const home = (req, res) => {
 export const home = async (req, res) => {
@@ -95,12 +93,17 @@ export const watch = async (req, res) => {
 
   // 에러 나는 경우를 먼저 if로 처리해주고 else에는 정상적인 케이스에 작동할 코드를 담으면 됨
   // 사용자가 존재하지 않는 페이지를 검색할 경우도 대비해 return res.render(PUG 파일 (즉,404 관련)) 적절한 응답처리 페이지 만들어놓아야 함
+  
   if(video === null) {
         // if(!video) {
     
     // ??? [ 주의 ] videoRouter.js의 정규표현식 /:id[0-9a-f]{24} 덕분에 몽고DB? 몽구스? ObjectID 24자리값을 인식하고 다룰 수 있게 됐지만, 글자수 24자이면서 오타(존재하지 않는 ID)는 videoRouter에서 404.pug로까지 데이터 넘어오지만, 글자수 24자 아닌(23이하, 25 이상) 오타값에 대한 페이지 검색시에는 여전히 cannot GET 응답 없는 페이지 나옴. 이 부분도 별도 처리 필요.
     // [ Javascript 문법 ] function을 끝내야 하므로 if문 안에 return 표기를 반드시 명시해야 함
-    return res.render('404', { pageTitle: 'Video not found.'});  
+    
+    // 404 Not Found 클라이언트 오류(서버가 요청받은 리소스를 찾을 수 없다)
+    // [ Express 문법 ] return res.render('404', { pageTitle: 'Video not found.'}); 라고만 처리하면 사용자에게는 오류 맥락을 이해시켰지만 브라우저는 상태 응답 코드 200을 받은 상태로 남게 됨. 브라우저도 오류 상황으로 처리할 수 있도록 .status() 문법으로 상태 코드를 명시해야 함. 그러면 morgan 미들웨어(즉, app.use(logger);) 통해 서버 로그 상에 404 이라고 표시됨
+    
+    return res.status(404).render('404', { pageTitle: 'Video not found.'});  
 
   } else {
     // [ 질문 ] ??? res 응답할 때 return 붙이고 안붙이고 실행결과 차이? 어떤 것이 옳은 문법? 왜?
@@ -120,7 +123,9 @@ export const getEdit = async (req, res) => {
   const video = await Video.findById(idVideo)
 
   if(!video) {
-    return res.render('404', { pageTitle: 'Video not found.'})
+    // 404 Not Found 클라이언트 오류(서버가 요청받은 리소스를 찾을 수 없다)
+    // [ Express 문법 ] return res.render('404', { pageTitle: 'Video not found.'}); 라고만 처리하면 사용자에게는 오류 맥락을 이해시켰지만 브라우저는 상태 응답 코드 200을 받은 상태로 남게 됨. 브라우저도 오류 상황으로 처리할 수 있도록 .status() 문법으로 상태 코드를 명시해야 함. 그러면 morgan 미들웨어(즉, app.use(logger);) 통해 서버 로그 상에 404 이라고 표시됨
+    return res.status(404).render('404', { pageTitle: 'Video not found.'})
   } else {
     return res.render('edit', { pageTitle: `Editing: ${video.title}`, video});
   }
@@ -225,13 +230,15 @@ export const postUpload = async (req, res) => {
       // video 생성에 문제가 없다면 home으로 페이지가 redirect 됨
       return res.redirect('/');
   } catch(error) {
-    
+
     console.log(error);    
     
     // [ Javascript 문법 ] try {} catch {} 문법으로 error를 잡아내더라도 무언가를 return 해야함 (즉, upload를 다시 render함 = getUpload 컨트롤러의 return 코드를 복붙했음)
     // 사용자에게 에러 메세지를 직접 보여주기 위해 upload.pug 템플릿으로 에러 메세지를 object key:value 형태로 담아서 넘겨줌 (에러를 try {} catch {console.log(error)} 해보면 _message: 'Video validation failed'와 같은 형태로 에러값이 표시됨)
 
-    return res.render('upload', { pageTitle: "Upload Video", errorMessage: error._message},)
+    // 400 Bad Request 클라이언트 오류(예: 잘못된 요청 구문, 유효하지 않은 요청 메시지 프레이밍, 또는 변조된 요청 라우팅)
+    // [ Express 문법 ] try { await Video.create() } catch(error) { return res.render() }  라고만 처리하면 사용자에게는 오류 맥락을 이해시켰지만 브라우저는 상태 응답 코드 200을 받은 상태로 남게 됨. 브라우저도 오류 상황으로 처리할 수 있도록 .status() 문법으로 상태 코드를 명시해야 함. 그러면 morgan 미들웨어(즉, app.use(logger);) 통해 서버 로그 상에 400 이라고 표시됨
+    return res.status(400).render('upload', { pageTitle: "Upload Video", errorMessage: error._message},)
   }
 }
 

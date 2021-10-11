@@ -1,5 +1,11 @@
 import './db';
 
+// ?? 질문: ?? init.js에 db model js파일을 import하는 것이 유효한 코드인가? (nomad 7.0 강의)
+// 서버 오류 로그: OverwriteModelError: Cannot overwrite `Video` model once compiled.
+
+// import './models/Video';
+// import './models/User';
+
 import app from './server'
 
 const PORT = 4000;

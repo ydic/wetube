@@ -34,6 +34,13 @@ html(lang="ko")
           
           li 
             a(href="/search") Search
+
+          //- 혼자 해볼 것들 (리팩토링): 로그인 안한 상태라면 nav 태그에서 Join 항목, Log in 항목 보여주고, 로그인 상태라면 Join 항목은 없애고, Log out 항목 보여주도록 리팩토링요
+          li 
+            a(href="/join") Join
+
+          li 
+            a(href="/login") Log in
     
     main
       block content

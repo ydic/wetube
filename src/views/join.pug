@@ -1,7 +1,33 @@
-//- [Pug 문법]extends를 통해 html 레이아웃을 base.pug 코드로부터 상속받음
-//- [Pug 문법]block을 통해 base.pug 레이아웃 기반으로 html 내용 재구성
+//- [Pug 문법] extends를 통해 html 레이아웃을 base.pug 코드로부터 상속받음
+//- [Pug 문법] block을 통해 base.pug 레이아웃 기반으로 html 내용 재구성
 
 extends base.pug
 
+//- VS Code 단축키 : 변경하려는 단어를 선택하고 Ctrl + Shift + L 
+//- 단축키를 누르면, 선택한 단어와 같은 단어가 모두 선택됩니다.
+//- 이 때, 단어를 수정하면, 동시에 수정이 됩니다.
+
 block content
-  h1 join pug
+  //- userController.js 코드 내의 postJoin 컨트롤러에서 try {} catch {} 문법으로 잡아낸 오류가 있을 경우, join.pug 템플릿에서 에러 메시지를 받을 수 있도록 { errorMessage: error._message } 형태로 보내줌
+  //- [ Mongoose 문법 ] Schema 지정시 unique 속성 지정하여 고유 인덱스로 만듦
+  //- [ MongoDB 문법 & Mongoose 문법 ] MongoError: duplicate key error 에러가 발생하면 DB에 저장하기 전에 에러를 앞서서 포착하여 사용자에게 에러 메시지를 보여주기
+  //- [ Mongoose 문법 ] <db model>.exists( { key : value } ) 내장함수로 사용자가 submit한 입력값이 이미 db에 존재하는지 확인한 후 True/False (즉, boolean) 형태로 결과를 return 해줌 (if문 판정기준으로 활용)
+  if errorMessage
+    span=errorMessage
+
+  form(method='POST')
+    //- 혼자 해볼 것들: 정규표현식으로 입력값 유효성 검사(즉, validation) 적용요
+    input(name='name', type='text', placeholder='Name' required)
+    input(name='email', type='email', placeholder='Email', required)
+    input(name='username', type='text', placeholder='Username', required)
+    input(name='password', type='password', placeholder='Password', required)
+    input(name='password2', type='password', placeholder='Confirm Password', required)
+    input(name='location', type='text', placeholder='Location', required)
+    input(type='submit', value='Join')
+
+  //- 오류메시지: hr is a self closing element: <hr/> but contains nested content.
+  hr
+  div
+    span Already have an account? 
+    a(href="/login") Log in now &rarr;
+

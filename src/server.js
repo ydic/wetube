@@ -1,11 +1,11 @@
 // server.js는 express 관련, server 환경설정(configuration) 관련 코드만 처리하도록 모듈화
 
 /* NodeJS 문법 require, ES6 문법 import from */
-import express, { urlencoded } from "express";
+import express from "express";
 import morgan from "morgan";
 
 // 하기 코드 형태로 import 가능한 이유는 각 라우터 js파일에서 export default 했기 때문임
-import globalRouter from './routers/globalRouter';
+import rootRouter from './routers/rootRouter';
 import userRouter from './routers/userRouter';
 import videoRouter from './routers/videoRouter';
 
@@ -39,7 +39,7 @@ app.use(logger);
 app.use(express.urlencoded({extended: true}));
 
 // route들을 사용하기 전에 middleware를 사용해야 함
-app.use('/', globalRouter);
+app.use('/', rootRouter);
 app.use('/videos', videoRouter)
 app.use('/users', userRouter);
 
