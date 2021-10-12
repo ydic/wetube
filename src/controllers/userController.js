@@ -86,21 +86,25 @@ export const postLogin = async (req, res) => {
   const { username, password } = req.body;
 
   // [ Mongoose 문법 ] 2가지 작업(로그인을 위해 사용자가 입력한 username의 존재여부, 존재한다면 DB password와 입력한 password의 일치여부)을 위해 DB 정보를 여러 번 개별 검색(즉, User.exists(), User.findOne() )하기보다 단 한 번의 User.findOne() 검색 후 그 결과를 2가지 작업에서 재사용하는 형태로 코드 구성 간략화
-                      // const userResult = await User.exists( { username } );
-  const userResult = await User.findOne( { username } );
+                      // const userDbResult = await User.exists( { username } );
+  const userDbResult = await User.findOne( { username } );
 
-  if (!userResult) {
+  if (!userDbResult) {
     return res.status(400).render('login', { pageTitle: 'Login', errorMessage: 'An account with this username does not exist.'})
   }
 
   // [ Bcrypt 라이브러리 문법 ] postLogin 컨트롤러에서 로그인 처리를 위해 bcrypt.compare() 내장함수로 사용자 입력 비밀번호와 DB Hash 비밀번호 값이 동일한지 비교하기 위함
   // [ Bcrypt 라이브러리 문법 ] Hash 원리상 입력값이 동일하면 출력값이 항상 동일하므로 bcrypt.compare(사용자 입력값, DB Hash 처리된 값) 형태로 두 값을 비교하여 결과값으로 True/False 리턴함
-  const matchedPassword = await bcrypt.compare(password, userResult.password)
+  const matchedPassword = await bcrypt.compare(password, userDbResult.password)
 
   if(!matchedPassword){
     return res.status(400).render('login', { pageTitle: 'Login', errorMessage: 'Wrong Password'})
   }
-  consoel.log('LOG USER IN! COMING SOON!')
+  
+  // [ Express-session 라이브러리 연계 문법 ] 사용자가 로그인하면 그 사용자에 대한 로그인 정보를 session에 담기 (각 사용자(브라우저)마다 서로 다른 req.session 오브젝트(즉, 서로 다른 세션ID)를 갖고 있음)
+  req.session.loggedIn = true;
+  req.session.userDbResult = userDbResult;
+
   return res.redirect('/');
 }
 

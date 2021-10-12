@@ -6,7 +6,9 @@ html(lang="ko")
   head 
     //- Controller 파트의 res.render 파라미터 값으로 {pageTitle : 'Home'} 오브젝트를 코딩해 놓았기에 pug파일의 #{pageTitle} 자리에 값이 담겨지게 됨
     //- [Pug 문법] #{} 문법 사용하면 한 html 태그에 대해 variable를 다른 text (예: | WeTube)와 섞어서 쓸 수 있음
-    title #{pageTitle} | WeTube
+          /* title #{pageTitle} | WeTube */
+    //- [ Express-session 라이브러리 연계 문법 ] Pug 템플릿에서 req.session.loggedIn 형태로는 session에 접근 불가. 별도의 전용 문법 없이 locals 활용해 접근 가능.
+    title #{pageTitle} | #{siteNameByLocals}
 
     //- (용어 약자 풀이 주의: MVP 디자인 패턴이 아님. Model View Presenter) Minimum Viable Product (MVP CSS) 
     //- Mobile friendly / Works out of the box / Easy to customize / Only semantic HTML / No class names / Perfect for an MVP
@@ -22,25 +24,33 @@ html(lang="ko")
             a(href="/") Home
             
           li
-
-            //- [ 질문 ] Cannot read property 'loggedIn' of undefined ??? 오류 해결방법 재확인요(그때까지 로그인/아웃 판별기능 주석처리함)
-            
-            //- if fakeUser.loggedIn
-            //-   a(href="/logout") Logout 
-            //- else
-            //-   a(href="/login") Login 
-
             a(href="/videos/upload") Upload Video
           
           li 
             a(href="/search") Search
 
           //- 혼자 해볼 것들 (리팩토링): 로그인 안한 상태라면 nav 태그에서 Join 항목, Log in 항목 보여주고, 로그인 상태라면 Join 항목은 없애고, Log out 항목 보여주도록 리팩토링요
-          li 
-            a(href="/join") Join
+          
+          //- [ Express-session 라이브러리 연계 문법 ] if !req.session.loggedIn 오류메시지: Cannot read property 'session' of undefined (즉, 누가 사용자인지 알 수 있더라도 그 정보를 pug 템플릿과 공유하지는 못하는 상황.) 
+          //- [ Express-session 라이브러리 연계 문법 ] Pug 템플릿에서 req.session.loggedIn 형태로는 session에 접근 불가. locals 활용해 접근 가능.
+          //- [ Express-session 라이브러리 연계 문법 ] Pug 템플릿이 전역(global) 변수인 locals에 접근할 수 있으므로, Pug와 Express가 서로 locals를 공유할 수 있도록 설정하여 사용자가 로그인 했는지 알 수 있게 만들어야 함. 
+          //- [ Express-session 라이브러리 연계 문법 ] locals 오브젝트는 이미 모든 Pug 템플릿에 import된 오브젝트임. Middlewares.js에서 res.locals.loggedIn = Boolean(req.session.loggedIn); 코드를 통해 session 로그인 상태를 받아서 locals에 로그인 상태를 전달(공유)함
+          
+          //- [ Express-session 라이브러리 연계 문법 ] Pug 템플릿에서 req.session.loggedIn 형태로는 session에 접근 불가. 별도의 전용 문법 없이 locals 활용해 접근 가능.
+          if loggedIn
+            li 
+              a(href="/logout") Log Out
+            
+            //- [ Express-session 라이브러리 연계 문법 ] session으로부터 locals에 전달(공유)된 값(즉, 전역 global 속성)을 별도의 전용 문법 없이 #{loggedInUser.name} 형태로 Pug에서 호출 가능함
+            //- [ Express-session 라이브러리 연계 문법 ] userDbResult 정보를 locals로 전달(공유)해서 Pug 파일에서 그 값을 사용자에게 보여줌 (예-a(href="") #{loggedInUser.name} 님의 Profile)
+            li 
+              a(href="/my-profile") #{loggedInUserDb.name} 님의 Profile
+          else
+            li 
+              a(href="/join") Join
 
-          li 
-            a(href="/login") Log in
+            li 
+              a(href="/login") Log in
     
     main
       block content

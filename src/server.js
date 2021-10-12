@@ -4,10 +4,14 @@
 import express from "express";
 import morgan from "morgan";
 
+// [ Express-session 라이브러리 문법 ] session과 cookie 설정을 위한 라이브러리 설치(npm i express-session) 및 호출
+import session from "express-session";
+
 // 하기 코드 형태로 import 가능한 이유는 각 라우터 js파일에서 export default 했기 때문임
 import rootRouter from './routers/rootRouter';
 import userRouter from './routers/userRouter';
 import videoRouter from './routers/videoRouter';
+import { localsMiddleware } from './middlewares';
 
 // const express = require('express');
 const app = express();
@@ -38,10 +42,54 @@ app.use(logger);
 // [ Express 문법 ] server.js에서 express.urlencoded() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
 app.use(express.urlencoded({extended: true}));
 
+// [ Express-session 라이브러리 문법 ] cookie는 백엔드가 브라우저에게 부여하는 식별 정보 (주의: cookie 안에 Session ID가 저장됨. 브라우저의 cookie는 Session ID(브라우저 고유 식별값)를 전송하는데 사용됨)
+// [ Express-session 라이브러리 문법 ] 백엔드와 브라우저 간의 영구적인 연결이 보장되는 것이 아니므로(즉, statless / 즉, 응답(res) 마치면 서버와 브라우저 간 연결 끊김) Session ID로 로그인한 사용자 식별요
+// [ Express-session 라이브러리 문법 ] Session ID를 가지고 있으면 Session object에 정보를 추가(예- req.session.숫자, req.session.사용자ID 등) 할 수 있음
+// [ Express-session 라이브러리 문법 ] route들을 사용하기 전에 middleware를 사용해야 함. (즉, 서버는 session middleware를 통해 브라우저에 cookie를 발행하여 사이트로 들어와 자기(서버)한테 요청하는 모두(비로그인 사용자 포함)를 식별하게 됨)
+app.use(session({
+  secret: 'Hello!',
+
+            // 서버로그 경고 알림: express-session deprecated undefined resave option; provide resave option src\server.js:53:40
+            // 서버로그 경고 알림: express-session deprecated undefined saveUninitialized option; provide saveUninitialized option src\server.js:53:40
+  resave: true,
+  saveUninitialized: true,
+}))
+
+        // [ Express-session 라이브러리 연계 문법 ] session을 메모리에 저장하는 경우, 서버 재시작하면 req.sessionStore.all((error, sessions) => {}) 코드에 잡히는 모든 세션 로그값이 휘발되어 버림 (따라서 back-end가 session을 기억(? req에 담긴 cookie)하도록 session을 MongoDB와 연결요)
+        /*
+        app.use((req, res, next) => {
+          console.log('cookie는 req.headers.cookie에 담겨서 서버로 보내진다 -------', req.headers.cookie);
+          
+          console.log('locals는 res 오브젝트 내에 있다(즉, res.locals) --------', res.locals);
+          
+          // req.sessionStore는 메모리 저장 방식이므로 서버 재시작하면 휘발되어 정보가 없어짐 (따라서 sessionStore ? cookieStore를 MongoDB와 연결요)
+          req.sessionStore.all((error, sessions) => {
+            console.log('백엔드가 메모리 상에 기억하고 있는 session 정보들 (req.sessionStore 속에 담겨있음)--------', sessions);
+            
+            // 함수가 next()를 호출하면 Middleware 맞음, send()를 호출하면 연결이 중단되므로 Middleware 역할 아님
+            next();
+          })
+        })
+        */
+
+// [ Express-session 라이브러리 연계 문법 ] locals를 통해 누가 로그인했는지 공유함
+// 주의: server.js에서 localsMiddleware가 코드 순서상 Express-session middleware ( 즉, app.use(session({}) )다음에 오기 때문에 가능함
+app.use(localsMiddleware);
+
 // route들을 사용하기 전에 middleware를 사용해야 함
 app.use('/', rootRouter);
 app.use('/videos', videoRouter)
 app.use('/users', userRouter);
+
+
+        // [ Express-session 라이브러리 연계 문법 ] 서버가 브라우저에게 부여하는 Session ID 확인해보기
+        // Session ID를 가지고 있으면 Session object에 정보를 추가(예- req.session.숫자, req.session.사용자ID 등) 할 수 있음
+        /*
+        app.get('/add-one',(req, res, next) => {
+          req.session.potato += 1;
+          return res.send(`aaa ${req.session.id}\n${req.session.potato}`);
+        })
+        */
 
 //  초기화 담당하는 init.js에서 express 라이브러리 액세스 할 수 있도록 export 해줌
 export default app;
