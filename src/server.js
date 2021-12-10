@@ -72,8 +72,9 @@ app.use(session({
         })
         */
 
-// [ Express-session 라이브러리 연계 문법 ] locals를 통해 누가 로그인했는지 공유함
+// [ Express-session 라이브러리 연계 문법 ] locals를 통해 누가 로그인했는지 공유함 (Pug와 Express가 서로 res.locals 값을 공유할 수 있도록(즉, res.render 없이도 Pug 템플릿 쪽으로 변수롤 전역적으로 보낼 수 있음) 기본 설정되어 있음)
 // 주의: server.js에서 localsMiddleware가 코드 순서상 Express-session middleware ( 즉, app.use(session({}) )다음에 오기 때문에 가능함
+// 주의: middlewares.js의 localMiddleware 함수는 session 오브젝트를 받아와야 그 값을 기반으로 res.locals. 값을 생성해 Pug 템플릿에서도 전역으로 값을 받아와 사용 가능해짐
 app.use(localsMiddleware);
 
 // route들을 사용하기 전에 middleware를 사용해야 함
