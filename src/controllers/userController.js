@@ -4,6 +4,9 @@
 // User.js에서 export default User; 한 것을 import 함
 import User from '../models/User';
 
+// [ node-fetch 라이브러리 문법]
+// import fetch from 'node-fetch';
+
 // [ bcrypt 라이브러리 문법 ] postLogin 컨트롤러에서 로그인 처리를 위해 bcrypt.compare() 내장함수로 사용자 입력 비밀번호와 DB Hash 비밀번호 값이 동일한지 비교하기 위함
 import bcrypt from 'bcrypt';
 
@@ -51,7 +54,7 @@ export const postJoin = async (req, res) => {
   if(existsResult){
     // [ Mongoose 문법 ] 주의: 한 collection 내의 db Schema에서 unique 속성을 지정한 항목이 2개 이상일 경우, $or 라는 operator를 사용한 await User.exists({ $or : [ {username}, {email}] }); 코드로 모든 db데이터 중복 에러를 포착할 수 있으나 사용자에게 에러 메시지 보여줄 때 어느 항목에서 기인한 중복 db데이터 오류인지 특정하여 알려주기 어려운 단점이 있음
     // 400 Bad Request 클라이언트 오류(예: 잘못된 요청 구문, 유효하지 않은 요청 메시지 프레이밍, 또는 변조된 요청 라우팅)
-    // [ Express 문법 ] User.exists() 결과가 False이면 User.create() 진입 못하고 return res.render() 라고만 처리하면 사용자에게는 오류 맥락을 이해시켰지만 브라우저는 상태 응답 코드 200을 받은 상태라서 로그인 입력값 저장여부 묻는 팝업이 나타남. 브라우저도 오류 상황으로 처리할 수 있도록 .status() 문법으로 상태 코드를 명시해야 함. 그러면 morgan 미들웨어(즉, app.use(logger);) 통해 서버 로그 상에 POST /join 400 라고 표시됨
+    // [ Express 문법 ] User.exists() 결과가 True(X: False)이면 User.create() 진입 못하고 return res.render() 라고만 처리하면 사용자에게는 오류 맥락을 이해시켰지만 브라우저는 상태 응답 코드 200을 받은 상태라서 로그인 입력값 저장여부 묻는 팝업이 나타남. 브라우저도 오류 상황으로 처리할 수 있도록 .status() 문법으로 상태 코드를 명시해야 함. 그러면 morgan 미들웨어(즉, app.use(logger);) 통해 서버 로그 상에 POST /join 400 라고 표시됨
     
     return res.status(400).render('join', { pageTitle: 'Join', errorMessage: 'This username/email is already taken.'});
   }

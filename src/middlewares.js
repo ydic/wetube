@@ -18,7 +18,7 @@ export const localsMiddleware = (req, res, next) => {
 
   // [ Express-session 라이브러리 연계 문법 ] userDbResult 정보를 locals로 전달(공유)해서 Pug 파일에서 그 값을 사용자에게 보여줌 (예- a(href="") #{loggedInUserDb.name} 님의 Profile)
   // [ Express-session 라이브러리 연계 문법 ] req.session.userDbResult 초기값은 로그인 전이므로 undefined 상태임 (userController.js의 postLogin 컨트롤러 코드 내에서 로그인 절차 검증 후 req.session.loggedIn = true; req.session.userDbResult = userDbResult; 형태로 session에 사용자 정보가 담기도록 했음. Pug 템플릿에서 이 정보를 활용해 사용자 정보를 화면 내용 맥락에 맞게 재사용.
-  // [ Express-session 라이브러리 연계 문법 ] ?? 단의 req.session.userDbResult 값이 서버DB? 메모리? 브라우저?단에 담겼다가 res.locals.loggedInUserDb 응답을 통해 Pug 템플릿의 a(href="/my-profile") #{loggedInUserDb.name} 님의 Profile 표현에 활용됨
+  // [ Express-session 라이브러리 연계 문법 ] userContoller.js의 polstLogin 함수 내의 ?? 단의 req.session.userDbResult 값이 서버DB? 메모리? 브라우저?단에 담겼다가 res.locals.loggedInUserDb 응답을 통해 Pug 템플릿의 a(href="/my-profile") #{loggedInUserDb.name} 님의 Profile 표현에 활용됨
   // [ Express-session 라이브러리 연계 문법 ] middlewares.js의 localsMiddleware 함수 내의 res.locals.loggedInUserDb = req.session.userDbResult; 코드 값을 base.pug에서 별도의 전용 문법 없이 loggedInUserDb.name 이라는 이름으로 접근함
   res.locals.loggedInUserDb = req.session.userDbResult;
 

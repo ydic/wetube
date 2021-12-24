@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 
+console.log('db.js ---------', process.env.DB_URL);
+
 // DB 연결
-mongoose.connect('mongodb://127.0.0.1:27017/wetube');
+// [ dotenv 라이브러리 / Node JS 문법] .env 파일로 별도 관리하는 환경변수값은 process.env.대문자환경변수명 형식으로 호출해 사용할 수 있음
+mongoose.connect(process.env.DB_URL);
 
 // DB 액세스
 const db = mongoose.connection;
