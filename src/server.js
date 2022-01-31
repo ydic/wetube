@@ -45,7 +45,7 @@ app.use(logger);
 // [ Express 문법 ] server.js에서 express.urlencoded() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
 app.use(express.urlencoded({extended: true}));
 
-console.log('server.js ------', process.env.COOKIE_SECRET);
+// console.log('server.js ------', process.env.COOKIE_SECRET);
 
 // [ Express-session 라이브러리 문법 ] cookie는 백엔드가 브라우저에게 부여하는 식별 정보 (주의: cookie 안에 Session ID가 저장됨. 브라우저의 cookie는 Session ID(브라우저 고유 식별값)를 전송하는데 사용됨)
 // [ Express-session 라이브러리 문법 ] 백엔드와 브라우저 간의 영구적인 연결이 보장되는 것이 아니므로(즉, statless / 즉, 응답(res) 마치면 서버와 브라우저 간 연결 끊김) Session ID로 로그인한 사용자 식별요

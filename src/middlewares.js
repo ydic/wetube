@@ -5,7 +5,7 @@ export const localsMiddleware = (req, res, next) => {
   // userController.js의 postLogin 컨트롤러 코드에 req.session.loggedIn = true; req.session.userDbResult = userDbResult; 형태로 사용자 정보를 별도로 추가함
 
   // * * * * 주의: next()를 호출하지 않으면 웹사이트가 정상 작동하지 않음
-  console.log('localMiddleware---------',req.session);
+  // console.log('localMiddleware---------',req.session);
 
   // [ Express-session 라이브러리 연계 문법 ] Pug 템플릿에서 req.session.loggedIn 형태로는 session에 접근 불가. 별도의 전용 문법 없이 locals 활용해 접근 가능.
   // [ Express-session 라이브러리 연계 문법 ] userContoller.js의 postLogin 컨트롤러 내의 req.session.loggedIn 값이 undefiend 또는 False일 수도 있으니 Boolean() 형식으로 감싸서 True/False 여부 확인함
@@ -14,7 +14,7 @@ export const localsMiddleware = (req, res, next) => {
 
   res.locals.siteNameByLocals = 'Wetube';
 
-  console.log('res.locals------------',res.locals);
+  // console.log('res.locals------------',res.locals);
 
   // [ Express-session 라이브러리 연계 문법 ] userDbResult 정보를 locals로 전달(공유)해서 Pug 파일에서 그 값을 사용자에게 보여줌 (예- a(href="") #{loggedInUserDb.name} 님의 Profile)
   // [ Express-session 라이브러리 연계 문법 ] req.session.userDbResult 초기값은 로그인 전이므로 undefined 상태임 (userController.js의 postLogin 컨트롤러 코드 내에서 로그인 절차 검증 후 req.session.loggedIn = true; req.session.userDbResult = userDbResult; 형태로 session에 사용자 정보가 담기도록 했음. Pug 템플릿에서 이 정보를 활용해 사용자 정보를 화면 내용 맥락에 맞게 재사용.
