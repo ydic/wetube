@@ -5,7 +5,7 @@
 import User from '../models/User';
 
 // [ node-fetch 라이브러리 문법]
-// import fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
 // [ bcrypt 라이브러리 문법 ] postLogin 컨트롤러에서 로그인 처리를 위해 bcrypt.compare() 내장함수로 사용자 입력 비밀번호와 DB Hash 비밀번호 값이 동일한지 비교하기 위함
 import bcrypt from 'bcrypt';
@@ -104,11 +104,130 @@ export const postLogin = async (req, res) => {
   }
   
   // [ Express-session 라이브러리 연계 문법 ] 사용자가 로그인하면 그 사용자에 대한 로그인 정보를 session에 담기 (각 사용자(브라우저)마다 서로 다른 req.session 오브젝트(즉, 서로 다른 세션ID)를 갖고 있음)
+  // [ Express-session 라이브러리 연계 문법 ] session 이 담긴 정보의 명칭을 userDbResult 로 지정했고, userDbResult는 middleware.js 의 localsMiddleware 함수 내의 res.locals.loggedInUserDb 가 이 값을 받아 login.pug 로 사용자 정보 값을 전달함
   req.session.loggedIn = true;
   req.session.userDbResult = userDbResult;
 
+  console.log('userController.js ---- postLogin 함수',req.session.userDbResult);
   return res.redirect('/');
 }
+
+// userRouter.js 파일에서 import하여 사용함
+export const startGithubLogin = (req, res) => {
+  // [ Github OAuth API 문법 ] 권한 부여 가이드 페이지(1. Request a user's GitHub identity)에서 지정한 url 값임(https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps) 
+  const baseUrl = 'http://github.com/login/oauth/authorize';
+
+  const config = {
+    // [ Github OAuth API 문법 ] Github 에서 지정한 파라미터 표기법에 따라 clientId 가 아닌 client_id 로 표기해야 값 인식 가능함
+    // [ Github OAuth API 문법 & Javascript] client_id 값이 URL 쿼리문으로도 노출되기에 대외비는 아니지만 다회 사용되는 값이므로 .env 에 환경변수 넣어두고 필요시마다 사용함
+    client_id: process.env.GH_CLIENT,
+    allow_signup: false,
+    scope: 'read:user user:email',
+  };
+  
+  const params = new URLSearchParams(config).toString();
+  const finalUrl = `${baseUrl}?${params}`;
+
+  return res.redirect(finalUrl);
+};
+
+// [ Javascript 문법 ] await 코드 상위 코드에서 async 명사하지 않으면 SyntaxError: Unexpected reserved word 'await' 오류 발생함
+export const finishGithubLogin = async (req, res) => {
+  // [ Github OAuth API 문법 ] 권한 부여 가이드 페이지(2. Users are redirected back to your site by GitHub)에서 지정한 POST 요청할 주소임(https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps) 
+  const baseUrl = 'https://github.com/login/oauth/access_token';
+
+  const config = {
+    client_id: process.env.GH_CLIENT,
+    // [ Github OAuth API 문법 ] client_secret 은 대외비이므로 .env 에 환경변수로 별도 분리 저장 관리함
+    client_secret: process.env.GH_SECRET,
+    code: req.query.code
+  };
+
+  // console.log('userController.js --- finishGithubLogin --- config',config);
+
+  const params = new URLSearchParams(config).toString();
+  const finalUrl = `${baseUrl}?${params}`;
+
+  // [ Javascript 문법 ] async 이하 await fetch 이후에 json 가져오는 것이 코드 간결성 높음 (코드 간결성 낮은 형태는 async 이하 await fetch 와 .then() 조합)
+  // [ Github OAuth API 문법 ] async 이하 이중으로 await 코딩한 이유: finalUrl 주소로 POST 하여 fetch 작업을 통해 받아온 access_token 값을 다시 한 번 json() 함수 처리하여 API 접근에 사용함(즉, https://api.github.com/user)
+  const tokenRequest = await (
+      await fetch(finalUrl, {
+          method: 'POST',
+          // [ Github OAuth API 문법 ] 권한 부여 가이드 페이지(2. Users are redirected back to your site by GitHub)에서 지정한 accept 파라미터 사용법임. You can also receive the response in different formats if you provide the format in the Accept header.
+          headers: {
+            Accept: 'application/json'
+          }
+       })
+  ).json();
+  
+  if('access_token' in tokenRequest){
+      const {access_token} = tokenRequest;
+      
+      // [ Github OAuth API 문법 ] 권한 부여 가이드 페이지(3. Use the access token to access the API)에서 지정한 GET 요청할 주소임 (https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps) 
+      const apiUrl = 'https://api.github.com';
+      const userData = await (
+          await fetch(`${apiUrl}/user`, {
+              headers: {
+                Authorization: `token ${access_token}`
+              }
+           })
+      ).json();
+
+      console.log('userController.js --- finishGithubLogin --- userData', userData);
+/*
+      const emailData = await (
+        await fetch(`${apiUrl}/user/emails`, {
+          headers: {
+            Authorization: `token ${access_token}`
+          }
+        })
+      ).json();
+
+      console.log('userController.js --- finishGithubLogin --- emailData', emailData);
+
+      const emailObj = emailData.find(
+        (email) => email.primary === true && email.verified === true
+      );
+
+      if (!emailObj){
+        return res.redirect('/login');
+      }
+
+      const existingUser = await User.findOne({ email: emailObj.email });
+
+      if(existingUser){
+        // [ Express-session 라이브러리 연계 문법 ] 사용자가 로그인하면 그 사용자에 대한 로그인 정보를 session에 담기 (각 사용자(브라우저)마다 서로 다른 req.session 오브젝트(즉, 서로 다른 세션ID)를 갖고 있음)
+        req.session.loggedIn = true;
+
+        // [ Express-session 라이브러리 연계 문법 ] session 이 담긴 정보의 명칭을 userDbResult 로 지정했고, userDbResult는 middleware.js 의 localsMiddleware 함수 내의 res.locals.loggedInUserDb 가 이 값을 받아 login.pug 로 사용자 정보 값을 전달함
+        req.session.userDbResult = existingUser;
+
+        return res.redirect('/');
+      }else {
+        const user = await User.create({
+          // [ Github OAuth API 문법 ] Github 를 이용해 계정 생성한 경우, password 값은 다뤄지지 않아 없으므로 username 와 password 키를 활용한 form 을 이용할 수 없음
+          // [ Github OAuth API 문법 ] User.js 의 userSchema 모델에 socialOnly: {type: Boolean, default: false} 적용하여 사용자가 Github로 로그인했는지 여부를 확인하기 위함 / 로그인 페이지에서 사용자가 email로 로그인하려는데 password 없을 때 이를 대신해 github 로그인 상태를 확인해 볼 수 있음
+          socialOnly: true,
+
+          name: userData.name,
+          email: userData.login,
+          username: emailObj.email,
+          password: '',
+          location: userData.location    
+        });
+
+        req.session.loggedIn = true;
+        
+        // [ Express-session 라이브러리 연계 문법 ] session 이 담긴 정보의 명칭을 userDbResult 로 지정했고, userDbResult는 middleware.js 의 localsMiddleware 함수 내의 res.locals.loggedInUserDb 가 이 값을 받아 login.pug 로 사용자 정보 값을 전달함
+        req.session.userDbResult = user;
+
+        return res.redirect('/');
+    }
+*/
+  }else {
+    return res.redirect('/login');
+  }
+};
 
 // videoRouter.js 파일에서 import하여 사용함
 export const edit = (req, res) => res.send("Edit User ctrl");

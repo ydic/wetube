@@ -4,11 +4,18 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
+
+  // [ Github OAuth API 문법 ] 사용자가 Github로 로그인했는지 여부를 확인하기 위함 / 로그인 페이지에서 사용자가 email로 로그인하려는데 password 없을 때 이를 대신해 github 로그인 상태를 확인해 볼 수 있음
+  socialOnly: {type: Boolean},
+
   name: { type: String, required: true },
   // [ Mongoose 문법 ] Schema 지정시 unique 속성 지정하여 고유 인덱스로 만듦
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  
+  // [ Github OAuth API 문법 ] Github 를 이용해 계정 생성한 경우, password 값은 다뤄지지 않아 없으므로 username 와 password 키를 활용한 form 을 이용할 수 없음
+  // [ Github OAuth API 문법 ] password 항목의 required: 속성을 해제해야 정상 동작함 (일부 사용자들에게는 password 가 없을 수도 있기 때문)
+  password: { type: String },
       // 오류메시지: UnhandledPromiseRejectionWarning: ValidationError: User validation failed: password2: Path `password2` is required.
       // password2: { type: String, required: true },
   location: { type: String },
