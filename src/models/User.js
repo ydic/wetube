@@ -6,7 +6,12 @@ import bcrypt from 'bcrypt';
 const userSchema = new mongoose.Schema({
 
   // [ Github OAuth API 문법 ] 사용자가 Github로 로그인했는지 여부를 확인하기 위함 / 로그인 페이지에서 사용자가 email로 로그인하려는데 password 없을 때 이를 대신해 github 로그인 상태를 확인해 볼 수 있음
-  socialOnly: {type: Boolean},
+  // [ Github OAuth API 문법 ] 사용자가 로그인 페이지에서 사이트ID(본 프로젝트에서는 email)/PW로 로그인하려는데 password가 없을 때 (즉, github OAuth 방식 가입자) socialOnly 값이 기본값 false 에서 userController.js 내의 finishGithubLogin 함수 내의 User.create({socialOnly:true}) 로 처리된 경우 wetube 로그인 승인 처리하기 위한 용도의 식별자
+  socialOnly: {type: Boolean, default: false},
+
+  // [ Github OAuth API 문법 ] userController.js 의 finishGithubLogin 함수에서 access_token 을 서버단의 nodejs (즉, node-fetch 라이브러리 기반) 에서 fetch 하여 Github 측으로부터 최종적으로 받아온 사용자 정보가 들어있는 userData 값 내부에 들어있는 avatar_url 값을 읽어와 사용자가 등록한 사진(즉, 프로필 사진)을 보여주기 위함
+  // [ Github OAuth API 문법 ] wetube 프로젝트 기준으로는 avatarUrl 값(즉, github 에서 받아온 avatar_url 값)이 없는 사용자는 wetube ID/PW 로만 계정을 만든 경우에 해당함
+  avatarUrl: String,
 
   name: { type: String, required: true },
   // [ Mongoose 문법 ] Schema 지정시 unique 속성 지정하여 고유 인덱스로 만듦
@@ -15,6 +20,7 @@ const userSchema = new mongoose.Schema({
   
   // [ Github OAuth API 문법 ] Github 를 이용해 계정 생성한 경우, password 값은 다뤄지지 않아 없으므로 username 와 password 키를 활용한 form 을 이용할 수 없음
   // [ Github OAuth API 문법 ] password 항목의 required: 속성을 해제해야 정상 동작함 (일부 사용자들에게는 password 가 없을 수도 있기 때문)
+  // [ Github OAuth API 문법 ] ★★★ 프론트앤드 단의 join.pug 와 login.pug 에서 input(중략 type='password', required) 라고 설정해도 백엔드 DB 단에서 password 항목의 required: 속성이 해제 되어 있기에 암호 미입력 상태임에도 엉터리 DB 스키마 구성으로 인해 가입이 되고, 로그인 시도시에는 생성한 적 없는 암호를 요구하는 이상한 모양새로 동작하게 됨
   password: { type: String },
       // 오류메시지: UnhandledPromiseRejectionWarning: ValidationError: User validation failed: password2: Path `password2` is required.
       // password2: { type: String, required: true },

@@ -52,21 +52,33 @@ app.use(express.urlencoded({extended: true}));
 // [ Express-session 라이브러리 문법 ] Session ID를 가지고 있으면 Session object에 정보를 추가(예- req.session.숫자, req.session.사용자ID 등) 할 수 있음
 // [ Express-session 라이브러리 문법 ] route들을 사용하기 전에 middleware를 사용해야 함. (즉, 서버는 session middleware를 통해 브라우저에 cookie를 발행하여 사이트로 들어와 자기(서버)한테 요청하는 모두(비로그인 사용자 포함)를 식별하게 됨)
 app.use(session({
+  // [ dotenv 라이브러리 문법 ] 전체 코드의 최우선 순위(본 프로젝트는 app.listen(PORT, handleListening(PORT)); 코드가 있는 init.js 파일)로 dotenv 라이브러리를 인식시켜야.env 파일에 별도 저장한 기밀 값들을 process.env.키값 문법을 통해 각 코드 파일들에서 불러와 각종 기능을 원활히 작동시킬 수 있음
+  // [ dotenv 라이브러리 문법 & Javascript 문법 ] require 방식은 특정 라이브러리(예: prcess.env.대문자환경변수를 사용하도록 하는 dotenv)를 사용하고 싶은 각각의 모든 js 파일 상단부에 require 표기해야 하는 번거로운 점이 있음
   // [ dotenv 라이브러리 / Node JS 문법] .env 파일로 별도 관리하는 환경변수값은 process.env.대문자환경변수명 형식으로 호출해 사용할 수 있음
+  // [ dotenv 라이브러리 / Node JS 문법] dotenv 라이브러리 미설치 상태로 process.env.대문자환경변수 코드 실행하면 cannot init client 오류 발생함. 해당 코드 윗단에 console.log(.env 파일에 지정한 대문자환경변수) 확인하면 undefined 로 나타남.
   secret: process.env.COOKIE_SECRET,
   
             // 서버로그 경고 알림: express-session deprecated undefined resave option; provide resave option src\server.js:53:40
             // 서버로그 경고 알림: express-session deprecated undefined saveUninitialized option; provide saveUninitialized option src\server.js:53:40
   
-  // resave: true,
-  // saveUninitialized: true,
+            // resave: true,
+            // saveUninitialized: true,
 
   resave: false,
+  
+  // [ Express-session 라이브러리 연계 문법 ] saveUninitialized: false 지정했으므로 본 프로젝트 코드의경우 backend가 로그인한 사용자(익명사용자 X)에게만 쿠키를 주도록 설정됨. 세션을 수정할 때만 세션을 DB에 저장하고 쿠키를 넘겨주도록 함 
+  // [ Express-session 라이브러리 연계 문법 ] (즉, UserController.js 내의 postLogin 함수에서 req.session.loggedIn = true; 와 req.session.userDbResult = userDbResult; 코드를 통해서 세션 수정됨)
+  // [ Express-session 라이브러리 연계 문법 ] session 인증의 문제점은 backend가 DB에 저장한다는 것임. 브라우저는 쿠키 이용한 세션 인증과 토큰 인증 적용 가능. 보완책으로는 iOS/안드로이드 앱 제작시 토큰(Token) 인증 방식이 활용됨.
   saveUninitialized: false,
 
   // [ connect-mongo 라이브러리 문법 ] connect-mongo 라이브러리를 .create({}) 하면 session들이 MongoDB에 저장 가능해짐
   // [ dotenv 라이브러리 / Node JS 문법] .env 파일로 별도 관리하는 환경변수값은 process.env.대문자환경변수명 형식으로 호출해 사용할 수 있음
   store: MongoStore.create({mongoUrl: process.env.DB_URL}),
+
+            // [ Express-session 라이브러리 연계 문법 ] cookie: { maxAge: 1/1000초 단위 } 설정으로 쿠키 유지 기간 설정 가능
+            // cookie: {
+            //   maxAge: 10000,
+            // }
 
 }))
 

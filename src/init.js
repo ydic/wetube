@@ -4,8 +4,8 @@
 
 // [ dotenv 라이브러리 문법 ] .gitignore 파일에 .env를 표기해야 함(대외비이므로)
 // [ dotenv 라이브러리 문법 ] .env 파일을 package.json과 동일 폴더 계층에 두어야 함
-// [ dotenv 라이브러리 문법 ] 전체 코드의 최우선 순위로 dotenv 라이브러리를 인식시켜야.env 파일에 별도 저장한 기밀 값들을 process.env.키값 문법을 통해 각 코드 파일들에서 불러와 각종 기능을 원활히 작동시킬 수 있음
-// [ dotenv 라이브러리 문법 & Javascript 문법 ] require 방식은 특정 라이브러리를 사용하고 싶은 모든 js 파일 상단부에 require 표기해야 함
+// [ dotenv 라이브러리 문법 ] 전체 코드의 최우선 순위(본 프로젝트는 app.listen(PORT, handleListening(PORT)); 코드가 있는 init.js 파일)로 dotenv 라이브러리를 인식시켜야.env 파일에 별도 저장한 기밀 값들을 process.env.키값 문법을 통해 각 코드 파일들에서 불러와 각종 기능을 원활히 작동시킬 수 있음
+// [ dotenv 라이브러리 문법 & Javascript 문법 ] require 방식은 특정 라이브러리(예: prcess.env.대문자환경변수를 사용하도록 하는 dotenv)를 사용하고 싶은 각각의 모든 js 파일 상단부에 require 표기해야 하는 번거로운 점이 있음
             // require('dotenv').config();
 import 'dotenv/config';
 

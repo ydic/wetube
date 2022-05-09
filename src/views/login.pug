@@ -15,6 +15,8 @@ block content
   form(method='POST')
     // 혼자 해볼 것들: 정규표현식으로 입력값 유효성 검사(즉, validation) 적용요
     input(name='username', type='text', placeholder='Username', required)
+    //- [ Github OAuth API 문법 ] ★★★ 프론트앤드 단의 join.pug 와 login.pug 에서 input(중략 type='password', required) 라고 설정해도 백엔드 DB 단에서 password 항목의 required: 속성이 해제 되어 있기에 암호 미입력 상태임에도 엉터리 DB 스키마 구성으로 인해 가입이 되고, 로그인 시도시에는 생성한 적 없는 암호를 요구하는 이상한 모양새로 동작하게 됨
+    //- input(name='password', type='password', placeholder='Password', )
     input(name='password', type='password', placeholder='Password', required)
     input(type='submit', value='Login')
 
