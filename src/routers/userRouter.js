@@ -1,7 +1,7 @@
 import express from "express";
 
 // import 하기 전에 export 처리 먼저 해주어야 함
-import {edit, remove, logout, see, startGithubLogin, finishGithubLogin} from "../controllers/userController.js"
+import {getEdit, postEdit, remove, logout, see, startGithubLogin, finishGithubLogin} from "../controllers/userController.js"
 
 const userRouter = express.Router();
 
@@ -13,7 +13,13 @@ userRouter.get("/edit", handleEdit);
 userRouter.get("/delete", handleDelete);
 */
 
-userRouter.get("/edit", edit);
+// [ Express 라이브러리 문법 ] GET/POST 요청에 대한 라우팅 코드 구성시 홑따옴표 .get('함수명') 형태로 표기하면 문법오류 발생하므로 홑따옴표 없이 함수명 기재요망
+// [ Express 라이브러리 문법 ] Error: Route.get() requires a callback function but got a [object String]
+// [ 코드 연게성 ] server.js 에서 카테고리 분류 목적으로 라우팅 ->UserRouter.js 에서 페이지 경로 라우팅 -> pug (예- base.pug) 에서 a(href="페이지 경로")로 연결 -> GET/POST 요청 방식에 따라 userRouter.js 에서 세팅된 라우팅 경로에 맞춰 userController.js 의 해당함수로 연결 -> 함수에서 return res.status().render() 또는 return res.redirect 
+// [ 시큐어 보안 코딩 ] 비로그인 상태의 사용자가 로그인 된 사용자에게만 보이는 Edit-Profile 하이퍼링크도 브라우저에 나타나지 않는 상황에서 사용자 정보 변경 페이지 URL 값을(즉, /users/edit) 직접 주소입력창에 입력하여 진입 시도하면 해당 URL 경로에 대한 접근을 제한시켜야 함(예- 리다이렉트 시키기)
+// [ 시큐어 보안 코딩 & Express-session 라이브러리 연계 문법 ] loggedInUserDb 에 접근하려는데 비로그인 상태이면 발생하는 에러에 대해 req.session.userDbResult || {}; 코드는 or 조건자와 빈 오브젝트(즉, {}, empty object) 를 덧붙여서 session 내의 user 값이 비어있는 상태일 때(즉, 사이트 방문자가 비로그인 상태일 때) loggedInUser 값이 undefined 여서 발생하게 되는 cannot read property '무언가' of undefined 오류를 방지할 수 있음
+userRouter.route('/edit').get(getEdit).post(postEdit);
+
 userRouter.get("/delete", remove);
 userRouter.get("/logout", logout);
 
@@ -29,6 +35,5 @@ userRouter.get('/github/finish', finishGithubLogin)
 // 주소에 문자 값 입력해 요청하면 Cannot GET 에러 발생시켜 줌
 
 userRouter.get("/:id(\\d+)", see);
-
 
 export default userRouter;

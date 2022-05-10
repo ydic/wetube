@@ -321,8 +321,14 @@ export const finishGithubLogin = async (req, res) => {
   }
 };
 
-// videoRouter.js 파일에서 import하여 사용함
-export const edit = (req, res) => res.send("Edit User ctrl");
+export const getEdit = (req, res) => {
+  res.render('edit-profile', { pageTitle: 'Edit Profile'});
+}
+
+export const postEdit = (req, res) => {
+  // res.redirect('/');
+  res.send("ddddddddd");
+}
 
 // delete는 JS 예약어라서 변수명으로 선언 불가, 변수명을 remove로 대체 선언
 export const remove = (req, res) => res.send("Remove User ctrl");

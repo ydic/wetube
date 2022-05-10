@@ -40,6 +40,9 @@ html(lang="ko")
           //- [ Express-session 라이브러리 연계 문법 ] Pug 템플릿에서 req.session.loggedIn 형태로는 session에 접근 불가. 별도의 전용 문법 없이 locals 활용해 접근 가능.
           //- [ Express-session 라이브러리 연계 문법 ] middlewares.js의 localsMiddleware 함수 내의 res.locals.loggedIn = Boolean(req.session.loggedIn); 코드 값을 base.pug에서 별도의 전용 문법 없이 loggedIn 이라는 이름으로 접근함
           if loggedIn
+            li
+              a(href="/users/edit") Edit-Profile
+
             li 
               a(href="/users/logout") Log Out
             
