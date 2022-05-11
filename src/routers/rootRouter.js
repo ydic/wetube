@@ -10,6 +10,9 @@ import express from "express";
 import {home, search} from "../controllers/videoController.js"
 import {getJoin, postJoin, getLogin, postLogin} from "../controllers/userController.js"
 
+// [ Express 라이브러리 문법 ] ReferenceError: publicOnlyMiddleware is not defined (middlewares.js 에서 export 한 함수를 rootRouter.js 에서 사용하려는 것이므로 import 해주어야 함)
+import { publicOnlyMiddleware } from '../middlewares.js';
+
 const rootRouter = express.Router();
 
 // Router 코드와 Controller 코드의 이원화 필요
@@ -21,9 +24,11 @@ const rootRouter = express.Router();
 rootRouter.get("/", home);
 
 // join 주소로의 GET, POST 요청은 userController 쪽에서 처리하여 응답하도록 코딩함
-rootRouter.route("/join").get(getJoin).post(postJoin);
+// [ 시큐어 보안 코딩 ] middlewares.js 의 publicOnlyMiddleware 함수를 통해 이미 로그인한 사용자(즉, loggedIn 값이 true)라면 로그인 처리용 URL 경로들에 접근 시도하는 것은 불필요한 접근이므로 접근 제한시킴
+rootRouter.route("/join").all(publicOnlyMiddleware).get(getJoin).post(postJoin);
 
-rootRouter.route("/login").get(getLogin).post(postLogin);
+// [ 시큐어 보안 코딩 ] middlewares.js 의 publicOnlyMiddleware 함수를 통해 이미 로그인한 사용자(즉, loggedIn 값이 true)라면 로그인 처리용 URL 경로들에 접근 시도하는 것은 불필요한 접근이므로 접근 제한시킴
+rootRouter.route("/login").all(publicOnlyMiddleware).get(getLogin).post(postLogin);
 rootRouter.get("/search", search);
 
 export default rootRouter;
