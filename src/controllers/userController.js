@@ -325,9 +325,30 @@ export const getEdit = (req, res) => {
   res.render('edit-profile', { pageTitle: 'Edit Profile'});
 }
 
-export const postEdit = (req, res) => {
-  // res.redirect('/');
-  res.send("ddddddddd");
+export const postEdit = async (req, res) => {
+  //- [ 코드 연계성 ] edit-profile.pug 에서 user가 POST 요청을 보내면 userController.js 의 postEdit 함수에서 body 값(pug 파일의 input(name='명칭') 에 대한 값이 object 형식으로 들어있음)을 받아서 읽어들일 수 있게 됨
+  //- [ 코드 연계성 & Javascript 문법 ] pug 파일의 input(name='명칭') 에 대한 값이 object 형식으로 들어있으므로 Javscript ES6 문법을 활용해 body 값 내에서 가져다 사용할 key (즉, input(name='명칭'))를 명시해야 함
+  //  [ 코드 연계성 ] user 로부터 수정하려는 내용에 대한 입력을 받아온 상태이므로, user 를 찾아서 update 해야 함
+  
+  // 혼합해서 데이터를 가져오기에 더 좋은 코딩 스타일이라서(즉, req 안에 있는 session 정보도 가져오고, req 안에 있는 body 정보도 가져오고)
+  const {
+          // middlewares.js 의 localsMiddleware 함수
+          // [ Express-session 라이브러리 문법 ] 키값이 id 가 아니라 _id 임
+          // [ Express-session 라이브러리 문법 ] middlewares.js 에서 로그인한 사용자 데이터가 담겨지는 부분의 코드인 console.log('로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult); 코드로 사용자 값에 대한 로그 결과물 속에서 키값이 id가 아닌 _id 임을 역추적으로 파악해낼 수 있어야 함
+          session: { userDbResult: { _id }},
+          
+          // edit-profile.pug 의 from(method='POST') 이하 input 태그값에서 넘어온 값들
+          body: { name:name, 
+                  email, username, location }, 
+        } = req;
+
+  // [ Express-session 라이브러리 문법 ★★★ ] Wetube DB 에서는 userDbResult 오브젝트를 업데이트 했으나, session 은 wetube DB와 미연결 상태
+  // [ Express-session 라이브러리 문법 ★★★ ] userController.js 의 postJoin 함수 내에서 req.session.userDbResult = userDbResult; 코드에서와 같이 session 에 userDbResult 를 넣도록 코딩한 상태이므로, wetube DB 에서 userDbResult 오브젝트를 업데이트 했으면 그 값이 그대로 반영되어 담겨지는 session 자체도 업데이트 해주어야 함
+  await User.findByIdAndUpdate(_id, {
+    name, email, username, location
+  })
+
+  return res.render('edit-profile');
 }
 
 // delete는 JS 예약어라서 변수명으로 선언 불가, 변수명을 remove로 대체 선언

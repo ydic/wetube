@@ -2,6 +2,7 @@ import express from "express";
 
 // import 하기 전에 export 처리 먼저 해주어야 함
 import {watch, getEdit, postEdit, getUpload, postUpload, deleteVideo} from "../controllers/videoController.js"
+import { protectorMiddleware } from '../middlewares.js';
 
 export const videoRouter = express.Router();
 
@@ -21,7 +22,8 @@ export const videoRouter = express.Router();
 // 정규표현식 테스트 사이트 https://regexr.com/
 // [0-9a-f]{24} 정규표현식의 의미는 0부터 9, a부터 f까지의 24자(24바이트 16진수) string을 찾아내는 것
 
-                // videoRouter.get('/:id(\\d+)', watch);
+                // videoRouter.get('/:id(\\d+)', watch)
+
 videoRouter.get('/:id([0-9a-f]{24})', watch);
 
 // [ Express 문법 ] express 스스로는 form의 body(즉, value)를 처리할 줄 모름. 
@@ -29,10 +31,12 @@ videoRouter.get('/:id([0-9a-f]{24})', watch);
 // [ Express 문법 ] server.js에서 express.urlencode() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
 
                 // videoRouter.route('/:id(\\d+)/edit').get(getEdit).post(postEdit);
-videoRouter.route('/:id([0-9a-f]{24})/edit').get(getEdit).post(postEdit);
-videoRouter.route('/:id([0-9a-f]{24})/delete').get(deleteVideo);
 
-videoRouter.route('/upload').get(getUpload).post(postUpload);
+// [ 코드 연계성 ] video model과 user model을 연결(즉, videoController 에서 video 마다 소유자를 지정해 소유자(wetube db 계정이 있고, 로그인 상태인 사용자 - 즉, middlewares.js 의 protectorMiddleware 함수에 부합하는 사용자)에게만 video 업로드 권한 부여, 해당 소유자가 아니라면 video 수정 및 삭제 권한 접근제한)
+videoRouter.route('/:id([0-9a-f]{24})/edit').all(protectorMiddleware).get(getEdit).post(postEdit);
+videoRouter.route('/:id([0-9a-f]{24})/delete').all(protectorMiddleware).get(deleteVideo);
+
+videoRouter.route('/upload').all(protectorMiddleware).get(getUpload).post(postUpload);
 
 
 

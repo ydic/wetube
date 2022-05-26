@@ -23,9 +23,6 @@ html(lang="ko")
         ul
           li
             a(href="/") Home
-            
-          li
-            a(href="/videos/upload") Upload Video
           
           li 
             a(href="/search") Search
@@ -41,9 +38,10 @@ html(lang="ko")
           //- [ Express-session 라이브러리 연계 문법 ] middlewares.js의 localsMiddleware 함수 내의 res.locals.loggedIn = Boolean(req.session.loggedIn); 코드 값을 base.pug에서 별도의 전용 문법 없이 loggedIn 이라는 이름으로 접근함
           if loggedIn
             li
+              a(href="/videos/upload") Upload Video
+            li
               a(href="/users/edit") Edit-Profile
-
-            li 
+            li
               a(href="/users/logout") Log Out
             
             //- [ Express-session 라이브러리 연계 문법 ] session으로부터 locals에 전달(공유)된 값(즉, 전역 global 속성)을 별도의 전용 문법 없이 #{loggedInUser.name} 형태로 Pug에서 호출 가능함
