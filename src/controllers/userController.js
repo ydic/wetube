@@ -344,11 +344,29 @@ export const postEdit = async (req, res) => {
 
   // [ Express-session 라이브러리 문법 ★★★ ] Wetube DB 에서는 userDbResult 오브젝트를 업데이트 했으나, session 은 wetube DB와 미연결 상태
   // [ Express-session 라이브러리 문법 ★★★ ] userController.js 의 postJoin 함수 내에서 req.session.userDbResult = userDbResult; 코드에서와 같이 session 에 userDbResult 를 넣도록 코딩한 상태이므로, wetube DB 에서 userDbResult 오브젝트를 업데이트 했으면 그 값이 그대로 반영되어 담겨지는 session 자체도 업데이트 해주어야 함
-  await User.findByIdAndUpdate(_id, {
+
+                        /*
+                        await User.findByIdAndUpdate(_id, {
+                          name, email, username, location
+                        })
+
+                        req.session.userDbResult = {
+                          ...req.session.userDbResult,
+                          name, email, username, location
+                        };
+                        */
+
+  const updatedUser = await User.findByIdAndUpdate(_id, {
     name, email, username, location
+  }, {
+    // [ Mongoose 라이브러리 문법 ] https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate
+    new: true
   })
 
-  return res.render('edit-profile');
+  req.session.userDbResult = updatedUser;
+
+                        // return res.render('edit-profile');
+  return res.redirect('/users/edit');
 }
 
 // delete는 JS 예약어라서 변수명으로 선언 불가, 변수명을 remove로 대체 선언
