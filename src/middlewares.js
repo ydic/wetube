@@ -23,7 +23,7 @@ export const localsMiddleware = (req, res, next) => {
   // [ 시큐어 보안 코딩 ] 비로그인 상태의 사용자가 로그인 된 사용자에게만 보이는 Edit-Profile 하이퍼링크조차 브라우저에 나타나지 않는 상황에서 사용자 정보 변경 페이지 URL 값을(즉, /users/edit) 직접 주소입력창에 입력하여 진입 시도할 때, 해당 URL 경로에 대한 접근을 제한시켜야 함(예- 리다이렉트 시키기)
   // [ 시큐어 보안 코딩 & Express-session 라이브러리 연계 문법 ] loggedInUserDb 에 접근하려는데 비로그인 상태이면 발생하는 에러에 대해 req.session.userDbResult || {}; 코드는 or 조건자와 빈 오브젝트(즉, {}, empty object) 를 덧붙여서 session 내의 user 값이 비어있는 상태일 때(즉, 사이트 방문자가 비로그인 상태일 때) loggedInUser 값이 undefined 여서 발생하게 되는 cannot read property '무언가' of undefined 오류를 방지할 수 있음
   res.locals.loggedInUserDb = req.session.userDbResult || {};
-        console.log('로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult);
+        // console.log('로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult);
   
   // * * * * 주의: next()를 호출하지 않으면 웹사이트가 정상 작동하지 않음
   next()

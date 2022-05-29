@@ -329,44 +329,107 @@ export const postEdit = async (req, res) => {
   //- [ 코드 연계성 ] edit-profile.pug 에서 user가 POST 요청을 보내면 userController.js 의 postEdit 함수에서 body 값(pug 파일의 input(name='명칭') 에 대한 값이 object 형식으로 들어있음)을 받아서 읽어들일 수 있게 됨
   //- [ 코드 연계성 & Javascript 문법 ] pug 파일의 input(name='명칭') 에 대한 값이 object 형식으로 들어있으므로 Javscript ES6 문법을 활용해 body 값 내에서 가져다 사용할 key (즉, input(name='명칭'))를 명시해야 함
   //  [ 코드 연계성 ] user 로부터 수정하려는 내용에 대한 입력을 받아온 상태이므로, user 를 찾아서 update 해야 함
-  
-  // 혼합해서 데이터를 가져오기에 더 좋은 코딩 스타일이라서(즉, req 안에 있는 session 정보도 가져오고, req 안에 있는 body 정보도 가져오고)
-  const {
-          // middlewares.js 의 localsMiddleware 함수
-          // [ Express-session 라이브러리 문법 ] 키값이 id 가 아니라 _id 임
-          // [ Express-session 라이브러리 문법 ] middlewares.js 에서 로그인한 사용자 데이터가 담겨지는 부분의 코드인 console.log('로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult); 코드로 사용자 값에 대한 로그 결과물 속에서 키값이 id가 아닌 _id 임을 역추적으로 파악해낼 수 있어야 함
-          session: { userDbResult: { _id }},
-          
-          // edit-profile.pug 의 from(method='POST') 이하 input 태그값에서 넘어온 값들
-          body: { name:name, 
-                  email, username, location }, 
-        } = req;
-
-  // [ Express-session 라이브러리 문법 ★★★ ] Wetube DB 에서는 userDbResult 오브젝트를 업데이트 했으나, session 은 wetube DB와 미연결 상태
-  // [ Express-session 라이브러리 문법 ★★★ ] userController.js 의 postJoin 함수 내에서 req.session.userDbResult = userDbResult; 코드에서와 같이 session 에 userDbResult 를 넣도록 코딩한 상태이므로, wetube DB 에서 userDbResult 오브젝트를 업데이트 했으면 그 값이 그대로 반영되어 담겨지는 session 자체도 업데이트 해주어야 함
-
+                        
+                        // 혼합해서 데이터를 가져오기에는 복잡한 코딩 스타일이라서 코드 논리는 맞지만 사용하지 않음                        
                         /*
                         await User.findByIdAndUpdate(_id, {
                           name, email, username, location
                         })
 
                         req.session.userDbResult = {
+                          // [ Javascript ES6 문법 ] ...req.session.userDbResult 문법은 req.session.userDbResult 안에 든 내용을 밖으로 꺼내주는 기능을 함
                           ...req.session.userDbResult,
+                          // [ Javascript ES6 문법 ] ...req.session.userDbResult 문법으로 꺼내 담은 값들 중에 name, email, username, location 키값들에 대해서는 값을 덮어쓰기함(즉, 업데이트)
                           name, email, username, location
                         };
                         */
 
-  const updatedUser = await User.findByIdAndUpdate(_id, {
-    name, email, username, location
-  }, {
-    // [ Mongoose 라이브러리 문법 ] https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate
-    new: true
-  })
+  // 혼합해서 데이터를 가져오기에 더 좋은 코딩 스타일이라서(즉, req 안에 있는 session 정보도 가져오고, req 안에 있는 body 정보도 가져오고)
+  const {
+    // middlewares.js 의 localsMiddleware 함수
+    // [ Express-session 라이브러리 문법 ] 키값이 id 가 아니라 _id 임
+    // [ Express-session 라이브러리 문법 ] middlewares.js 에서 로그인한 사용자 데이터가 담겨지는 부분의 코드인 console.log('로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult); 코드로 사용자 값에 대한 로그 결과물 속에서 키값이 id가 아닌 _id 임을 역추적으로 파악해낼 수 있어야 함
+    session: { userDbResult: { _id }},
+    
+    // edit-profile.pug 의 from(method='POST') 이하 input 태그값에서 넘어온 값들
+    body: { name:name, 
+            email, username, location }, 
+  } = req;
+  // console.log('userController.js ---- edit-profile.pug 의 form에서 넘어온 상태의 req 값들 중 ----- ',req.session.userDbResult, req.body)
 
-  req.session.userDbResult = updatedUser;
+                        // ********* 코드챌린지 받기 직전까지의 클론 코딩 #8.3 Edit Profile POST part Two *********
+                        /*
+                        const updatedUser = await User.findByIdAndUpdate(_id, {
+                          name, email, username, location
+                        }, {
+                          // [ Mongoose 라이브러리 문법 ] https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate
+                          // [ Mongoose 라이브러리 문법 ] new: true 옵션을 설정하면 findByIdAndUpdate 가 업데이트 된 데이터를 return 해 줌. (즉, new: true 옵션이 지정되어 있지 않은 경우, 기본적으로 findByIdAndUpdate 는 업데이트 되기 전의 데이터를 return 해 줌)
+                          // [ Mongoose 라이브러리 문법 ] new: true 옵션을 사용한다는 것은 "가장 최근 업데이트 된 object 를 원한다. 그 이전 데이터는 필요하지 않다."
+                          new: true
+                        })
 
-                        // return res.render('edit-profile');
-  return res.redirect('/users/edit');
+                        req.session.userDbResult = updatedUser;
+                        return res.redirect('/users/edit');
+                        */
+
+  // ********* 코드챌린지 내용 #8.3 Edit Profile POST part Two *********
+  /*
+  username 바꾸려는데 이미 있거나 email 바꾸려는데 이미 있다면
+  ---> 업데이트 차단해야함
+  
+  사용자가 username 이나 email 업데이트하려는걸 아는 방법?
+  ---> postEdit 함수에서 body는 form으로부터 받아오고
+  form은 현재 사용자의 정보이고
+  form 정보가 session의 userDbResult 정보와 같은지 확인해야함
+  
+  주의: userController.js 의 postJoin 함수의 exists 방식을 사용하면 항상 true 처리됨
+  postEdit 에서 사용한 username과 email 은 현재 session에 있는 사용자의 정보이므로
+  
+  즉, postEdit 함수의 body의 username과 email이
+  session.userDbResult 에 있는 username과 email 과 다른지 확인해야함
+  다르다면 사용자가 username이나 email을 변경하고 싶다는것
+  */
+
+  if(req.session.userDbResult.username !== req.body.username){
+    const existsResultUsername = await User.exists({username: req.body.username});
+    if(existsResultUsername){
+      // 400 Bad Request 클라이언트 오류(예: 잘못된 요청 구문, 유효하지 않은 요청 메시지 프레이밍, 또는 변조된 요청 라우팅)
+      // [ Express 문법 ] User.exists() 결과가 True(X: False)이면 res.render() 라고만 처리하면 사용자에게는 오류 맥락을 이해시켰지만 브라우저는 상태 응답 코드 200을 받은 상태라서 로그인 입력값 저장여부 묻는 팝업이 나타남. 브라우저도 오류 상황으로 처리할 수 있도록 .status() 문법으로 상태 코드를 명시해야 함. 그러면 morgan 미들웨어(즉, app.use(logger);) 통해 서버 로그 상에 POST /users/edit 400 라고 표시됨      
+      
+      return res.status(400).render('edit-profile', { pageTitle: 'Edit Profile', errorMessage: 'Please choose another. This username is already taken. '});                
+    } 
+  } 
+
+  if(req.session.userDbResult.email !== req.body.email){
+    const existsResultEmail = await User.exists({email: req.body.email});
+    if(existsResultEmail){
+      // 400 Bad Request 클라이언트 오류(예: 잘못된 요청 구문, 유효하지 않은 요청 메시지 프레이밍, 또는 변조된 요청 라우팅)
+      // [ Express 문법 ] User.exists() 결과가 True(X: False)이면 res.render() 라고만 처리하면 사용자에게는 오류 맥락을 이해시켰지만 브라우저는 상태 응답 코드 200을 받은 상태라서 로그인 입력값 저장여부 묻는 팝업이 나타남. 브라우저도 오류 상황으로 처리할 수 있도록 .status() 문법으로 상태 코드를 명시해야 함. 그러면 morgan 미들웨어(즉, app.use(logger);) 통해 서버 로그 상에 POST /users/edit 400 라고 표시됨      
+      
+      return res.status(400).render('edit-profile', { pageTitle: 'Edit Profile', errorMessage: 'Please choose another.This email is already taken. '});                
+    } 
+  }
+
+  // [ Javascript 문법 ] (질문) userController.js 의 postJoin 함수 내의 try{} catch(error){} 코드 구조에다 세부내용만 바꾼건데 try catch 코드를 목적과 용도에 맞게 사용한 게 맞는건지?
+  try {
+    const updatedUser = await User.findByIdAndUpdate(_id, {
+      name, email, username, location
+    }, {
+      // [ Mongoose 라이브러리 문법 ] https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate
+      // [ Mongoose 라이브러리 문법 ] new: true 옵션을 설정하면 findByIdAndUpdate 가 업데이트 된 데이터를 return 해 줌. (즉, new: true 옵션이 지정되어 있지 않은 경우, 기본적으로 findByIdAndUpdate 는 업데이트 되기 전의 데이터를 return 해 줌)
+      // [ Mongoose 라이브러리 문법 ] new: true 옵션을 사용한다는 것은 "가장 최근 업데이트 된 object 를 원한다. 그 이전 데이터는 필요하지 않다."
+      new: true
+    })
+    // console.log('userController.js --- updatedUser-----------', updatedUser);
+    
+    // [ Express-session 라이브러리 문법 ★★★ ] Wetube DB 에서는 userDbResult 오브젝트를 업데이트 했으나, session 은 wetube DB와 미연결 상태라서 프론트엔드(브라우저 화면)에 반영되지 않는 문제 상황. 프론트엔드는 session 으로부터 정보를 얻도록 코딩했으므로.
+    // [ Express-session 라이브러리 문법 ★★★ ] session 은 로그인 할 때 한 번만 작성되도록 코딩함. 로그인 이후에는 session 을 건드리지 않기 떄문에 로그인 했을 때 읽어들인 userDbResult 값의 모습으로 그대로 잔류하는 상태.
+    // [ Express-session 라이브러리 문법 ★★★ ] userController.js 의 postJoin 함수 내에서 req.session.userDbResult = userDbResult; 코드에서와 같이 session 에 userDbResult 를 넣도록 코딩한 상태이므로, wetube DB 에서 userDbResult 오브젝트를 업데이트 했으면 그 값이 그대로 반영되어 담겨지는 session 자체도 업데이트 해주어야 함
+    req.session.userDbResult = updatedUser;
+    return res.redirect('/users/edit');
+  } catch(error){
+    return res.status(400).render('edit-profile', { pageTitle: "Edit profile Error", errorMessage: error._message},)
+  }
 }
 
 // delete는 JS 예약어라서 변수명으로 선언 불가, 변수명을 remove로 대체 선언
