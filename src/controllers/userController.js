@@ -432,6 +432,26 @@ export const postEdit = async (req, res) => {
   }
 }
 
+export const getChangePassword = (req, res) => {
+  // [ Pug 라이브러리 문법 ] Error: Failed to lookup view "ABC" in views directory
+  // [ Pug 라이브러리 문법 ] 오류 해석: userController.js 의 getChangePassword 함수 내의 return res.render('ABC', { pageTitle: 'Change Password'}) 코드에서 시킨대로 views 폴더(즉, Pug 엔진 프론트엔드 상호작용 고유경로) 이하에서 ABC.pug 를 찾지못했다(아직 안 만들었으니까)
+  // [ Pug 라이브러리 문법 ] views 폴더 이하에 pug 파일이 너무 많아져서 폴더로 카테고리화 하기 위해 views 폴더 이하에 users 폴더를 만들고 그 안에 change-password.pug 를 생성함
+
+  //- [ Github OAuth API 연계 문법 ] Github OAuth 방식으로 wetube DB 에 계정 만든 사용자는 Wetube DB 내에 비밀번호 값이 없으므로 비밀번호 변경 페이지 자체를 보여주지 말아야 함
+  if(req.session.userDbResult.socialOnly === true){
+    return res.redirect('/');
+  }
+  // [ Pug 라이브러리 문법 ] views 폴더 이하에 pug 파일이 너무 많아져서 폴더로 카테고리화 하기 위해 views 폴더 이하에 users 폴더를 만들고 그 안에 change-password.pug 를 생성함
+  // [ Pug 라이브러리 문법 ] return res.render('users/change-password', {생략}) 코드의 users/change-password 경로는 userRouter.js 내의 userRouter.route('/change-password').생략 코드와는 별개이며 pug 엔진이 참조하는 views 폴더 이하의 users 폴더 안에 있는 change-password.pug 를 가리킴
+  return res.render('users/change-password', { pageTitle: 'Change Password'})
+}
+
+export const postChangePassword = (req, res) => {
+  // send notification
+  return res.redirect('/')
+
+}
+
 // delete는 JS 예약어라서 변수명으로 선언 불가, 변수명을 remove로 대체 선언
 export const remove = (req, res) => res.send("Remove User ctrl");
 

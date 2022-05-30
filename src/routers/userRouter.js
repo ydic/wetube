@@ -1,7 +1,7 @@
 import express from "express";
 
 // import 하기 전에 export 처리 먼저 해주어야 함
-import {getEdit, postEdit, remove, logout, see, startGithubLogin, finishGithubLogin} from "../controllers/userController.js"
+import {getChangePassword, postChangePassword, getEdit, postEdit, remove, logout, see, startGithubLogin, finishGithubLogin} from "../controllers/userController.js"
 
 // [ Express 라이브러리 문법 ] ReferenceError: protectorMiddleware is not defined (middlewares.js 에서 export 한 함수를 userRouter.js 에서 사용하려는 것이므로 import 해주어야 함)
 import { protectorMiddleware, publicOnlyMiddleware } from '../middlewares.js';
@@ -24,6 +24,8 @@ userRouter.get("/delete", handleDelete);
 // [ 시큐어 보안 코딩 ] middlewares.js 의 protectorMiddleware 함수로 비로그인 사용자가 로그인 승인 필요한 페이지(로그인된 사용자 전용)에 접근하지 못하도록 제한하기
 // [ Express 라이브러리 문법 ] .all(함수명) 문법을 통해 GET/POST/PUT/DELETE 요청 구분 없이 모든 http method 요청에 대해 .all( ) 로 지정한 함수를 거친 다음에 Controller 함수 쪽으로 넘어가도록 만듦
 userRouter.route('/edit').all(protectorMiddleware).get(getEdit).post(postEdit);
+
+userRouter.route('/change-password').all(protectorMiddleware).get(getChangePassword).post(postChangePassword);
 
 userRouter.get("/logout", protectorMiddleware, logout);
 

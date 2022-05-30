@@ -1,6 +1,7 @@
 //- [Pug 문법] extends를 통해 html 레이아웃을 base.pug 코드로부터 상속받음
 //- [Pug 문법] block을 통해 base.pug 레이아웃 기반으로 html 내용 재구성
 
+
 extends base.pug
 
 block content 
@@ -32,3 +33,9 @@ block content
     input(value=loggedInUserDb.location, name='location', type='text', placeholder='Location', required)
 
     input(type='submit', value='Update Profile')
+
+    //- [ Github OAuth API 연계 문법 ] Github OAuth 방식으로 wetube DB 에 계정 만든 사용자는 Wetube DB 내에 비밀번호 값이 없으므로 비밀번호 변경 페이지 자체를 보여주지 말아야 함
+    if !loggedInUserDb.socialOnly
+      hr
+      //- 절대URL(즉, /users/change-password)로 적어도 되는데 상대URL(즉, change-password) 사용하여 /users/ 이하 부분의 경로값만 바뀌게 함
+      a(href='change-password') Change Password &rarr;
