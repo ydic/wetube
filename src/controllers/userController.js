@@ -446,9 +446,74 @@ export const getChangePassword = (req, res) => {
   return res.render('users/change-password', { pageTitle: 'Change Password'})
 }
 
-export const postChangePassword = (req, res) => {
+export const postChangePassword = async (req, res) => {
+  // [ Mongo DB 명령어] mongo / show dbs / use wetube / show collections / db.sessions.remove({}) / db.users.remove({}) / db.users.find({})
+
+  const {
+    // middlewares.js 의 localsMiddleware 함수
+    // [ Express-session 라이브러리 문법 ] 키값이 id 가 아니라 _id 임
+    // 작업 01단계: 변경할 비밀번호 값을 알아도 그 값을 어느 사용자의 DB 값에 대해 업데이트 해야 하는지 모르면 비밀번호 변경 처리 불가하므로 로그인한 사용자을 식별해야 함
+
+                  // 방식A - [ Express-session 라이브러리 문법 ] middlewares.js 에서 로그인한 사용자 데이터가 담겨지는 부분의 코드인 console.log('로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult); 코드로 사용자 값에 대한 로그 결과물 속에서 키값이 id가 아닌 _id 임을 역추적으로 파악해낼 수 있어야 함
+                  // session: { userDbResult: { _id, password }},
+    
+    // 방식B
+    session: { userDbResult: { _id, }},
+    
+    // 작업 01단계: edit-profile.pug 의 from(method='POST') 이하 input 태그값에서 넘어온 값들
+    body: { oldPassword: oldPassword,
+            newPassword, newPasswordConfirmation }, 
+  } = req;
+
+  // 작업 02단계: 로그인한 사용자의 session 에서 _id 값을 이용해 wetube DB 로부터 사용자 데이터 받아옴
+  const user = await User.findById(_id);
+
+  // userController.js 의 postLogin 함수 내의 wetube DB 와 사용자 입력 비밀번호 일치여부 코드와 유사한 구조
+  // [ Bcrypt 라이브러리 문법 ] postLogin 컨트롤러에서 로그인 처리를 위해 bcrypt.compare() 내장함수로 사용자 입력 비밀번호와 DB Hash 비밀번호 값이 동일한지 비교하기 위함
+  // [ Bcrypt 라이브러리 문법 ] Hash 원리상 입력값이 동일하면 출력값이 항상 동일하므로 bcrypt.compare(사용자 입력값, DB Hash 처리된 값) 형태로 두 값을 비교하여 결과값으로 True/False 리턴함
+
+  // 작업 03단계: 사용자가 비밀번호 변경 페이지(change-password.pug)에서 변경전 비빌번호로 입력한 값이 들어있는 oldPassword 와 wetube DB 에 들어있는 비밀번호 일치 여부 확인
+                  
+                  // 방식A - [ Bcrypt 라이브러리 & Mongoose 연계 문법] oldPassword 값은 change-password.pug 내의 input 값이 넘어온 것이고, password 값은 postChangePassword 함수 내에서 session 으로부터 가져온 사용자의 비밀번호 값임
+                  // const matchedPassword = await bcrypt.compare(oldPassword, password)
+
+  // 방식B - [ Bcrypt 라이브러리 & Mongoose 연계 문법] oldPassword 값은 change-password.pug 내의 input 값이 넘어온 것이고, password 값은 postChangePassword 함수 내에서 await User.findById(_id) 로부터 가져온 사용자의 비밀번호 값임(즉, wetube DB 에 저장되어 있는 사용자의 비밀번호 값)
+  const matchedPassword = await bcrypt.compare(oldPassword, user.password)
+  if(!matchedPassword){
+    // [ Pug 라이브러리 문법 ] views 폴더 이하에 pug 파일이 너무 많아져서 폴더로 카테고리화 하기 위해 views 폴더 이하에 users 폴더를 만들고 그 안에 change-password.pug 를 생성함
+    // [ Pug 라이브러리 문법 ] return res.render('users/change-password', {생략}) 코드의 users/change-password 경로는 userRouter.js 내의 userRouter.route('/change-password').생략 코드와는 별개이며 pug 엔진이 참조하는 views 폴더 이하의 users 폴더 안에 있는 change-password.pug 를 가리킴
+    // [ Express 라이브러리 문법 ] return res.render() 함수로 errorMessage 키값을 pug 템플릿에 전달하는 것은 사용자에게는 비밀번호 불일치 상황 이해시켰지만 브라우저는 여전히 오류 상황을 몰라 비밀번호 기기내 저장 팝업을 띄우므로 status(400) 코드를 첨가하여 브라우저도 오류 상황 인지하도록 코딩해야 함
+    return res.status(400).render('users/change-password', { pageTitle: 'Change Password', errorMessage: "The current password is incorrect."})
+  }
+
+  // 작업 04단계: 비밀번호 변경값 일치 여부 확인 
+  if(newPassword !== newPasswordConfirmation){
+    // [ Pug 라이브러리 문법 ] views 폴더 이하에 pug 파일이 너무 많아져서 폴더로 카테고리화 하기 위해 views 폴더 이하에 users 폴더를 만들고 그 안에 change-password.pug 를 생성함
+    // [ Pug 라이브러리 문법 ] return res.render('users/change-password', {생략}) 코드의 users/change-password 경로는 userRouter.js 내의 userRouter.route('/change-password').생략 코드와는 별개이며 pug 엔진이 참조하는 views 폴더 이하의 users 폴더 안에 있는 change-password.pug 를 가리킴
+    // [ Express 라이브러리 문법 ] return res.render() 함수로 errorMessage 키값을 pug 템플릿에 전달하는 것은 사용자에게는 비밀번호 불일치 상황 이해시켰지만 브라우저는 여전히 오류 상황을 몰라 비밀번호 기기내 저장 팝업을 띄우므로 status(400) 코드를 첨가하여 브라우저도 오류 상황 인지하도록 코딩해야 함
+    return res.status(400).render('users/change-password', { pageTitle: 'Change Password', errorMessage: "The password doesn't match the confirmation."})
+  }
+
+  // 작업 05단계: [ Express-session & Mongoose & Bcrpyt 연계 문법 ] userController.js 의 postChangePassword 함수 내에서 session 속에 들어있는 사용자 식별값인 _id 값을 불러와서 그 사용자의 password 값에 newPassword 값을 대입해 비밀번호를 변경함
+            // 방식A - 로그인한 사용자의 session 으로부터 사용자를 식별해 password 값에 newPassword 값을 대입하고자 await User.findById(_id) 코드로 wetube DB 검색함
+            // const user = await User.findById(_id);
+  console.log('old password -----', user.password);
+  user.password = newPassword;
+  
+  // [ Bcrpyt 라이브러리 문법 ] 사용자에 의해 변경된 비밀번호를 wetube DB 에 업데이트 하기 전에 User.js 의 userSchema.pre('save', async function(){생략} 코드를 이용해 hash 적용시킴
+  console.log('new unhashed password -----', user.password);
+  
+  // 작업 06단계: [ Javascript 문법 ] DB 에 데이터를 저장하는 데는 시간이 걸리므로 async 함수 내에 await 명시요
+  await user.save();
+
+            // 방식A - [ Express-session & Bcrypt 연계 문법 ] 변경된 비밀번호에 대해 hash 처리 된 상태의 값인 user.password(즉, 현재값)를 req.session.user.password(즉,그때의 값)에도 반영시켜 session 속에 들어있는 password 값을 변경된 값으로 최신화시켜야 함
+            // req.session.userDbResult.password = user.password;
+
+  console.log('new password -----', user.password);
   // send notification
-  return res.redirect('/')
+  
+  // 작업 07단계: wetube DB 상에서 비밀번호 변경 작업이 완료되었다면 사용자를 로그아웃시켜 변경된 비밀번호로 재로그인 하도록 redirect 시킴
+  return res.redirect('/users/logout');
 
 }
 
