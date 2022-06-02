@@ -1,3 +1,8 @@
+// [ Multer 라이브러리 문법 ] ReferenceError: multer is not defined
+// [ Multer 라이브러리 문법 ] Multer는 파일 업로드를 위해 사용되는 multipart/form-data 를 다루기 위한 node.js 의 미들웨어 입니다. 효율성을 최대화 하기 위해 busboy 를 기반으로 하고 있습니다.
+// [ Multer 라이브러리 문법 ] 주: Multer는 multipart (multipart/form-data)가 아닌 폼에서는 동작하지 않습니다.
+import multer from 'multer';
+
 // [ Express-session 라이브러리 연계 문법 ] 주의: server.js에서 localsMiddleware가 코드 순서상 Express-session middleware ( 즉, app.use(session({}) )다음에 오기 때문에 가능함
 export const localsMiddleware = (req, res, next) => {
   
@@ -50,3 +55,9 @@ export const publicOnlyMiddleware = (req, res, next) => {
     return res.redirect('/');
   }
 }
+
+// [ Multer 라이브러리 문법 ] export const ABC = (req, res) => {} 형식의 코드를 사용하지 않음
+// [ Multer 라이브러리 문법 ] middlewares.js 파일이 있는 디렉토리에 uploads 라는 폴더가 생성됨
+// [ Multer 라이브러리 문법 ] dest 속성은 업로드한 파일을 저장할 경로 설정을 담당하므로 사용자가 보낸 파일을 uploads 폴더에 저장하도록 설정된 middleware 를 만듦
+export const uploadFiles = multer({ dest: 'uploads/' })
+

@@ -354,7 +354,11 @@ export const postEdit = async (req, res) => {
     // edit-profile.pug 의 from(method='POST') 이하 input 태그값에서 넘어온 값들
     body: { name:name, 
             email, username, location }, 
+    // userRouter.js 의 userRouter.route('/edit').all(protectorMiddleware).get(getEdit).post(uploadFiles.single('avatar'), postEdit); 코드
+    file
   } = req;
+
+  console.log('multer ', file);
   // console.log('userController.js ---- edit-profile.pug 의 form에서 넘어온 상태의 req 값들 중 ----- ',req.session.userDbResult, req.body)
 
                         // ********* 코드챌린지 받기 직전까지의 클론 코딩 #8.3 Edit Profile POST part Two *********

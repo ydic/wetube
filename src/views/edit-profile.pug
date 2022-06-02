@@ -16,8 +16,12 @@ block content
   //- form(method="GET") 요청은 구글과 같은 검색엔진에서 활용
   //- form(method="POST") 요청은 웹사이트 로그인 / DB에 들어있는 값을 바꾸는 data를 보내거나 file을 보낼 때 사용
 
-  //- [ 코드 연계성 ] edit-profile.pug 에서 user가 POST 요청을 보내면 userController.js 의 postEdit 함수에서 body 값을 받아서 읽어들일 수 있게 됨
-  form(method='POST')
+  //- [ 코드 연계성 ] edit-profile.pug 에서 user가 POST 요청을 보내면 userController.js 의 postEdit 함수에서 body 값을 받아서 읽어들일 수 있게 됨                  
+
+  //- [ Multer 라이브러리 문법 ] Multer는 파일 업로드를 위해 사용되는 multipart/form-data 를 다루기 위한 node.js 의 미들웨어 입니다. 효율성을 최대화 하기 위해 busboy 를 기반으로 하고 있습니다.
+  //- [ Multer 라이브러리 문법 ] 주: Multer는 multipart (multipart/form-data)가 아닌 폼에서는 동작하지 않습니다.
+                  //- form(method='POST')
+  form(method='POST', enctype='multipart/form-data')
     //- [ Pug 라이브러리 문법 ] 본 코드 페이지에서는 계정을 새로 생성하는 것이 아니라 기존 계정의 정보를 수정하는 것이므로 사용자의 현재 프로필을 form 형식에서 브라우저에 보여주어야 하므로 input(value= ) 속성으로 사용자 정보 값을 읽어와야 함
     //- [ 코드 연게성 ] userController.js의 postLogin 함수에서 socialOnly: false (즉, wetube ID/PW 방식 가입) 회원의 userDbResult 를 req.session.userDbResult = userDbResult; 형태로 1차 전달함
     //- [ 코드 연게성 ] 그것을 middleware.js 의 localsMiddleware 함수에서 res.locals.loggedInUserDb = req.session.userDbResult; 형태로 값을 2차 전달함
@@ -26,6 +30,15 @@ block content
     //- [ 리마인드 - servers.js 에서 express 호환 view engine 으로서의 pug 운용 환경설정 ] express 호환 템플리트가 있는 디렉토리
     //- [ 리마인드 - servers.js 에서 express 호환 view engine 으로서의 pug 운용 환경설정 ] package.json 파일이 있는 폴더 위치가 pug 템플릿 동작시 인식하는 cwd 기준점
     //- [ 리마인드 - servers.js 에서 express 호환 view engine 으로서의 pug 운용 환경설정 ] 따라서 초기 기본값으로 지정된 ./views 경로를 src/views 경로로 변경 (s자 빠진 view로 폴더명 생성시 오류발생함)
+
+    //- [ HTML 문법 ] <label> 을 <input> 요소와 연관시키려면, <input> 에 id 속성을 넣어야합니다. 그런 다음 <label> 에 id 와 같은 값의 for 속성을 넣어야합니다. 
+    //- [ HTML 문법 ] 또는, <label> 안에 <input> 을 중첩시킬 수 있습니다. 이 경우 연관이 암시적이므로 for 및 id속성이 필요없습니다.
+    label(for='avatarSection') Avatar
+    //- 저는 예전에 이런 폼을 만들어 파일 인풋에 모든 이미지를 허용했을 때 나중에 그 이미지 중 svg 포맷이 템플릿에서 정상적으로 출력 되지 않는 것을 봤어서 accept=".png, .jpg, .jpeg"로 설정하였습니다 :)
+                    //- input(type='file', id='avatarSection', name='avatar', accept='.png, .jpg, .jpeg')    
+    //- [ HTML 문법 ] input(name='ABC') 속성은 POST 요청이 발생됐을 때 userController.js 에서 그 값을 받아와 이용하기 위해서 속성 값들에 대한 명칭이 필요함
+    //- [ HTML 문법 ] input(accept='image/*') 속성은 이미지 파일형식만 선택하도록 설정
+    input(id='avatarSection', name='avatar', type='file', accept='image/*')
 
     input(value=loggedInUserDb.name, name='name', type='text', placeholder='Name', required)
     input(value=loggedInUserDb.email, name='email', type='email', placeholder='Email', required)

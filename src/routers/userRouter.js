@@ -4,7 +4,7 @@ import express from "express";
 import {getChangePassword, postChangePassword, getEdit, postEdit, remove, logout, see, startGithubLogin, finishGithubLogin} from "../controllers/userController.js"
 
 // [ Express 라이브러리 문법 ] ReferenceError: protectorMiddleware is not defined (middlewares.js 에서 export 한 함수를 userRouter.js 에서 사용하려는 것이므로 import 해주어야 함)
-import { protectorMiddleware, publicOnlyMiddleware } from '../middlewares.js';
+import { uploadFiles, protectorMiddleware, publicOnlyMiddleware } from '../middlewares.js';
 
 const userRouter = express.Router();
 
@@ -23,7 +23,11 @@ userRouter.get("/delete", handleDelete);
 // [ 시큐어 보안 코딩 & Express-session 라이브러리 연계 문법 ] loggedInUserDb 에 접근하려는데 비로그인 상태이면 발생하는 에러에 대해 req.session.userDbResult || {}; 코드는 or 조건자와 빈 오브젝트(즉, {}, empty object) 를 덧붙여서 session 내의 user 값이 비어있는 상태일 때(즉, 사이트 방문자가 비로그인 상태일 때) loggedInUser 값이 undefined 여서 발생하게 되는 cannot read property '무언가' of undefined 오류를 방지할 수 있음
 // [ 시큐어 보안 코딩 ] middlewares.js 의 protectorMiddleware 함수로 비로그인 사용자가 로그인 승인 필요한 페이지(로그인된 사용자 전용)에 접근하지 못하도록 제한하기
 // [ Express 라이브러리 문법 ] .all(함수명) 문법을 통해 GET/POST/PUT/DELETE 요청 구분 없이 모든 http method 요청에 대해 .all( ) 로 지정한 함수를 거친 다음에 Controller 함수 쪽으로 넘어가도록 만듦
-userRouter.route('/edit').all(protectorMiddleware).get(getEdit).post(postEdit);
+
+// [ Multer 라이브러리 문법 ] POST 요청에 대해 postEdit 함수 기재 이전에 Multer (즉, uploadFiles.single('avatar') 라는 코드)를 먼저 기재하여 Multer 코드 실행 후 그 다음 controller 인 postEdit 에 업로드한 파일의 정보를 전달함
+// [ Multer 라이브러리 문법 ] 즉, postEdit을 먼저 기재했다면 Multer 라이브러리의 req.file 기능 사용 불가함
+// [ Multer 라이브러리 문법 ★★★ ] uploadFiles.single('avatar') 코드는 edit-profile.pug 의 form(method='POST', enctype='multipart/form-data') 입력폼 내의 avatar 라는 이름의 input(type='file') 값에 단일 파일(즉, single)을 담아 uploads 폴더 이하에 업로드하고 req.file 을 추가함
+userRouter.route('/edit').all(protectorMiddleware).get(getEdit).post(uploadFiles.single('avatar'), postEdit);
 
 userRouter.route('/change-password').all(protectorMiddleware).get(getChangePassword).post(postChangePassword);
 
