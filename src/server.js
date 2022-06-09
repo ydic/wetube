@@ -1,5 +1,9 @@
 // server.js는 express 관련, server 환경설정(configuration) 관련 코드만 처리하도록 모듈화
 
+// Node JS는 Browser 밖에서도 동작하는 Javascript 이다
+// Babel은 Node JS가 이해하지 못하는 최신 Javascript를 이해하고 실행하도록 도와준다.
+// npm install --save-dev nodemon @babel/core @babel/preset-env @babel/node
+
 /* NodeJS 문법 require, ES6 문법 import from */
 import express from "express";
 import morgan from "morgan";
