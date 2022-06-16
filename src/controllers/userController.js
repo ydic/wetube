@@ -349,16 +349,27 @@ export const postEdit = async (req, res) => {
     // middlewares.js 의 localsMiddleware 함수
     // [ Express-session 라이브러리 문법 ] 키값이 id 가 아니라 _id 임
     // [ Express-session 라이브러리 문법 ] middlewares.js 에서 로그인한 사용자 데이터가 담겨지는 부분의 코드인 console.log('로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult); 코드로 사용자 값에 대한 로그 결과물 속에서 키값이 id가 아닌 _id 임을 역추적으로 파악해낼 수 있어야 함
-    session: { userDbResult: { _id }},
+    
+    session: { userDbResult: { _id, 
+                                // userDbResult 내에는 기존에 저장된 avatarUrl 항목이 있어서 기존 avatarUrl 값을 꺼내올 수 있음  
+                                avatarUrl }},
     
     // edit-profile.pug 의 from(method='POST') 이하 input 태그값에서 넘어온 값들
     body: { name:name, 
             email, username, location }, 
-    // userRouter.js 의 userRouter.route('/edit').all(protectorMiddleware).get(getEdit).post(uploadFiles.single('avatar'), postEdit); 코드
-    file
+
+                        // edit-profile.pug 에서 avatar용 파일 업로드하지 않았더니 req.file 은 undefined 되므로 path 값을 얻을 수 없는 오류 발생 TypeError: Cannot read property 'path' of undefined
+                        // file : { path },
+            
+            // [ Multer 라이브러리 문법 ] userRouter.js 의 userRouter.route('/edit').all(protectorMiddleware).get(getEdit).post(uploadFiles.single('avatar'), postEdit); 코드 결과로 Multer 라이브러리는 req.file 키를 생성 및 사용하도록 해줌
+            // [ Multer 라이브러리 연계 문법] edit-profile.pug 에서 avatar용 파일 업로드하지 않았더니 avatarUrl 값은 내용이 비어있는 상태이므로 avatarUrl: file.path 사용 불가 ReferenceError: path is not defined
+            // [ Multer 라이브러리 연계 문법] req.file 값을 userController.js 의 postEdit 함수 내의 findByIdAndUpdate 쿼리 함수에서 받아와 삼항연산 코드로 사용자가 avatar 이미지 업로드 하는 여부에 따라 이미지 소스경로를 달리 처리함 avatarUrl: file ? file.path : avatarUrl
+            file
+
   } = req;
 
-  console.log('multer ', file);
+  // console.log(path);
+  // console.log('multer ', file);
   // console.log('userController.js ---- edit-profile.pug 의 form에서 넘어온 상태의 req 값들 중 ----- ',req.session.userDbResult, req.body)
 
                         // ********* 코드챌린지 받기 직전까지의 클론 코딩 #8.3 Edit Profile POST part Two *********
@@ -417,6 +428,16 @@ export const postEdit = async (req, res) => {
   // [ Javascript 문법 ] (질문) userController.js 의 postJoin 함수 내의 try{} catch(error){} 코드 구조에다 세부내용만 바꾼건데 try catch 코드를 목적과 용도에 맞게 사용한 게 맞는건지?
   try {
     const updatedUser = await User.findByIdAndUpdate(_id, {
+      
+      // [ GitHub 문법 ] .gitignore 에 /uploads 추가함
+      // [ Multer 라이브러리 연계 문법 ] req.file 값을 userController.js 의 postEdit 함수 내의 findByIdAndUpdate 쿼리 함수에서 받아와 삼항연산 코드로 사용자가 avatar 이미지 업로드 하는 여부에 따라 이미지 소스경로를 달리 처리함 avatarUrl: file ? file.path : avatarUrl
+      // [ Multer 라이브러리 연계 문법 ] edit-profile.pug 에서 avatar용 파일 업로드하지 않았더니 avatarUrl 값은 내용이 비어있는 상태이므로 avatarUrl: file.path 사용 불가 ReferenceError: path is not defined
+      // [ Multer 라이브러리 연계 문법 ] 사용자가 edit-profile.pug 에서 avatar 파일을 업로드한다면 file.path 를 사용하고, 업로드하지 않았다면 현재 로그인한 사용자의 session 의 userDbResult 에 내장된 기존 avatarUrl 에 들어있는 이미지 값으로 유지함
+      // [ Mongo DB & Mongoose 라이브러리 문법 ] 코드 원칙: DB 에 파일 저장 금지 / 폴더(예- Amazon HDD)에만 파일 저장 / DB 에는 파일의 경로만 저장
+      avatarUrl: file ? file.path : avatarUrl,
+
+                      // 사용자가 이미 avatar 있다면, undefined 상태인 avatar 를 보내면 안됨
+                      // avatarUrl: path,
       name, email, username, location
     }, {
       // [ Mongoose 라이브러리 문법 ] https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate

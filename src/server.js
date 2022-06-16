@@ -19,6 +19,7 @@ import rootRouter from './routers/rootRouter';
 import userRouter from './routers/userRouter';
 import videoRouter from './routers/videoRouter';
 import { localsMiddleware } from './middlewares';
+import { application } from 'express';
 
 // const express = require('express');
 const app = express();
@@ -113,6 +114,11 @@ app.use('/', rootRouter);
 app.use('/videos', videoRouter)
 app.use('/users', userRouter);
 
+// [ 시큐어 보안 코딩 & Express 라이브러리 문법 ] 브라우저가 uploads 폴더에 있는 파일 내용을 볼 수 있도록 route 경로 설정
+// [ 시큐어 보안 코딩 & Express 라이브러리 문법 ] 브라우저가 서버의 어떤 폴더로든 아무런 제한 없이 접근하는 것은 보안에 취약함
+// [ 시큐어 보안 코딩 & Express 라이브러리 문법 ] express.static('노출시키려는 폴더명') 라는 코드를 통해 일명 static files serving 기능을 가동해 브라우저가 열람 가능한 페이지와 폴더를 지정해 놓는 것이 보안에 바람직함
+// [ 시큐어 보안 코딩 & Express 라이브러리 문법 ] express.static('노출시키려는 폴더명') 라는 코드가 반영된 접근경로 폴더의 파일들에는 확장자가 없어서 브라우저가 해당 파일을 다운로드 하려고 함
+app.use('/uploads', express.static('uploads'));
 
         // [ Express-session 라이브러리 연계 문법 ] 서버가 브라우저에게 부여하는 Session ID 확인해보기
         // Session ID를 가지고 있으면 Session object에 정보를 추가(예- req.session.숫자, req.session.사용자ID 등) 할 수 있음
