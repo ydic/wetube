@@ -4,6 +4,7 @@
 */  
 
 // Video.js에서 export default Video; 한 것을 import 함
+import { path } from 'express/lib/application';
 import Video from '../models/video'; 
 
 // Controller 모듈 코드 내의 res.render를 통해 views 폴더 이하의 pug파일을 html 코드로 render하여 받아옴
@@ -185,6 +186,11 @@ export const getUpload = (req, res) => {
 export const postUpload = async (req, res) => {
   // console.log(req.body);
 
+  // [ Javascript ES6 문법 ] req.file.pth 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.file;
+  const { path: fileUrl } = req.file;
+        // 혹은 const { path } = req.file;
+        // 혹은 const file = req.file;
+
   // Pug 코드의 form 태그 내의 input 태그에 name 속성으로 명명해 주어야 POST submit한 값이 key: value 형태로 req.body에서 포착 가능함
   const titleVideoUpload = req.body.titleVideoUploadInput;
   const { description, hashtags } = req.body;
@@ -198,8 +204,13 @@ export const postUpload = async (req, res) => {
   try {
     await Video.create({
           // const video = new Video({
+
+      // [ Javascript ES6 문법 ] req.file.pth 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.file;
+      fileUrl,
+          // 혹은 fileUrl: path,
+          // 혹은 fileUrl: file.path,
       
-          title: titleVideoUpload,
+      title: titleVideoUpload,
 
       description,
       

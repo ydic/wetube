@@ -8,8 +8,15 @@ block content
   if errorMessage
     span=errorMessage
     //- span All fields are required
-
-  form(method="POST")
+  
+  form(method='POST', enctype='multipart/form-data')
+    //- [ Pug 라이브러리 문법 ] 들여쓰기 주의: Inconsistent indentation. Expecting either 2 or 8 spaces/tabs.
+    //- form(method="POST")
+  
+    label(for='videoSection') Video File
+    
+    input(id='videoSection', name='videoByMulter', type='file', accept='video/*', required)
+    
     //- HTML input reference 안에 minlength, maxlength 기능이 있음
     //- maxlength 속성을 가진 input 태그는 maxlength 값 이상의 글자수는 타이핑 불가
     //- PUG 파일(upload.pug)의 HTML form에서도 minlength, maxlength 설정할 수 있는데 굳이 왜 db 스키마에서도 설정해야 할까? 

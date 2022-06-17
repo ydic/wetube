@@ -60,7 +60,7 @@ block content
                     //- input(type='file', id='avatarSection', name='avatar', accept='.png, .jpg, .jpeg')    
     //- [ HTML 문법 ] input(name='ABC') 속성은 POST 요청이 발생됐을 때 userController.js 에서 그 값을 받아와 이용하기 위해서 속성 값들에 대한 명칭이 필요함
     //- [ HTML 문법 ] input(accept='image/*') 속성은 이미지 파일형식만 선택하도록 설정
-    input(id='avatarSection', name='avatar', type='file', accept='image/*')
+    input(id='avatarSection', name='avatarByMulter', type='file', accept='image/*')
 
     input(value=loggedInUserDb.name, name='name', type='text', placeholder='Name', required)
     input(value=loggedInUserDb.email, name='email', type='email', placeholder='Email', required)

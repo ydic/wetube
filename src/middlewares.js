@@ -59,5 +59,9 @@ export const publicOnlyMiddleware = (req, res, next) => {
 // [ Multer 라이브러리 문법 ] export const ABC = (req, res) => {} 형식의 코드를 사용하지 않음
 // [ Multer 라이브러리 문법 ] middlewares.js 파일이 있는 디렉토리에 uploads 라는 폴더가 생성됨
 // [ Multer 라이브러리 문법 ] dest 속성은 업로드한 파일을 저장할 경로 설정을 담당하므로 사용자가 보낸 파일을 uploads 폴더에 저장하도록 설정된 middleware 를 만듦
-export const uploadFiles = multer({ dest: 'uploads/' })
+            // export const uploadFiles = multer({ dest: 'uploads/' })
 
+// [ Multer 라이브러리 문법 ] MulterError: File too large --- fileSize 속성 (in bytes 즉, 단위는 바이트 / 이진법? 십진법?) 영문 설명: for multipart forms, the max file size (in bytes)
+
+export const avatarUpload = multer({ dest: 'uploads/avatars/', limits: { fileSize: 3000000, }, });
+export const videoUpload = multer({ dest: 'uploads/videos/', limits: { fileSize: 10000000, }, });
