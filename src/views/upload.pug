@@ -9,7 +9,19 @@ block content
     span=errorMessage
     //- span All fields are required
 
-  form(method="POST")
+  //- [ Multer 라이브러리 문법 ] Multer는 파일 업로드를 위해 사용되는 multipart/form-data 를 다루기 위한 node.js 의 미들웨어 입니다. 효율성을 최대화 하기 위해 busboy 를 기반으로 하고 있습니다.
+  //- [ Multer 라이브러리 문법 ] 주: Multer는 multipart (multipart/form-data)가 아닌 폼에서는 동작하지 않습니다.
+  //- [ Multer 라이브러리 문법 ] 업로드 하는 파일의 이름을 랜덤파일명으로 생성해서 처리함(장점: 서로 다른 두 사용자가 파일명만 동일한 서로 다른 내용의 파일을 업로드 하더라도 덮어씌워지는 사태 방지함)  
+  form(method='POST', enctype='multipart/form-data')
+    //- [ Pug 라이브러리 문법 ] 들여쓰기 주의: Inconsistent indentation. Expecting either 2 or 8 spaces/tabs.
+    //- 수명만료 form(method="POST")
+
+    //- [ HTML 문법 ] <label> 을 <input> 요소와 연관시키려면, <input> 에 id 속성을 넣어야합니다. 그런 다음 <label> 에 id 와 같은 값의 for 속성을 넣어야합니다. 
+    //- [ HTML 문법 ] 또는, <label> 안에 <input> 을 중첩시킬 수 있습니다. 이 경우 연관이 암시적이므로 for 및 id속성이 필요없습니다.
+    label(for='videoSection') Video File    
+    //- [ HTML 문법 ] input( required ) 속성 명시해서 파일 지정해야만 input(type='submit') 태그의 업로드 버튼이 동작하도록 제한함
+    input(id='videoSection', name='videoByMulter', type='file', accept='video/*', required)
+    
     //- HTML input reference 안에 minlength, maxlength 기능이 있음
     //- maxlength 속성을 가진 input 태그는 maxlength 값 이상의 글자수는 타이핑 불가
     //- PUG 파일(upload.pug)의 HTML form에서도 minlength, maxlength 설정할 수 있는데 굳이 왜 db 스키마에서도 설정해야 할까? 

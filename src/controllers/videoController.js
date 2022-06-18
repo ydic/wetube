@@ -185,6 +185,11 @@ export const getUpload = (req, res) => {
 export const postUpload = async (req, res) => {
   // console.log(req.body);
 
+  // [ Javascript ES6 문법 ] Multer 가 제공해주는 req.file 값에서 file 자체가 아닌 file 의 경로가 필요하므로 req.file.path 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.file;
+  const { path: fileUrl } = req.file;
+        // 혹은 import { path } from 'express/lib/application'; 코드로 임포트(vsc에서 자동기재처리) 한 다음 const { path } = req.file;
+        // 혹은 const file = req.file;
+
   // Pug 코드의 form 태그 내의 input 태그에 name 속성으로 명명해 주어야 POST submit한 값이 key: value 형태로 req.body에서 포착 가능함
   const titleVideoUpload = req.body.titleVideoUploadInput;
   const { description, hashtags } = req.body;
@@ -198,8 +203,14 @@ export const postUpload = async (req, res) => {
   try {
     await Video.create({
           // const video = new Video({
+
+      // [ Javascript ES6 문법 ] Multer 가 제공해주는 req.file 값에서 file 자체가 아닌 file 의 경로가 필요하므로 req.file.path 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.file;
+      // [ Mongoose 문법 ] videoController.js 의 postUpload 함수 내의 Video.create{} 쿼리 코드가 동작하려면 video.js 의 Video 모델의 new mongoose.Schema({}) 스키마 내에 fileUrl: { type: String, required: true } 라고 정의되어 있어야 함
+      fileUrl,
+          // 혹은 fileUrl: path,
+          // 혹은 fileUrl: file.path,
       
-          title: titleVideoUpload,
+      title: titleVideoUpload,
 
       description,
       

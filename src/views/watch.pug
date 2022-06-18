@@ -8,6 +8,10 @@ block content
   
   //- ??? mvp.css 패딩 마진 속성 문제로 추정
 
+  //- [ Multer 라이브러리 연계 문법 ] videoRouter.js 의 videoRouter.get('/:id([0-9a-f]{24})', watch); 라우팅 코드를 거쳐 videoController.js 의 watch 함수에서 await Video.findById(idVideo) 쿼리문의 결과값을 video 에 담아 return res.render('watch', { pageTitle: video.title, video}); 코드를 통해 Pug 템플릿으로 전달함
+  //- [ Multer 라이브러리 연계 문법 & Express 문법 ★★★] video(src=video.fileUrl) 로 작성하면 상대경로(즉, /videos/uploads/videos/랜덤파일명) 처리되므로 video(src='/' + video.fileUrl) 로 작성하여 절대경로 (즉, /uploads/videos/랜덤파일명) 처리되도록 해야함(Multer 를 통한 파일 저장경로가 video/uploads/videos 가 아니라 uploads/videos 이기 때문)
+  video(src='/' + video.fileUrl, controls)
+
   //- [ Pug 문법 + JavaScript문법 ] 삼항연산자를 활용해 영문법 단수view / 복수views 단위 구분함
             //- h3 #{video.views} #{video.views < 2 ? "view" : "views"}
   div
