@@ -13,6 +13,7 @@ const videoSchema = new mongoose.Schema({
   title: {type: String, required: true, trim: true, maxlength: 80},
   description: { type: String, required: true, trim: true, minlength: 10 },
 
+  // [ Mongoose 문법 ] videoController.js 의 postUpload 함수 내의 Video.create{} 쿼리 코드가 동작하려면 video.js 의 Video 모델의 new mongoose.Schema({}) 스키마 내에 fileUrl: { type: String, required: true } 라고 정의되어 있어야 함
   fileUrl: { type: String, required: true },
       
   // [ Mongoose 문법 ] createdAt: Date 라고만 스키마를 만들고 { required: true } 속성을 기재하지 않으면 db 형식 코드(사용자 직접 입력하지 않는 자동 값 부여 내장항목 -예: Date)나 사용자 입력값에 대한 데이터 유효성 검사를 할 수 없음
