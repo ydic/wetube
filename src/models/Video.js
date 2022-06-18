@@ -7,6 +7,8 @@ import mongoose from 'mongoose';
 
 const videoSchema = new mongoose.Schema({
 
+  // [ Mongoose 연계 문법 ] Video 모델에 스키마 추가요 --- video 에 유일한 owner 명시하는 스키마 추가요 --- 영상 재생 페이지에서 비디오 업로더 당사자가 아니면 Edit Video, Delete Video 접근하지 못하도록 버튼 숨김 처리하는 기능 / 영상 재생 페이지에 비디오 업로더 이름 표기하는 기능
+
   // [ Mongoose 문법 ] db 스키마에서 minlength, maxlength 설정시 사용자와 해당 코드가 제대로 연결되지 않으면 에러 발생할 수 있음. 
   // [ Mongoose 문법 ] PUG 파일(upload.pug)의 HTML form에서도 minlength, maxlength 설정할 수 있는데 굳이 왜 db 스키마에서도 설정해야 할까? 
   // [ Mongoose 문법 ] 정답은 둘 다 해야함 (upload.pug 페이지는 사용자가 개발자 도구로 HTML 재편집해 글자 수 제한이 풀릴 수 있음 / 이런 사용자로부터 사이트를 보호해야 하므로 db 스키마에도 글자 수 제한을 설정해야 함)

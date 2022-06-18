@@ -39,16 +39,22 @@ html(lang="ko")
           if loggedIn
             li
               a(href="/videos/upload") Upload Video
+            li 
+              //- [ Express-session 라이브러리 연계 문법 ] userContoller.js 의 postLogin 함수 내의 req.session.userDbResult = userDbResult; 코드를 통해 session 으로 전달하고 middlewares.js의 localsMiddleware 함수 내의 res.locals.loggedInUserDb = req.session.userDbResult || {}; 코드 값을 base.pug에서 별도의 전용 문법 없이 loggedInUserDb._id 이라는 항목으로 접근함
+              //- [ Express-session 라이브러리 연계 문법 ] My Profile 페이지 연결은 비공개 상테에서도 전체공개 페이지이므로 아무나 열람 가능함. 
+              //- [ Express-session 라이브러리 연계 문법 ] 로그인한 사용자 당사자의 식별값을 userController.js 의 postJoin 함수 내의 await User.create({}) 쿼리문을 통해 MongoDB 에 의해 자체 부여된 _id 값으로 파악함
+              a(href=`/users/${loggedInUserDb._id}`) My Profile
             li
               a(href="/users/edit") Edit-Profile
             li
               a(href="/users/logout") Log Out
-            
+
             //- [ Express-session 라이브러리 연계 문법 ] session으로부터 locals에 전달(공유)된 값(즉, 전역 global 속성)을 별도의 전용 문법 없이 #{loggedInUser.name} 형태로 Pug에서 호출 가능함
             //- [ Express-session 라이브러리 연계 문법 ] userController.js의 postLogin 함수 내의 userDbResult 정보를 locals로 전달(공유)해서 Pug 파일에서 그 값을 사용자에게 보여줌 (예-a(href="") #{loggedInUser.name} 님의 Profile)
-            //- [ Express-session 라이브러리 연계 문법 ] middlewares.js의 localsMiddleware 함수 내의 res.locals.loggedInUserDb = req.session.userDbResult; 코드 값을 base.pug에서 별도의 전용 문법 없이 loggedInUserDb.name 이라는 이름으로 접근함
-            li 
-              a(href="/my-profile") #{loggedInUserDb.name} 님의 Profile
+            //- [ Express-session 라이브러리 연계 문법 ] userContoller.js 의 postLogin 함수 내의 req.session.userDbResult = userDbResult; 코드를 통해 session 으로 전달하고 middlewares.js의 localsMiddleware 함수 내의 res.locals.loggedInUserDb = req.session.userDbResult || {}; 코드 값을 base.pug에서 별도의 전용 문법 없이 loggedInUserDb.name 이라는 이름으로 접근함            
+            //- li               
+              //- a(href="/my-profile") #{loggedInUserDb.name} 님의 Profile
+              
           else
             li 
               a(href="/join") Join

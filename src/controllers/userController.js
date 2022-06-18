@@ -551,8 +551,24 @@ export const logout = (req, res) => {
   return res.redirect('/')
 }
 
-// README.md 내용 /users/:id -> See User
-export const see = (req, res) => res.send("see user ctrl");
+      // README.md 내용 /users/:id -> See User
+      // export const see = (req, res) => res.send("see user ctrl");
+export const see = async (req, res) => {
+  
+  // [ Express 라이브러리 연계 문법 ] My Profile 페이지 연결은 비로그인 상태에서도 전체공개 페이지이므로 아무나 열람 가능하므로 userController.js 의 postLogin 함수 내의 req.session.userDbResult = userDbResult; 코드에서 생성된 session 내의 _id 값(즉, req.session.userDbResult._id)을 id 값으로 가져오는 것이 아님
+  // [ Express 라이브러리 연계 문법 ] userRouter.js 의 userRouter.get("/:id", see); 라우팅 코드로부터 전달받은 id 파라미터 값(즉, URL 로부터 가져온 값)을 가져와야 함
+  const { id } = req.params;
+
+  // [ Mongoose 연계 문법 ] URL 에 있는 id 파리미터를 이용해 사용자를 찾아야 함 (즉, My Profile 페이지 연결은 비로그인 상태에서도 전체공개 페이지이기 때문에 session 내의 _id 값(즉, req.session.userDbResult._id) 으로 사용자 정보를 찾지 않음)
+  const userProfileDbResult = await User.findById(id);
+
+  // [ Express 라이브러리 연계 문법 & Mongo DB ] wetube DB 에 userController.js 의 postJoin 함수 내의 await User.create({}) 쿼리문 실행 결과로 Mongo DB 에 의해 자체 부여된 _id 값으로 await User.findById(id); 쿼리 검색결과가 없을 때 return res.status(404).render('404', {}) 형태로 에러를 발생시키고 404.pug 템플릿으로 연결시켜야 함
+  if(!userProfileDbResult){
+    return res.status(404).render('404', { pageTitle: 'User Not Found'});
+  }
+
+  return res.render('users/profile', { pageTitle: `${userProfileDbResult.name}의 Profile`, userProfileDbResult})
+}
 
 // videoControllers.js에서 videoRouter.js로 export 해야할 함수가 2개 이상이므로 export default 적용 불가
 //export default join;

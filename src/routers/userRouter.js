@@ -47,8 +47,11 @@ userRouter.get('/github/finish', publicOnlyMiddleware, finishGithubLogin)
 // 정규표현식(Regular Expressions): 문자열로부터 특정 정보를 추출해내는 방법
 // 숫자 값만 받도록 하는 정규표현식 \d+ 앞에 Javascript 문법 \ 기호를 붙이고 소괄호 쳐서 완성
 // 주소에 문자 값 입력해 요청하면 Cannot GET 에러 발생시켜 줌
+      // userRouter.get("/:id(\\d+)", see);
 
 // [ 시큐어 보안 코딩 ] 로그인 여부가 중요하지 않은 중립적 성격의 함수이므로 해당 URL에 대한 별도의 접근 제한을 두지 않음
-userRouter.get("/:id(\\d+)", see);
+// [ 정규표현식 & MongoDB & Pug ] 숫자 값만 받도록 하는 정규표현식 \d+ 을 삭제해야 userController.js 의 postJoin 함수 내의 await User.create({}) 쿼리문 실행 결과로 MongoDB 가 자체 발행하는 _id 값(즉, 24자리 영문숫자혼합값)을 cannot GET 에러 메시지 없이 라우팅 처리해 줌
+// [ 정규표현식 & MongoDB & Pug ] base.pug 의 a(href=`/users/${loggedInUserDb._id}`) 태그의 /users/${loggedInUserDb._id 값에 대한 부분을 :id 파리미터 코드를 통해 받아 /:id 경로로 라우팅 함
+userRouter.get("/:id", see);
 
 export default userRouter;
