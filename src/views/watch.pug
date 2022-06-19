@@ -18,9 +18,23 @@ block content
     p=video.description
     small=video.createdAt
   
-  //- videoRouter에서 edit 페이지 라우트 경로는 동영상 개별 id의 하위 경로로 설정했었음
-  //- absolute & relative URL 개념: 경로 설정시 앞머리에 슬래쉬(/) 표기 여부에 따라 절대주소 또는 상대주소 성격을 부여할 수 있음
-  a(href=`${video.id}/edit`) Edit Video &rarr;
-  br
-  a(href=`${video.id}/delete`) Delete Video &rarr;
+  //- [ Mongoose 연계 문법 ] 기능02: (video.js 코드부터 참조요) 영상 재생 페이지에 비디오 업로더 이름 표기하는 기능
+  //- [ Mongoose 연계 문법 ] Video 모델 스키마에 기반해 저장된 owner 의 _id 값(즉, postJoin 함수 내의 await User.create({}) 쿼리문에 의해 Mongo DB 자동 부여한 _id 값) 을 기반으로 videoController.js 의 watch 함수 내에서 해당 영상 업로드 한 사용자에 대한 정보를 const videoOwner = await User.findById(video.owner); 쿼리문으로 videoOwner 에 담은 후 Pug 템플릿으로 전달함
+  div
+    small Uploaded by #{videoOwner.name}
+
+  //- [ Mongoose 연계 문법 ] 기능01: (video.js 코드부터 참조요) 영상 재생 페이지에서 비디오 업로더 당사자가 아니면 Edit Video, Delete Video 접근하지 못하도록 버튼 숨김 처리하는 기능
+  //- [ Mongoose & Express-session 연계 문법 ] 영상의 owner 의 _id 값과 로그인 한 사용자의 _id 값이 일치하면 로그인 한 사용자를 영상의 원소유자(owner)로 판별함
+  //- [ Mongoose & Express-session 연계 문법 ] video.owner 타입은 ObjectId 인데 반해 loggedInUserDb._id 타입은 String 이므로 양단에 String() 처리하여 타입 형식을 동일하게 맞춰야 함
+  if String(video.owner) === String(loggedInUserDb._id)
+    //- br
+    //- small=video.owner
+    //- br
+    //- small=loggedInUserDb._id
+
+    //- videoRouter에서 edit 페이지 라우트 경로는 동영상 개별 id의 하위 경로로 설정했었음
+    //- absolute & relative URL 개념: 경로 설정시 앞머리에 슬래쉬(/) 표기 여부에 따라 절대주소 또는 상대주소 성격을 부여할 수 있음  
+    a(href=`${video.id}/edit`) Edit Video &rarr;
+    br
+    a(href=`${video.id}/delete`) Delete Video &rarr;
   

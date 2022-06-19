@@ -6,9 +6,6 @@ import mongoose from 'mongoose';
       */
 
 const videoSchema = new mongoose.Schema({
-
-  // [ Mongoose 연계 문법 ] Video 모델에 스키마 추가요 --- video 에 유일한 owner 명시하는 스키마 추가요 --- 영상 재생 페이지에서 비디오 업로더 당사자가 아니면 Edit Video, Delete Video 접근하지 못하도록 버튼 숨김 처리하는 기능 / 영상 재생 페이지에 비디오 업로더 이름 표기하는 기능
-
   // [ Mongoose 문법 ] db 스키마에서 minlength, maxlength 설정시 사용자와 해당 코드가 제대로 연결되지 않으면 에러 발생할 수 있음. 
   // [ Mongoose 문법 ] PUG 파일(upload.pug)의 HTML form에서도 minlength, maxlength 설정할 수 있는데 굳이 왜 db 스키마에서도 설정해야 할까? 
   // [ Mongoose 문법 ] 정답은 둘 다 해야함 (upload.pug 페이지는 사용자가 개발자 도구로 HTML 재편집해 글자 수 제한이 풀릴 수 있음 / 이런 사용자로부터 사이트를 보호해야 하므로 db 스키마에도 글자 수 제한을 설정해야 함)
@@ -30,6 +27,13 @@ const videoSchema = new mongoose.Schema({
     views: {type:Number, default:0, required: true},
     rating: {type:Number, default:0, required: true},
   },
+  
+  // [ Mongoose 연계 문법 ] Video 모델에 유일한 owner 명시하여 양단 연결하는 스키마 추가요
+  // [ Mongoose 연계 문법 ] 기능01: 영상 재생 페이지에서 비디오 업로더 당사자가 아니면 Edit Video, Delete Video 접근하지 못하도록 버튼 숨김 처리하는 기능
+  // [ Mongoose 연계 문법 ] 기능02: 영상 재생 페이지에 비디오 업로더 이름 표기하는 기능
+  // [ Mongoose 문법 ] owner 의 type 유형은 ObjectId 유형인데 Javascript 기반에서는 ObjectId 라는 유형을 인식하지 못하므로 Mongoose 라이브러리를 활용해 ObjectId 라는 속성을 추출 및 연계하여 type: mongoose.Schema.Types.ObjectId 형태로 인식시킴
+  // [ Mongoose 문법 ] ref: 'User' 라고 지정함으로써 owner 의 ObjectId 라는 값은 User 모델로부터 온다고(즉, 참조된다고) Mongoose 에게 알려주게 됨
+  owner: { type: mongoose.Schema.Types.ObjectId, require: true, ref: 'User'},
 });
 
 // [ Mongoose 문법 ] 주의: 미들웨어(Middleware) 코드는 model 코드 이전에 작성되어야 함

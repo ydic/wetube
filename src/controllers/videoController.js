@@ -4,6 +4,7 @@
 */  
 
 // Video.js에서 export default Video; 한 것을 import 함
+import User from '../models/User';
 import Video from '../models/video'; 
 
 // Controller 모듈 코드 내의 res.render를 통해 views 폴더 이하의 pug파일을 html 코드로 render하여 받아옴
@@ -91,6 +92,12 @@ export const watch = async (req, res) => {
   
   const video = await Video.findById(idVideo)
 
+  console.log(video);
+
+  // [ Mongoose 연계 문법 ] 기능02: (video.js 코드부터 참조요) 영상 재생 페이지에 비디오 업로더 이름 표기하는 기능
+  // [ Mongoose 연계 문법 ] video.js 의 Video 모델 스키마 지정 부문에서 new mongoose.Schema({ owner: { type: mongoose.Schema.Types.ObjectId, require: true, ref: 'User'} }) 라는 내용을 추가하여 owner 에 대해 ObjectId 유형으로 _id 식별할 수 있게 미리 지정해 놓았음
+  const videoOwner = await User.findById(video.owner);
+
   // 에러 나는 경우를 먼저 if로 처리해주고 else에는 정상적인 케이스에 작동할 코드를 담으면 됨
   // 사용자가 존재하지 않는 페이지를 검색할 경우도 대비해 return res.render(PUG 파일 (즉,404 관련)) 적절한 응답처리 페이지 만들어놓아야 함
   
@@ -109,7 +116,9 @@ export const watch = async (req, res) => {
     // [ 질문 ] ??? res 응답할 때 return 붙이고 안붙이고 실행결과 차이? 어떤 것이 옳은 문법? 왜?
 
     // 존재하지 않아 유효하지 않은 id(24바이트 16진수) 값으로 접속 시도하면 영상 검색에 실패했으므로 "비디오는 null이고 null은 title을 갖고 있지 않습니다" --- TypeError: Cannot read property 'title' of null
-    return res.render('watch', { pageTitle: video.title, video});  
+    // [ Mongoose 연계 문법 ] 기능02: (video.js 코드부터 참조요) 영상 재생 페이지에 비디오 업로더 이름 표기하는 기능
+    // [ Mongoose 연계 문법 ] Video 모델 스키마에 기반해 저장된 owner 의 _id 값(즉, postJoin 함수 내의 await User.create({}) 쿼리문에 의해 Mongo DB 자동 부여한 _id 값) 을 기반으로 videoController.js 의 watch 함수 내에서 해당 영상 업로드 한 사용자에 대한 정보를 const videoOwner = await User.findById(video.owner); 쿼리문으로 videoOwner 에 담은 후 Pug 템플릿으로 전달함
+    return res.render('watch', { pageTitle: video.title, video, videoOwner});  
   }
 }
 
@@ -185,6 +194,8 @@ export const getUpload = (req, res) => {
 export const postUpload = async (req, res) => {
   // console.log(req.body);
 
+  const { userDbResult: { _id } } = req.session;
+
   // [ Javascript ES6 문법 ] Multer 가 제공해주는 req.file 값에서 file 자체가 아닌 file 의 경로가 필요하므로 req.file.path 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.file;
   const { path: fileUrl } = req.file;
         // 혹은 import { path } from 'express/lib/application'; 코드로 임포트(vsc에서 자동기재처리) 한 다음 const { path } = req.file;
@@ -210,6 +221,11 @@ export const postUpload = async (req, res) => {
           // 혹은 fileUrl: path,
           // 혹은 fileUrl: file.path,
       
+      // [ Mongoose 연계 문법 ] 기능01: (video.js 코드부터 참조요) 영상 재생 페이지에서 비디오 업로더 당사자가 아니면 Edit Video, Delete Video 접근하지 못하도록 버튼 숨김 처리하는 기능
+      // 영상 업로드하는 사용자의 _id (즉, userController.js 의 PostJoin 함수 내의 await User.create({}) 쿼리문에 의한 Mongo DB 자체 부여값)를 전송
+      // [ Mongoose 연계 문법 ] video.js 의 Video 모델 스키마 지정 부문에서 new mongoose.Schema({ owner: { type: mongoose.Schema.Types.ObjectId, require: true, ref: 'User'} }) 라는 내용을 추가하여 owner 에 대해 ObjectId 유형으로 _id 식별할 수 있게 미리 지정해 놓았음
+      owner: _id,
+
       title: titleVideoUpload,
 
       description,
