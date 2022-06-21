@@ -3,6 +3,7 @@
 
 // User.js에서 export default User; 한 것을 import 함
 import User from '../models/User';
+import Video from '../models/video';
 
 // [ node-fetch 라이브러리 문법] 브라우저의 JS에서는 fetch 함수 있지만 서버의 nodejs는 없다는 점(에러 문구: fetch is not defined)에서 다른 플랫폼임을 확인할 수 있음. 
 // [ node-fetch 라이브러리 문법] node-fetch 라이브러리 설치를 통해 서버의 nodejs 에서도 관련 기능 사용 가능해짐
@@ -10,6 +11,7 @@ import fetch from 'node-fetch';
 
 // [ bcrypt 라이브러리 문법 ] postLogin 컨트롤러에서 로그인 처리를 위해 bcrypt.compare() 내장함수로 사용자 입력 비밀번호와 DB Hash 비밀번호 값이 동일한지 비교하기 위함
 import bcrypt from 'bcrypt';
+
 
 // pug 파일 가리킬 때 res.render('따옴표 포함한 pug파일명') 입력해야 TypeError: View is not a constructor 에러 안 생김
 
@@ -564,10 +566,20 @@ export const see = async (req, res) => {
 
   // [ Express 라이브러리 연계 문법 & Mongo DB ] wetube DB 에 userController.js 의 postJoin 함수 내의 await User.create({}) 쿼리문 실행 결과로 Mongo DB 에 의해 자체 부여된 _id 값으로 await User.findById(id); 쿼리 검색결과가 없을 때 return res.status(404).render('404', {}) 형태로 에러를 발생시키고 404.pug 템플릿으로 연결시켜야 함
   if(!userProfileDbResult){
+    // [ Mongoose 연계 문법 ] Relationship 작업A - Video 모델에 유일한 owner 명시하여 양단 연결하는 스키마 추가요
+    // [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자가 업로드한 모든 video 목록 보여주기: 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기 (userController.js 의 see 함수 내의 const videos = await Video.find({ owner: userProfileDbResult._id}); 코드로 처리)
+    // [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
+    // [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
     return res.status(404).render('404', { pageTitle: 'User Not Found'});
   }
 
-  return res.render('users/profile', { pageTitle: `${userProfileDbResult.name}의 Profile`, userProfileDbResult})
+  // [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기
+  // [ Mongoose 연계 문법 ] 즉, video 의 params 의 id 와 같은 영상들을 찾기
+  // [ Mongoose 연계 문법 ] 즉, video 의 owner 의 ID 가 URL(즉, /users/MongoDB자체부여한_id값) 에 있는 ID 값(즉, userController.js 의 see 함수 내의 userProfileDbResult._id 값)과 같은 영상들을 찾기
+  const videos = await Video.find({ owner: userProfileDbResult._id});
+  console.log('userController.js ------- see ----- videos', videos);
+
+  return res.render('users/profile', { pageTitle: `${userProfileDbResult.name}의 Profile`, userProfileDbResult, videos})
 }
 
 // videoControllers.js에서 videoRouter.js로 export 해야할 함수가 2개 이상이므로 export default 적용 불가

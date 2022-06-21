@@ -28,11 +28,12 @@ const videoSchema = new mongoose.Schema({
     rating: {type:Number, default:0, required: true},
   },
   
-  // [ Mongoose 연계 문법 ] Video 모델에 유일한 owner 명시하여 양단 연결하는 스키마 추가요
-  // [ Mongoose 연계 문법 ] 기능01: 영상 재생 페이지에서 비디오 업로더 당사자가 아니면 Edit Video, Delete Video 접근하지 못하도록 버튼 숨김 처리하는 기능
-  // [ Mongoose 연계 문법 ] 기능02: 영상 재생 페이지에 비디오 업로더 이름 표기하는 기능
+  // [ Mongoose 연계 문법 ] Relationship 작업A - Video 모델에 유일한 owner 명시하여 양단 연결하는 스키마 추가요
+  // [ Mongoose 연계 문법 ] Relationship 작업A - 기능01: 영상 재생 페이지에서 비디오 업로더 당사자가 아니면 Edit Video, Delete Video 접근하지 못하도록 버튼 숨김 처리하는 기능
+  // [ Mongoose 연계 문법 ] Relationship 작업A - 기능02: 영상 재생 페이지에 비디오 업로더 이름 표기하는 기능
+  // [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
   // [ Mongoose 문법 ] owner 의 type 유형은 ObjectId 유형인데 Javascript 기반에서는 ObjectId 라는 유형을 인식하지 못하므로 Mongoose 라이브러리를 활용해 ObjectId 라는 속성을 추출 및 연계하여 type: mongoose.Schema.Types.ObjectId 형태로 인식시킴
-  // [ Mongoose 문법 ] ref: 'User' 라고 지정함으로써 owner 의 ObjectId 라는 값은 User 모델로부터 온다고(즉, 참조된다고) Mongoose 에게 알려주게 됨
+  // [ Mongoose 문법 ] ref: 'User' 라고 지정함으로써 Mongoose 에게 owner 의 ObjectId 라는 값은 User 모델로부터 온다고(즉, 참조된다고) 알려주게 됨
   owner: { type: mongoose.Schema.Types.ObjectId, require: true, ref: 'User'},
 });
 

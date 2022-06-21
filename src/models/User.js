@@ -5,8 +5,9 @@ import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
 
-  // [ Mongoose 연계 문법 ] User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 스키마 추가요
-  // [ Mongoose 연계 문법 ] 비디오 업로드한 사용자의 프로필을 열람하는 페이지에서 그 사용자가 업로드한 전체 영상 목록을 보여주는 기능
+  // [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자가 업로드한 모든 video 목록 보여주기: 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기 (userController.js 의 see 함수 내의 const videos = await Video.find({ owner: userProfileDbResult._id}); 코드로 처리)
+  // [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
+  // [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
 
   // [ Github OAuth API 문법 ] 사용자가 Github로 로그인했는지 여부를 확인하기 위함 / 로그인 페이지에서 사용자가 email로 로그인하려는데 password 없을 때 이를 대신해 github 로그인 상태를 확인해 볼 수 있음
   // [ Github OAuth API 문법 ] 사용자가 로그인 페이지에서 사이트ID(본 프로젝트에서는 email)/PW로 로그인하려는데 password가 없을 때 (즉, github OAuth 방식 가입자) socialOnly 값이 기본값 false 에서 userController.js 내의 finishGithubLogin 함수 내의 User.create({socialOnly:true}) 로 처리된 경우 wetube 로그인 승인 처리하기 위한 용도의 식별자

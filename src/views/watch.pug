@@ -19,14 +19,23 @@ block content
     small=video.createdAt
   
   //- [ Mongoose 연계 문법 ] 기능02: (video.js 코드부터 참조요) 영상 재생 페이지에 비디오 업로더 이름 표기하는 기능
+  //- [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
   //- [ Mongoose 연계 문법 ] Video 모델 스키마에 기반해 저장된 owner 의 _id 값(즉, postJoin 함수 내의 await User.create({}) 쿼리문에 의해 Mongo DB 자동 부여한 _id 값) 을 기반으로 videoController.js 의 watch 함수 내에서 해당 영상 업로드 한 사용자에 대한 정보를 const videoOwner = await User.findById(video.owner); 쿼리문으로 videoOwner 에 담은 후 Pug 템플릿으로 전달함
   div
-    small Uploaded by #{videoOwner.name}
+    //- small Uploaded by #{videoOwner.name}
+    small Uploaded by 
+      //- [ Mongoose 문법 ] videoController.js 의 watch 함수 내의 const video = await Video.findById(idVideo) 코드였을 때는 video.name 에 사용자의 이름이 담기는 형태였는데 .populate('owner') 속성을 추가로 연결하면 owner 에 user 모델 스키마에 기반한 DB 값(Object 형태)이 담기게 됨
+      //- [ Pug 문법 ] a(href=`/users/${video.owner._id}`) 태그를 통해 소유자 프로필 페이지로 링크 연결함
+      a(href=`/users/${video.owner._id}`)=video.owner.name
 
   //- [ Mongoose 연계 문법 ] 기능01: (video.js 코드부터 참조요) 영상 재생 페이지에서 비디오 업로더 당사자가 아니면 Edit Video, Delete Video 접근하지 못하도록 버튼 숨김 처리하는 기능
+  //- [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
   //- [ Mongoose & Express-session 연계 문법 ] 영상의 owner 의 _id 값과 로그인 한 사용자의 _id 값이 일치하면 로그인 한 사용자를 영상의 원소유자(owner)로 판별함
   //- [ Mongoose & Express-session 연계 문법 ] video.owner 타입은 ObjectId 인데 반해 loggedInUserDb._id 타입은 String 이므로 양단에 String() 처리하여 타입 형식을 동일하게 맞춰야 함
-  if String(video.owner) === String(loggedInUserDb._id)
+  
+  //- if String(video.owner) === String(loggedInUserDb._id)
+  //- [ Mongoose 문법 ] videoController.js 의 watch 함수 내의 const video = await Video.findById(idVideo) 코드였을 때는 video.owner 에 _id 값(String 형태)만 담기는 형태였는데 .populate('owner') 속성을 추가로 연결하면 owner 에 user 모델 스키마에 기반한 DB 값(Object 형태)이 담기게 됨
+  if String(video.owner._id) === String(loggedInUserDb._id)
     //- br
     //- small=video.owner
     //- br

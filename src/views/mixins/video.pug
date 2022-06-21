@@ -1,4 +1,6 @@
 //- [Pug 문법] mixin을 통해 각 페이지마다 같은 형태의 HTML을 보여주면서 다른 데이터를 제공할 수 있도록 해줌
+//- [Pug 문법] mixin 모델 자체 제작하는 문법은 mixin 작명한mixin모델명(파리미터명) 형태로 만들어야 함
+//- [Pug 문법] 예시) include mixins/video 경로와 같이 자체 제작 및 작명한 mixin 모델인 videoMixin 모델을 +videoMixin(파라미터명) 형태의 Pug 문법으로 불러와 재사용함
 mixin videoMixin(videoItem)
   div 
     
