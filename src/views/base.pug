@@ -48,6 +48,7 @@ html(lang="ko")
               a(href="/users/edit") Edit-Profile
             li
               a(href="/users/logout") Log Out
+            li Welcome #{loggedInUserDb.name} !
 
             //- [ Express-session 라이브러리 연계 문법 ] session으로부터 locals에 전달(공유)된 값(즉, 전역 global 속성)을 별도의 전용 문법 없이 #{loggedInUser.name} 형태로 Pug에서 호출 가능함
             //- [ Express-session 라이브러리 연계 문법 ] userController.js의 postLogin 함수 내의 userDbResult 정보를 locals로 전달(공유)해서 Pug 파일에서 그 값을 사용자에게 보여줌 (예-a(href="") #{loggedInUser.name} 님의 Profile)

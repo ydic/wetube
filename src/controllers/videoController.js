@@ -135,14 +135,32 @@ export const getEdit = async (req, res) => {
   // 소문자 video는 db에서 검색한 영상 object임(title, description, hashtags, ...)
   
   const video = await Video.findById(idVideo)
+  
+  const { userDbResult: { _id}} = req.session; // 표기효율성 증진용
 
   if(!video) {
     // 404 Not Found 클라이언트 오류(서버가 요청받은 리소스를 찾을 수 없다)
     // [ Express 문법 ] return res.render('404', { pageTitle: 'Video not found.'}); 라고만 처리하면 사용자에게는 오류 맥락을 이해시켰지만 브라우저는 상태 응답 코드 200을 받은 상태로 남게 됨. 브라우저도 오류 상황으로 처리할 수 있도록 .status() 문법으로 상태 코드를 명시해야 함. 그러면 morgan 미들웨어(즉, app.use(logger);) 통해 서버 로그 상에 404 이라고 표시됨
     return res.status(404).render('404', { pageTitle: 'Video not found.'})
-  } else {
+  } 
+
+    // [ 시큐어 보안 코딩 ★★★ ] 사용자A 가 올린 동영상이라서 watch.pug(즉, 프론트엔드) 에서 사용자A 에게만 해당 영상 게시물의 edit 페이지 및 기능과 delete 기능(즉, videoController.js 의 getEdit 함수, postEdit 함수, deleteVideo 함수)에 접근할 수 있는 링크(즉, a 태그) 를 보여주는 방식 만으로는 접근 제한 보안성 취약함
+    // [ 시큐어 보안 코딩 ★★★ ] 사용자B 가 직접 URL 경로 입력(즉, http://localhost:4000/videos/동영상랜덤파일명/edit)을 통해 사용자A 가 올린 동영상 게시물의 edit 페이지 및 기능과 delete 기능(즉, videoController.js 의 getEdit 함수, postEdit 함수, deleteVideo 함수)에 접근 및 사용할 수 있는 보안취약점이 있음 
+    // [ 시큐어 보안 코딩 ] video.owner(즉, 영상 게시자)와 req.session.userDbResult._id(즉, 현재 로그인한 사용자)가 동일한 인물인지 검증해서 거짓이라면 Forbidden 상태코드 발생시켜 메인페이지로 강제 이동시킴 return res.status(403).redirect('/') ;
+    // if(video.owner !== req.session.userDbResult._id){ // 표기효율성 증진하기 전
+    // [ 시큐어 보안 코딩 & Javascript ] 동영상 올린 당사자임에도 조건문 비교값의 형식이 Object 와 String 을로 달라서 if(video.owner !== req.session.userDbResult._id) 조건문이 전혀 실행되지 않는 오류 발생함
+    // [ 시큐어 보안 코딩 & Javascript ] 조건문 문법 ===, !== 은 생김새 뿐만 아니라 type (즉, 자료형)도 비교하기 때문
+    // [ 시큐어 보안 코딩 & Javascript ] console.log(typeof video.owner, typeof req.session.userDbResult._id); 확인해보니 video.owner 는 Object 형식이고 req.session.userDbResult._id 는 String 형식
+    // [ 시큐어 보안 코딩 & Javascript ] 조건문의 양변을 String 타입으로 변환 처리요 if(String(video.owner) !== String(_id)){}
+    if(String(video.owner) !== String(_id)){ // 표기효율성 증진용
+                // if(video.owner !== _id){ 
+      return res.status(403).redirect('/') ;
+    }
+
+    console.log(typeof video.owner, typeof req.session.userDbResult._id);
+    console.log('videoController.js ------ getEdit -------', video.owner, _id);
+
     return res.render('edit', { pageTitle: `Editing: ${video.title}`, video});
-  }
 };
 
 // postEdit 함수는 변경사항을 저장해줌
@@ -175,9 +193,29 @@ export const postEdit = async (req, res) => {
   // [ Mongoose 문법 ] <db model>.exists(아규먼트 자리인 이곳에 id는 받지 않으며 filter(즉, 조건)만 받음)
   // 오브젝트 id(즉, _id)가 req.params.id와 같은 경우(즉, 조건)를 찾음
   const videoTrueFalse = Video.exists({ _id : idVideo});
-
+  
   if(!videoTrueFalse) {
     return res.render('404', { pageTitle: 'Video not found.'})
+  }
+
+  // console.log(videoTrueFalse); 값을 확인해 보면 Promise { <pending> } 상태로 표시됨
+  // console.log(videoTrueFalse.owner); 값을 확인해 보면 undefined 상태로 표시됨
+  console.log('videoController.js ----- postEdit ----- videoTrueFalse', videoTrueFalse);
+  console.log('videoController.js ----- postEdit ----- videoTrueFalse.owner', videoTrueFalse.owner);
+
+  // [ 시큐어 보안 코딩 ★★★ ] 사용자A 가 올린 동영상이라서 watch.pug(즉, 프론트엔드) 에서 사용자A 에게만 해당 영상 게시물의 edit 페이지 및 기능과 delete 기능(즉, videoController.js 의 getEdit 함수, postEdit 함수, deleteVideo 함수)에 접근할 수 있는 링크(즉, a 태그) 를 보여주는 방식 만으로는 접근 제한 보안성 취약함
+  // [ 시큐어 보안 코딩 ★★★ ] 사용자B 가 직접 URL 경로 입력(즉, http://localhost:4000/videos/동영상랜덤파일명/edit)을 통해 사용자A 가 올린 동영상 게시물의 edit 페이지 및 기능과 delete 기능(즉, videoController.js 의 getEdit 함수, postEdit 함수, deleteVideo 함수)에 접근 및 사용할 수 있는 보안취약점이 있음 
+  // [ 시큐어 보안 코딩 ] video.owner(즉, 영상 게시자)와 req.session.userDbResult._id(즉, 현재 로그인한 사용자)가 동일한 인물인지 검증해서 거짓이라면 Forbidden 상태코드 발생시켜 메인페이지로 강제 이동시킴 return res.status(403).redirect('/') ;
+  // if(video.owner !== req.session.userDbResult._id){ // 표기효율성 증진하기 전
+  // [ 시큐어 보안 코딩 & Javascript ] 동영상 올린 당사자임에도 조건문 비교값의 형식이 Object 와 String 을로 달라서 if(video.owner !== req.session.userDbResult._id) 조건문이 전혀 실행되지 않는 오류 발생함
+  // [ 시큐어 보안 코딩 & Javascript ] 조건문 문법 ===, !== 은 생김새 뿐만 아니라 type (즉, 자료형)도 비교하기 때문
+  // [ 시큐어 보안 코딩 & Javascript ] console.log(typeof video.owner, typeof req.session.userDbResult._id); 확인해보니 video.owner 는 Object 형식이고 req.session.userDbResult._id 는 String 형식
+  // [ 시큐어 보안 코딩 & Javascript ] 조건문의 양변을 String 타입으로 변환 처리요 if(String(video.owner) !== String(_id)){}
+  // 주의! ★★★ postEdit 함수 내에서는 getEdit 함수 내에서 const video = await Video.findById(idVideo) 쿼리문과는 다르게 True 또는 False 를 반환하는 Video.exists 쿼리문을 사용하므로 쿼리 결과값 담는 명칭을 videoTrueFalse 라고 작명함
+  const { userDbResult: { _id}} = req.session; // 표기효율성 증진용
+  if(String(videoTrueFalse.owner) !== String(_id)){ // 표기효율성 증진용
+    // if(video.owner !== _id){ 
+    return res.status(403).redirect('/') ;
   }
 
   // [ Mongoose 문법 ] <db model>.findByIdAndUpdate 내장함수를 이용해 _id값에 해당하는 db데이터에 대해 update 처리함
@@ -196,6 +234,8 @@ export const getUpload = (req, res) => {
   return res.render('upload', { pageTitle: "Upload Video"})
 }
 
+// [ 클론코딩 허점 보완요 ★★★ ] #8.14 deleteVideo 에서 User 의 videos 에서도 제거해주는 게 나을 듯요? 에러는 안 날 것 같긴 한데
+// [ 클론코딩 허점 보완요 ★★★ ] #8.14 음 그러게요 delete 해도 에러는 안나는데 Users DB에 남아있는게 거슬리네요
 export const postUpload = async (req, res) => {
   // console.log(req.body);
 
@@ -274,6 +314,7 @@ export const postUpload = async (req, res) => {
       // 저장(save) 되기 전에(pre) Middleware(userSchema)로 호출될 async function
       
       // [ Mongoose 문법 & 버그 수정 ★★★ ] videoController.js 의 postUpload 함수 내에서 새로운 비디오 업로드 할 때마다 user.save(); 코드 실행해야 하는데 마침 그 전 단계에 pre 기능으로 비밀번호를 hash 하도록 하는 코드가 반복적으로 가동되어 사용자의 원비밀번호를 계속 변경시키는 코드 버그 발생함 User.js 의 userSchema.pre('save', async function(){this.password = await bcrypt.hash(this.password, 5);} 
+      // [ Mongoose 문법 & 버그 수정 ★★★ ] User.js 의 userSchema.pre('save', async function(){} 함수 내에서 if(this.isModified('password')){ 패스워드 해싱해주는 코드 } 조건문을 통해 사용자 password 값이 변경될 때만 password 값을 hash 하도록 경우를 구분해 처리시킴
       user.save();
 
       // [ Mongoose 문법 ] .save()는 promise를 return 해줌. (즉, save 되는 순간 db에 기록되고 저장되려면 시간이 걸리므로 작업이 끝날 때까지 기다려줘야 함)
@@ -295,12 +336,42 @@ export const postUpload = async (req, res) => {
   }
 }
 
+// [ 클론코딩 허점 보완요 ★★★ ] #8.14 deleteVideo 에서 User 의 videos 에서도 제거해주는 게 나을 듯요? 에러는 안 날 것 같긴 한데
+// [ 클론코딩 허점 보완요 ★★★ ] #8.14 음 그러게요 delete 해도 에러는 안나는데 Users DB에 남아있는게 거슬리네요
 export const deleteVideo = async (req, res) => {
   const idVideo = req.params.id;
+  
+  const video = await Video.findById(idVideo);
+
+  if(!video) {
+    // 404 Not Found 클라이언트 오류(서버가 요청받은 리소스를 찾을 수 없다)
+    // [ Express 문법 ] return res.render('404', { pageTitle: 'Video not found.'}); 라고만 처리하면 사용자에게는 오류 맥락을 이해시켰지만 브라우저는 상태 응답 코드 200을 받은 상태로 남게 됨. 브라우저도 오류 상황으로 처리할 수 있도록 .status() 문법으로 상태 코드를 명시해야 함. 그러면 morgan 미들웨어(즉, app.use(logger);) 통해 서버 로그 상에 404 이라고 표시됨
+    return res.status(404).render('404', { pageTitle: 'Video not found.'})
+  } 
+
+  // [ 시큐어 보안 코딩 ★★★ ] 사용자A 가 올린 동영상이라서 watch.pug(즉, 프론트엔드) 에서 사용자A 에게만 해당 영상 게시물의 edit 페이지 및 기능과 delete 기능(즉, videoController.js 의 getEdit 함수, postEdit 함수, deleteVideo 함수)에 접근할 수 있는 링크(즉, a 태그) 를 보여주는 방식 만으로는 접근 제한 보안성 취약함
+  // [ 시큐어 보안 코딩 ★★★ ] 사용자B 가 직접 URL 경로 입력(즉, http://localhost:4000/videos/동영상랜덤파일명/edit)을 통해 사용자A 가 올린 동영상 게시물의 edit 페이지 및 기능과 delete 기능(즉, videoController.js 의 getEdit 함수, postEdit 함수, deleteVideo 함수)에 접근 및 사용할 수 있는 보안취약점이 있음 
+  // [ 시큐어 보안 코딩 ] video.owner(즉, 영상 게시자)와 req.session.userDbResult._id(즉, 현재 로그인한 사용자)가 동일한 인물인지 검증해서 거짓이라면 Forbidden 상태코드 발생시켜 메인페이지로 강제 이동시킴 return res.status(403).redirect('/') ;
+  // if(video.owner !== req.session.userDbResult._id){ // 표기효율성 증진하기 전
+  // [ 시큐어 보안 코딩 & Javascript ] 동영상 올린 당사자임에도 조건문 비교값의 형식이 Object 와 String 을로 달라서 if(video.owner !== req.session.userDbResult._id) 조건문이 전혀 실행되지 않는 오류 발생함
+  // [ 시큐어 보안 코딩 & Javascript ] 조건문 문법 ===, !== 은 생김새 뿐만 아니라 type (즉, 자료형)도 비교하기 때문
+  // [ 시큐어 보안 코딩 & Javascript ] console.log(typeof video.owner, typeof req.session.userDbResult._id); 확인해보니 video.owner 는 Object 형식이고 req.session.userDbResult._id 는 String 형식
+  // [ 시큐어 보안 코딩 & Javascript ] 조건문의 양변을 String 타입으로 변환 처리요 if(String(video.owner) !== String(_id)){}
+  
+  const { userDbResult: { _id}} = req.session; // 표기효율성 증진용
+  if(String(video.owner) !== String(_id)){ // 표기효율성 증진용
+    // if(video.owner !== _id){ 
+    return res.status(403).redirect('/') ;
+  }
+
+  console.log('videoController.js ------ postEdit -------', video.owner, _id);
 
   // [ Mongoose 문법 ] findByIdAndDelete(id) 내장함수는 findOneAndDelete({_id:id}) 함수의 간략화 버전
   // [ Mongoose 문법 ] findByIdAndDelete(), findOneAndDelete() 사용 권장 (즉, findByIdAndRemove, findOneAndRemove() 사용 비권장)
   await Video.findOneAndDelete(idVideo);
+
+  // [ 클론코딩 허점 보완요 ★★★ ] #8.14 deleteVideo 에서 User 의 videos 에서도 제거해주는 게 나을 듯요? 에러는 안 날 것 같긴 한데
+  // [ 클론코딩 허점 보완요 ★★★ ] #8.14 음 그러게요 delete 해도 에러는 안나는데 Users DB에 남아있는게 거슬리네요
 
   return res.redirect('/');
 }
