@@ -5,11 +5,14 @@ include ../mixins/video
 
 block content   
   //- [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
-  //- [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기
-  //- [ Mongoose 연계 문법 ] 즉, video 의 params 의 id 와 같은 영상들을 찾기
-  //- [ Mongoose 연계 문법 ] 즉, video 의 owner 의 ID 가 URL(즉, /users/MongoDB자체부여한_id값) 에 있는 ID 값(즉, userController.js 의 see 함수 내의 userProfileDbResult._id 값)과 같은 영상들을 찾기
-  //- userController.js 의 see 함수 내의 const videos = await Video.find({ owner: userProfileDbResult._id}); 코드 실행 값을 videos 에 담아 Pug 템플릿으로 전달함
-  each video in videos
+            //- [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기
+            //- [ Mongoose 연계 문법 ] 즉, video 의 params 의 id 와 같은 영상들을 찾기
+            //- [ Mongoose 연계 문법 ] 즉, video 의 owner 의 ID 가 URL(즉, /users/MongoDB자체부여한_id값) 에 있는 ID 값(즉, userController.js 의 see 함수 내의 userProfileDbResult._id 값)과 같은 영상들을 찾기
+            //- userController.js 의 see 함수 내의 const videos = await Video.find({ owner: userProfileDbResult._id}); 코드 실행 값을 videos 에 담아 Pug 템플릿으로 전달함
+              //- each video in videos
+
+  //- [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드 <즉, Mongoose 의 .populate('videos') 곁들인> ) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
+  each video in userProfileDbResult.videos
     //- [Pug 문법] include ../mixins/video 로부터 자체 제작 및 작명한 mixin 모델인 videoMixin 모델을 +videoMixin(파라미터명) 형태의 Pug 문법으로 불러와 재사용함
     +videoMixin(video)
   else

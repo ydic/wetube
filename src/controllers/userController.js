@@ -3,7 +3,7 @@
 
 // User.js에서 export default User; 한 것을 import 함
 import User from '../models/User';
-import Video from '../models/video';
+// import Video from '../models/video';
 
 // [ node-fetch 라이브러리 문법] 브라우저의 JS에서는 fetch 함수 있지만 서버의 nodejs는 없다는 점(에러 문구: fetch is not defined)에서 다른 플랫폼임을 확인할 수 있음. 
 // [ node-fetch 라이브러리 문법] node-fetch 라이브러리 설치를 통해 서버의 nodejs 에서도 관련 기능 사용 가능해짐
@@ -562,24 +562,31 @@ export const see = async (req, res) => {
   const { id } = req.params;
 
   // [ Mongoose 연계 문법 ] URL 에 있는 id 파리미터를 이용해 사용자를 찾아야 함 (즉, My Profile 페이지 연결은 비로그인 상태에서도 전체공개 페이지이기 때문에 session 내의 _id 값(즉, req.session.userDbResult._id) 으로 사용자 정보를 찾지 않음)
-  const userProfileDbResult = await User.findById(id);
+  // [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드 <즉, Mongoose 의 .populate('videos') 곁들인> ) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
+  // [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
+  // [ Mongoose 문법 ] userController.js 의 see 함수 내의 const userProfileDbResult = await User.findById(id) 코드였을 때는 userProfileDbResult.videos 에 _id 값(String 형태)만 담기는 형태였는데 .populate('videos') 속성을 추가로 연결하면 videos 에 video 모델 스키마에 기반한 DB 값(array 형태의 Object 값들)이 담기게 됨
+  // [ Mongoose 문법 ] 즉, .populate('videos') 코드를 추가로 연결하면 Mongoose 가 _id 를 찾고 그 안에서 videos 도 찾아 줌
+  const userProfileDbResult = await User.findById(id).populate('videos');
+
+  console.log('userController.js ------- see ----- userProfileDbResult', userProfileDbResult);
 
   // [ Express 라이브러리 연계 문법 & Mongo DB ] wetube DB 에 userController.js 의 postJoin 함수 내의 await User.create({}) 쿼리문 실행 결과로 Mongo DB 에 의해 자체 부여된 _id 값으로 await User.findById(id); 쿼리 검색결과가 없을 때 return res.status(404).render('404', {}) 형태로 에러를 발생시키고 404.pug 템플릿으로 연결시켜야 함
   if(!userProfileDbResult){
     // [ Mongoose 연계 문법 ] Relationship 작업A - Video 모델에 유일한 owner 명시하여 양단 연결하는 스키마 추가요
-    // [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자가 업로드한 모든 video 목록 보여주기: 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기 (userController.js 의 see 함수 내의 const videos = await Video.find({ owner: userProfileDbResult._id}); 코드로 처리)
-    // [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
+              // [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자가 업로드한 모든 video 목록 보여주기: 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기 (userController.js 의 see 함수 내의 const videos = await Video.find({ owner: userProfileDbResult._id}); 코드로 처리)
+    // [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드 <즉, Mongoose 의 .populate('videos') 곁들인> ) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
     // [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
     return res.status(404).render('404', { pageTitle: 'User Not Found'});
   }
 
-  // [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기
+          // [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기
   // [ Mongoose 연계 문법 ] 즉, video 의 params 의 id 와 같은 영상들을 찾기
   // [ Mongoose 연계 문법 ] 즉, video 의 owner 의 ID 가 URL(즉, /users/MongoDB자체부여한_id값) 에 있는 ID 값(즉, userController.js 의 see 함수 내의 userProfileDbResult._id 값)과 같은 영상들을 찾기
-  const videos = await Video.find({ owner: userProfileDbResult._id});
-  console.log('userController.js ------- see ----- videos', videos);
+          // const videos = await Video.find({ owner: userProfileDbResult._id});
+          // console.log('userController.js ------- see ----- videos', videos);
+          // return res.render('users/profile', { pageTitle: `${userProfileDbResult.name}의 Profile`, userProfileDbResult, videos})
 
-  return res.render('users/profile', { pageTitle: `${userProfileDbResult.name}의 Profile`, userProfileDbResult, videos})
+  return res.render('users/profile', { pageTitle: `${userProfileDbResult.name}의 Profile`, userProfileDbResult })
 }
 
 // videoControllers.js에서 videoRouter.js로 export 해야할 함수가 2개 이상이므로 export default 적용 불가

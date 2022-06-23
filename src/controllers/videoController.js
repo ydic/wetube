@@ -5,6 +5,7 @@
 
 // Video.js에서 export default Video; 한 것을 import 함
 // import User from '../models/User';
+import User from '../models/User';
 import Video from '../models/video'; 
 
 // Controller 모듈 코드 내의 res.render를 통해 views 폴더 이하의 pug파일을 html 코드로 render하여 받아옴
@@ -96,7 +97,7 @@ export const watch = async (req, res) => {
 
             // const video = await Video.findById(idVideo)
   // [ Mongoose 문법 ] videoController.js 의 watch 함수 내의 const video = await Video.findById(idVideo) 코드였을 때는 video.owner 에 _id 값(String 형태)만 담기는 형태였는데 .populate('owner') 속성을 추가로 연결하면 owner 에 user 모델 스키마에 기반한 DB 값(Object 형태)이 담기게 됨
-  // [ Mongoose 문법 ] 즉, .populate('owner) 코드를 추가로 연결하면 Mongoose 가 video 를 찾고 그 안에서 owner 도 찾아 줌
+  // [ Mongoose 문법 ] 즉, .populate('owner') 코드를 추가로 연결하면 Mongoose 가 video 를 찾고 그 안에서 owner 도 찾아 줌
   const video = await Video.findById(idVideo).populate('owner');
 
   console.log(video);
@@ -216,7 +217,8 @@ export const postUpload = async (req, res) => {
   
   // [ Javascript 문법 ] await에서 error 생기면 내부 코드는 아무것도 실행되지 않으므로 try {} catch {} 문법을 통해 error를 catch 해줘야 함
   try {
-    await Video.create({
+      const newVideo = await Video.create({
+          // await Video.create({
           // const video = new Video({
 
       // [ Javascript ES6 문법 ] Multer 가 제공해주는 req.file 값에서 file 자체가 아닌 file 의 경로가 필요하므로 req.file.path 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.file;
@@ -253,6 +255,26 @@ export const postUpload = async (req, res) => {
                 // [ Mongoose 문법 ] Javascript 문법인 export, import를 활용해 샵(#) 달아주기 코드를 save와 update 컨트롤 함수에서 불러와 사용해도 되지만, 몽구스 내장함수인 videoSchema.static(이름, 함수)를 활용해서 save와 update 작업에서의 샵(#) 달아주기를 처리할 수도 있다 
                 Video.formatHashtags(hashtags),
       })
+
+      // [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드 <즉, Mongoose 의 .populate('videos') 곁들인> ) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
+      // [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
+      // [ Mongoose 연계 문법 ] 1개의 영상에 대한 소유주가 1명이지만 소유주는 여러 영상을 소유할 수 있으므로 array 형태로 스키마 추가함
+      // [ Mongoose 연계 문법 ] 새로 업로드 하는 영상의 _id 값(즉, Video 모델 기반의 const newVideo = await Video.create({}) 쿼리 결과로 Mongo DB 가 자체 부여하는 영상별 _id 값) 을 User 모델의 videos 에 array 형태로 저장해야 함
+      const user = await User.findById(_id);
+      
+      // [ Javascript 문법 ] array 에 요소를 추가하려면 push 문법 활용요
+      user.videos.push(newVideo._id);
+      
+      // [ Javascript 문법 ] DB 에 데이터를 저장하는 데는 시간이 걸리므로 async 함수 내에 await 명시요
+      // [ Mongoose 문법 ] .save()는 promise를 return 해줌. (즉, save 되는 순간 db에 기록되고 저장되려면 시간이 걸리므로 작업이 끝날 때까지 기다려줘야 함)
+      // [ Mongoose 문법 ] join.pug의 input 태그에서 submit한 내용이 User.create() 함수에 의해 처리되기 전에 .pre('save', function(){}) 미들웨어 코드로 비밀번호 hash 상태로 변환시킴
+      // [ Mongoose 문법 ] 주의: 미들웨어(Middleware) 코드는 model 코드 이전에 작성되어야 함
+      // [ Mongoose 문법 ] 미들웨어(Middleware) / pre, post, hook 기능을 통해 object가 db에 저장 및 업데이트 하기 전 또는 후 시점에 사용자의 입력값에 대한 사전처리를 하거나 체크를 해야하는 경우가 있음
+      // [ Mongoose 문법 ] 미들웨어(Middleware) / pre, post, hook 코드 내에서 this는 저장하려는 문서를 가리킴
+      // 저장(save) 되기 전에(pre) Middleware(userSchema)로 호출될 async function
+      
+      // [ Mongoose 문법 & 버그 수정 ★★★ ] videoController.js 의 postUpload 함수 내에서 새로운 비디오 업로드 할 때마다 user.save(); 코드 실행해야 하는데 마침 그 전 단계에 pre 기능으로 비밀번호를 hash 하도록 하는 코드가 반복적으로 가동되어 사용자의 원비밀번호를 계속 변경시키는 코드 버그 발생함 User.js 의 userSchema.pre('save', async function(){this.password = await bcrypt.hash(this.password, 5);} 
+      user.save();
 
       // [ Mongoose 문법 ] .save()는 promise를 return 해줌. (즉, save 되는 순간 db에 기록되고 저장되려면 시간이 걸리므로 작업이 끝날 때까지 기다려줘야 함)
       // document(즉, javascript object)를 db에 저장

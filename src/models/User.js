@@ -5,10 +5,6 @@ import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
 
-  // [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자가 업로드한 모든 video 목록 보여주기: 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기 (userController.js 의 see 함수 내의 const videos = await Video.find({ owner: userProfileDbResult._id}); 코드로 처리)
-  // [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
-  // [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
-
   // [ Github OAuth API 문법 ] 사용자가 Github로 로그인했는지 여부를 확인하기 위함 / 로그인 페이지에서 사용자가 email로 로그인하려는데 password 없을 때 이를 대신해 github 로그인 상태를 확인해 볼 수 있음
   // [ Github OAuth API 문법 ] 사용자가 로그인 페이지에서 사이트ID(본 프로젝트에서는 email)/PW로 로그인하려는데 password가 없을 때 (즉, github OAuth 방식 가입자) socialOnly 값이 기본값 false 에서 userController.js 내의 finishGithubLogin 함수 내의 User.create({socialOnly:true}) 로 처리된 경우 wetube 로그인 승인 처리하기 위한 용도의 식별자
   socialOnly: {type: Boolean, default: false},
@@ -29,6 +25,14 @@ const userSchema = new mongoose.Schema({
       // 오류메시지: UnhandledPromiseRejectionWarning: ValidationError: User validation failed: password2: Path `password2` is required.
       // password2: { type: String, required: true },
   location: { type: String },
+
+          // [ Mongoose 연계 문법 ] Relationship 작업B - 1차버전장황코드) 사용자가 업로드한 모든 video 목록 보여주기: 사용자의 _id 를 owner 로 가진 video list(즉, 여러 개의 video 목록) 찾기 (userController.js 의 see 함수 내의 const videos = await Video.find({ owner: userProfileDbResult._id}); 코드로 처리)
+  // [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드 <즉, Mongoose 의 .populate('videos') 곁들인> ) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
+  // [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
+  // [ Mongoose 연계 문법 ] 1개의 영상에 대한 소유주가 1명이지만 소유주는 여러 영상을 소유할 수 있으므로 array 형태로 스키마 추가함
+  // [ Mongoose 문법 ] videos 의 type 유형은 ObjectId 유형인데 Javascript 기반에서는 ObjectId 라는 유형을 인식하지 못하므로 Mongoose 라이브러리를 활용해 ObjectId 라는 속성을 추출 및 연계하여 type: mongoose.Schema.Types.ObjectId 형태로 인식시킴
+  // [ Mongoose 문법 ] ref: 'Video' 라고 지정함으로써 Mongoose 에게 videos 의 ObjectId 라는 값은 Video 모델로부터 온다고(즉, 참조된다고) 알려주게 됨
+  videos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }]
 });
 
 // [ Mongoose 문법 ] join.pug의 input 태그에서 submit한 내용이 User.create() 함수에 의해 처리되기 전에 .pre('save', function(){}) 미들웨어 코드로 비밀번호 hash 상태로 변환시킴
