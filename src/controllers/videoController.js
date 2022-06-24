@@ -4,7 +4,6 @@
 */  
 
 // Video.js에서 export default Video; 한 것을 import 함
-// import User from '../models/User';
 import User from '../models/User';
 import Video from '../models/video'; 
 
@@ -100,7 +99,7 @@ export const watch = async (req, res) => {
   // [ Mongoose 문법 ] 즉, .populate('owner') 코드를 추가로 연결하면 Mongoose 가 video 를 찾고 그 안에서 owner 도 찾아 줌
   const video = await Video.findById(idVideo).populate('owner');
 
-  console.log(video);
+  console.log('videoController.js ------ watch ----- video >>>>>> Pug -----',video);
 
   // 에러 나는 경우를 먼저 if로 처리해주고 else에는 정상적인 케이스에 작동할 코드를 담으면 됨
   // 사용자가 존재하지 않는 페이지를 검색할 경우도 대비해 return res.render(PUG 파일 (즉,404 관련)) 적절한 응답처리 페이지 만들어놓아야 함
@@ -192,16 +191,17 @@ export const postEdit = async (req, res) => {
   // [ Mongoose 문법 ] Edit 기능 구현을 위해 video 오브젝트(title, description, hashtags, ...) 전체를 받는 대신에 true/false 여부(즉, 영상 존재 여부)만 받아와도 됨 (즉, <db model>.findById() 대신에 <db model>.exists() 사용이 적절)
   // [ Mongoose 문법 ] <db model>.exists(아규먼트 자리인 이곳에 id는 받지 않으며 filter(즉, 조건)만 받음)
   // 오브젝트 id(즉, _id)가 req.params.id와 같은 경우(즉, 조건)를 찾음
-  const videoTrueFalse = Video.exists({ _id : idVideo});
+
+  // #8.14 니코쌤 코드 그대로 쓰면 postEdit에서 video.owner이 undefinded가 나옵니다! 이유는 video를 가져올때 Video.exists로 가져오는데 exists메소드는 boolean을 리턴하기때문에 video.owner이 undefinded로 나오는 거예요!
+  const video = await Video.findById(idVideo); // 로 바꿔주시면 해결 될 겁니다!
+            // 주의! ★★★ postEdit 함수 내에서는 getEdit 함수 내에서 const video = await Video.findById(idVideo) 쿼리문과는 다르게 True 또는 False 를 반환하는 Video.exists 쿼리문을 사용하므로 쿼리 결과값 담는 명칭을 videoTrueFalse 라고 작명함      
+            // const videoTrueFalse = Video.exists({ _id : idVideo});
   
-  if(!videoTrueFalse) {
+  console.log('videoController.js ------ postEdit ------ video',  video);
+
+  if(!video) {
     return res.render('404', { pageTitle: 'Video not found.'})
   }
-
-  // console.log(videoTrueFalse); 값을 확인해 보면 Promise { <pending> } 상태로 표시됨
-  // console.log(videoTrueFalse.owner); 값을 확인해 보면 undefined 상태로 표시됨
-  console.log('videoController.js ----- postEdit ----- videoTrueFalse', videoTrueFalse);
-  console.log('videoController.js ----- postEdit ----- videoTrueFalse.owner', videoTrueFalse.owner);
 
   // [ 시큐어 보안 코딩 ★★★ ] 사용자A 가 올린 동영상이라서 watch.pug(즉, 프론트엔드) 에서 사용자A 에게만 해당 영상 게시물의 edit 페이지 및 기능과 delete 기능(즉, videoController.js 의 getEdit 함수, postEdit 함수, deleteVideo 함수)에 접근할 수 있는 링크(즉, a 태그) 를 보여주는 방식 만으로는 접근 제한 보안성 취약함
   // [ 시큐어 보안 코딩 ★★★ ] 사용자B 가 직접 URL 경로 입력(즉, http://localhost:4000/videos/동영상랜덤파일명/edit)을 통해 사용자A 가 올린 동영상 게시물의 edit 페이지 및 기능과 delete 기능(즉, videoController.js 의 getEdit 함수, postEdit 함수, deleteVideo 함수)에 접근 및 사용할 수 있는 보안취약점이 있음 
@@ -210,10 +210,9 @@ export const postEdit = async (req, res) => {
   // [ 시큐어 보안 코딩 & Javascript ] 동영상 올린 당사자임에도 조건문 비교값의 형식이 Object 와 String 을로 달라서 if(video.owner !== req.session.userDbResult._id) 조건문이 전혀 실행되지 않는 오류 발생함
   // [ 시큐어 보안 코딩 & Javascript ] 조건문 문법 ===, !== 은 생김새 뿐만 아니라 type (즉, 자료형)도 비교하기 때문
   // [ 시큐어 보안 코딩 & Javascript ] console.log(typeof video.owner, typeof req.session.userDbResult._id); 확인해보니 video.owner 는 Object 형식이고 req.session.userDbResult._id 는 String 형식
-  // [ 시큐어 보안 코딩 & Javascript ] 조건문의 양변을 String 타입으로 변환 처리요 if(String(video.owner) !== String(_id)){}
-  // 주의! ★★★ postEdit 함수 내에서는 getEdit 함수 내에서 const video = await Video.findById(idVideo) 쿼리문과는 다르게 True 또는 False 를 반환하는 Video.exists 쿼리문을 사용하므로 쿼리 결과값 담는 명칭을 videoTrueFalse 라고 작명함
+  // [ 시큐어 보안 코딩 & Javascript ] 조건문의 양변을 String 타입으로 변환 처리요 if(String(video.owner) !== String(_id)){}  
   const { userDbResult: { _id}} = req.session; // 표기효율성 증진용
-  if(String(videoTrueFalse.owner) !== String(_id)){ // 표기효율성 증진용
+  if(String(video.owner) !== String(_id)){ // 표기효율성 증진용
     // if(video.owner !== _id){ 
     return res.status(403).redirect('/') ;
   }
@@ -280,7 +279,6 @@ export const postUpload = async (req, res) => {
           // createdAt: Date.now(),
 
       // [ Mongoose 문법 ] 미들웨어(Middleware) / pre, post, hook 기능을 통해 object가 db에 저장 및 업데이트 하기 전 또는 후 시점에 사용자의 입력값에 대한 사전처리를 하거나 체크를 해야하는 경우가 있음
-
 
       // ??? 질문- 사용자가 쉼표 다음에 빈 칸 넣어서 입력했다면 어떻게 빈 칸 자동 제거?
       // Video.js 파일의 db schema 설정 코드에서 hashtags 속성을 string 타입의 array로 지정했었음 (즉, hashtags: [{ type: String, trim: true }])
@@ -357,21 +355,45 @@ export const deleteVideo = async (req, res) => {
   // [ 시큐어 보안 코딩 & Javascript ] 조건문 문법 ===, !== 은 생김새 뿐만 아니라 type (즉, 자료형)도 비교하기 때문
   // [ 시큐어 보안 코딩 & Javascript ] console.log(typeof video.owner, typeof req.session.userDbResult._id); 확인해보니 video.owner 는 Object 형식이고 req.session.userDbResult._id 는 String 형식
   // [ 시큐어 보안 코딩 & Javascript ] 조건문의 양변을 String 타입으로 변환 처리요 if(String(video.owner) !== String(_id)){}
-  
+  console.log('videoController.js ----- deleteVideo ---- video.owner / req.session.userDbResult._id -------', video.owner, req.session.userDbResult._id);
   const { userDbResult: { _id}} = req.session; // 표기효율성 증진용
   if(String(video.owner) !== String(_id)){ // 표기효율성 증진용
     // if(video.owner !== _id){ 
     return res.status(403).redirect('/') ;
   }
 
-  console.log('videoController.js ------ postEdit -------', video.owner, _id);
-
   // [ Mongoose 문법 ] findByIdAndDelete(id) 내장함수는 findOneAndDelete({_id:id}) 함수의 간략화 버전
-  // [ Mongoose 문법 ] findByIdAndDelete(), findOneAndDelete() 사용 권장 (즉, findByIdAndRemove, findOneAndRemove() 사용 비권장)
-  await Video.findOneAndDelete(idVideo);
+  // [ Mongoose 문법 ] findByIdAndDelete(), findOneAndDelete() 사용 권장 (즉, findByIdAndRemove, findOneAndRemove() 사용 비권장)    
+  // [ Mongoose 문법 ] findByIdAndDelete() 사용하려는 경우에는 const videoOwner = await Video.findByIdAndDelete(video._id);
+  // [ Mongoose 문법 ] findOneAndDelete() 사용하려는경우에는 const videoOwner = await Video.findOneAndDelete({_id: video._id});
+  const videoOwner = await Video.findByIdAndDelete(video._id);
+  console.log('videoController.js ----- deleteVideo ---- idVideo / video._id ----------', typeof idVideo, idVideo, typeof video._id, video._id)
+  console.log('videoController.js ----- videoOwner -----', videoOwner);
 
-  // [ 클론코딩 허점 보완요 ★★★ ] #8.14 deleteVideo 에서 User 의 videos 에서도 제거해주는 게 나을 듯요? 에러는 안 날 것 같긴 한데
-  // [ 클론코딩 허점 보완요 ★★★ ] #8.14 음 그러게요 delete 해도 에러는 안나는데 Users DB에 남아있는게 거슬리네요
+  // [ 클론코딩 허점 보완 해냄 ★★★ ] #8.14 deleteVideo 에서 User 의 videos 에서도 제거해주는 게 나을 듯요? 에러는 안 날 것 같긴 한데
+  // [ 클론코딩 허점 보완 해냄 ★★★ ] #8.14 음 그러게요 delete 해도 에러는 안나는데 Users DB에 남아있는게 거슬리네요
+  const DeletedVideoOwnerUserDb = await User.findById(String(videoOwner.owner))
+  console.log('DeletedVideoOwnerUserDb-------------', DeletedVideoOwnerUserDb);
+
+  // const positionIndex = DeletedVideoOwnerUserDb.videos.indexOf(videoOwner._id);
+  const positionIndex = DeletedVideoOwnerUserDb.videos.indexOf(video._id);
+  console.log('positionIndex-------------', positionIndex);
+  
+  const videoToBeDeletedInVideos = DeletedVideoOwnerUserDb.videos.splice(positionIndex, 1);
+  console.log('videoToBeDeletedInVideos -------------', videoToBeDeletedInVideos);
+
+  DeletedVideoOwnerUserDb.save();
+  
+  // [ Mongoose 문법 ] 구글 키워드 delete element in array mongoose 
+  // [ Mongoose 문법 ] Unable to delete element from array of objects using mongoose
+  // [ Mongoose 문법 ] https://getridbug.com/node-js/unable-to-delete-element-from-array-of-objects-using-mongoose/
+
+  await User.findByIdAndUpdate(
+    { _id: DeletedVideoOwnerUserDb._id },     
+    { $pull: {
+        videos: { _id: video._id },
+      },
+    });
 
   return res.redirect('/');
 }

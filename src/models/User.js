@@ -44,18 +44,16 @@ const userSchema = new mongoose.Schema({
 // [ Bcrypt 라이브러리 문법 ] 설치 명령어는 npm i bcrypt 이며 hacker가 rainbow table 공격을 bcrypt 라이브러리 적용을 통해 막을 수 있음 (secure code 보안 코드 확인요)
 // [ Bcrypt 라이브러리 문법 ] bcrypt.hash(사용자 비밀번호, 해싱 횟수, 콜백함수(async, await 사용시 콜백함수는 불필요))
 userSchema.pre('save', async function(){
-  
-  console.log('user.js bcrypt 해싱전',this.passowrd);
-  
+    
   // [ Javascript 문법 ] this는 userController.js의 postJoin async 함수 내부에 있는 await User.create()를 가리킴 (즉, 사용자가 입력하여 submit한 값)
   // [ Mongoose 문법 & 버그 수정 ★★★ ] videoController.js 의 postUpload 함수 내에서 새로운 비디오 업로드 할 때마다 user.save(); 코드 실행해야 하는데 마침 그 전 단계에 pre 기능으로 비밀번호를 hash 하도록 하는 코드가 반복적으로 가동되어 사용자의 원비밀번호를 계속 변경시키는 코드 버그 발생함 User.js 의 userSchema.pre('save', async function(){this.password = await bcrypt.hash(this.password, 5);} 
   // [ Mongoose 문법 & 버그 수정 ★★★ ] User.js 의 userSchema.pre('save', async function(){} 함수 내에서 if(this.isModified('password')){ 패스워드 해싱해주는 코드 } 조건문을 통해 사용자 password 값이 변경될 때만 password 값을 hash 하도록 경우를 구분해 처리시킴
   if(this.isModified('password')){
+    console.log('User.js --- user.js bcrypt 해싱전',this.password);
     this.password = await bcrypt.hash(this.password, 5);
+    console.log('User.js --- user.js bcrypt 해싱후',this.password);
   }
-  
-    
-  console.log('user.js bcrypt 해싱후',this.passowrd);
+
 })
 
 // [ Bcrypt 라이브러리 문법 ] Hash 원리상 입력값이 동일하면 출력값이 항상 동일하므로 bcrypt.compare(사용자 입력값, DB Hash 처리된 값) 형태로 두 값을 비교하여 결과값으로 True/False 리턴함

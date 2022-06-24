@@ -528,7 +528,7 @@ export const postChangePassword = async (req, res) => {
   user.password = newPassword;
   
   // [ Bcrpyt 라이브러리 문법 ] 사용자에 의해 변경된 비밀번호를 wetube DB 에 업데이트 하기 전에 User.js 의 userSchema.pre('save', async function(){생략} 코드를 이용해 hash 적용시킴
-  console.log('new unhashed password -----', user.password);
+  console.log('userController.js --- new unhashed password -----', user.password);
   
   // 작업 06단계: [ Javascript 문법 ] DB 에 데이터를 저장하는 데는 시간이 걸리므로 async 함수 내에 await 명시요
   await user.save();
@@ -536,7 +536,7 @@ export const postChangePassword = async (req, res) => {
             // 방식A - [ Express-session & Bcrypt 연계 문법 ] 변경된 비밀번호에 대해 hash 처리 된 상태의 값인 user.password(즉, 현재값)를 req.session.user.password(즉,그때의 값)에도 반영시켜 session 속에 들어있는 password 값을 변경된 값으로 최신화시켜야 함
             // req.session.userDbResult.password = user.password;
 
-  console.log('new password -----', user.password);
+  console.log('userController.js --- new password -----', user.password);
   // send notification
   
   // 작업 07단계: wetube DB 상에서 비밀번호 변경 작업이 완료되었다면 사용자를 로그아웃시켜 변경된 비밀번호로 재로그인 하도록 redirect 시킴
