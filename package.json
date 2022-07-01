@@ -4,7 +4,8 @@
   "description": "wetube clone",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec babel-node src/init.js"
+    "dev": "nodemon --exec babel-node src/init.js",
+    "assets": "webpack --config webpack.config.js"
   },
   "author": "ydic",
   "license": "MIT",
@@ -25,7 +26,10 @@
     "@babel/core": "^7.13.16",
     "@babel/node": "^7.13.10",
     "@babel/preset-env": "^7.13.10",
-    "nodemon": "^2.0.7"
+    "babel-loader": "^8.2.5",
+    "nodemon": "^2.0.7",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0"
   },
   "repository": {
     "type": "git",
