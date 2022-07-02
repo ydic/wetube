@@ -25,6 +25,11 @@
 // [ WebPack 문법 ] package.json 의 scripts 항목에 지정한 "dev:server": "nodemon" 속성이 실행되면 nodemon.json 파일의 configuration 내용을 읽도록 설정함(즉, 별도 json 파일로 이원화시켜 관리하되 내용은 여전히 package.json 에 종속되도록 함)
 // [ WebPack 문법 ] 이러한 맥락은 "dev:assets": "webpack" 속성 실행시에도 적용되는데 자동으로 webpack.config.js 파일을 찾게 됨
 
+// [ mini-css-extract-plugin 문법 ] https://www.npmjs.com/package/mini-css-extract-plugin
+// [ mini-css-extract-plugin 문법 ] npm install --save-dev mini-css-extract-plugin
+// [ mini-css-extract-plugin 문법 ] mini-css-extract-plugin 설치 및 사용
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
 // [ Nodejs 문법 ] ReferenceError: path is not defined
 // [ Nodejs 문법 ] path 기능은 module.exports = { output: { path: path.resolve(__dirname, "assets", "js"),}} 에서 사용됨
 const path = require("path");
@@ -39,16 +44,38 @@ console.log(
 // [ WebPack 문법 & Nodejs 문법 ] module.exports 통해서 WebPack 이 읽을 configuration 파일 내보내기
 // [ WebPack 문법 ] npm i -D webpack webpack-cli 설치 이후에 package.json 에서 Webpack 실행명령어 단축 표기(npm run assets) 지정함 scripts": { "assets": "webpack --config webpack.config.js" }
 module.exports = {
+  // [ mini-css-extract-plugin 문법 ] https://www.npmjs.com/package/mini-css-extract-plugin
+  // [ mini-css-extract-plugin & WebPack 문법 ] filename 속성에 폴더명 표기를 더하여 변환 처리된 파일 결과물의 저장 경로를 재구성 하려는 경우, 기존의 assets 폴더는 지운 상태에서 npm run assets 실행요
+  // [ mini-css-extract-plugin 문법 & SCSS 문법 ] CSS 를 추출해서 별도의 파일로 만들기 위해서 style-loader 대신에 MiniCssExtractPlugin.loader 으로 대체하여 사용함
+  // [ WebPack 문법 ] /assets/js/main.js 코드 내의 CSS 속성을 다루는 주체는 CSS 가 아닌 Javascript 이며, CSS 파일은 별도로 다른 곳에 만듦(즉, plugins: [new MiniCssExtractPlugin({ filename: 'css/styles.css', } )] 통해서 /asset/css/styles.css 경로 형태로 CSS 파일 만듦)
+  // [ mini-css-extract-plugin 문법 & WebPack 문법 ] 즉, output : { filename: "main.js" } 로 파일명만 설정했던 기존 속성에 폴더명 표기를 더한 output : { filename: "js/main.js" } 형태로 기재하여 bundle 처리된 main.js 를 /assets/js/main.js 에 위치시킴
+  // [ mini-css-extract-plugin 문법 ] webpack.config.js 의 module.export = { plugins: [new MiniCssExtractPlugin()] } 함수 내에 폴더명 표기를 더한 filename: "css/styles.css" 형태로 기재하여 styles.css 를 /assets/css/styles.css 에 위치시킴
+  //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] webpack.config.js 에서의 configuration 설정으로 인해 변환 처리된 CSS 파일을 mini-css-extract-plugin 통해서 /assets/css/styles.css 경로에 위치하도록 만든 후 해당 CSS 를 브라우저단의 Pug 템플릿에 연결시킴
+  //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] client 폴더의 파일은 WebPack 에 의해서만 로딩 가능함 / assets 폴더의 파일은 사용자, Pug, 브라우저에 의해서만 로딩 가능함
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: "css/styles.css",
+    }),
+  ],
+
   // [ WebPack 문법 ] entry 항목에는 WebPack 통해 변형시키려는 원본 소스 코드의 경로를 기재함
   entry: "./src/client/js/main.js",
 
   // [ WebPack 문법 ] 실제 배포시에는 mode: "production" 으로 설정요 / 개발시에는 mode: "development" 설정하여 압축되지 않은 코드 형태로 코드를 다룰 수 있음
   mode: "development",
 
+  // [ WebPack 문법 ] output 의 filename 항목에는 변형 처리 결과물을 위한 파일명을 지정해야 함
+  // [ WebPack 문법 ] 브라우저가 읽어들일 코드는 clients 폴더가 아니라 코드가 bundle 처리되어진 assets 폴더의 코드
   output: {
-    // [ WebPack 문법 ] output 의 filename 항목에는 변형 처리 결과물을 위한 파일명을 지정해야 함
-    // [ WebPack 문법 ] 브라우저가 읽어들일 코드는 clients 폴더가 아니라 코드가 bundle 처리되어진 assets 폴더의 코드
-    filename: "main.js",
+    // [ mini-css-extract-plugin 문법 ] https://www.npmjs.com/package/mini-css-extract-plugin
+    // [ mini-css-extract-plugin & WebPack 문법 ] filename 속성에 폴더명 표기를 더하여 변환 처리된 파일 결과물의 저장 경로를 재구성 하려는 경우, 기존의 assets 폴더는 지운 상태에서 npm run assets 실행요
+    // [ mini-css-extract-plugin 문법 & SCSS 문법 ] CSS 를 추출해서 별도의 파일로 만들기 위해서 style-loader 대신에 MiniCssExtractPlugin.loader 으로 대체하여 사용함
+    // [ WebPack 문법 ] /assets/js/main.js 코드 내의 CSS 속성을 다루는 주체는 CSS 가 아닌 Javascript 이며, CSS 파일은 별도로 다른 곳에 만듦(즉, plugins: [new MiniCssExtractPlugin({ filename: 'css/styles.css', } )] 통해서 /asset/css/styles.css 경로 형태로 CSS 파일 만듦)
+    // [ mini-css-extract-plugin 문법 & WebPack 문법 ] 즉, output : { filename: "main.js" } 로 파일명만 설정했던 기존 속성에 폴더명 표기를 더한 output : { filename: "js/main.js" } 형태로 기재하여 bundle 처리된 main.js 를 /assets/js/main.js 에 위치시킴
+    // [ mini-css-extract-plugin 문법 ] webpack.config.js 의 module.export = { plugins: [new MiniCssExtractPlugin()] } 함수 내에 폴더명 표기를 더한 filename: "css/styles.css" 형태로 기재하여 styles.css 를 /assets/css/styles.css 에 위치시킴
+    //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] webpack.config.js 에서의 configuration 설정으로 인해 변환 처리된 CSS 파일을 mini-css-extract-plugin 통해서 /assets/css/styles.css 경로에 위치하도록 만든 후 해당 CSS 를 브라우저단의 Pug 템플릿에 연결시킴
+    //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] client 폴더의 파일은 WebPack 에 의해서만 로딩 가능함 / assets 폴더의 파일은 사용자, Pug, 브라우저에 의해서만 로딩 가능함
+    filename: "js/main.js",
 
     // [ WebPack 문법 ] Invalid configuration object. configuration.output.path: The provided value "./assets/js" is not an absolute path!
     // path: './assets/js'
@@ -58,7 +85,9 @@ module.exports = {
     // [ WebPack 문법 ] output 의 path 값은 절대경로여야 함 The provided value "./assets/js" is not an absolute path!
     // [ Nodejs 문법 ] path.resolve() 는 파트들을 모아서 경로를 만들어 줌
     // [ Nodejs 문법 ] __dirnmae 통해서 코드파일 자신이 위치한 파일 경로를 알 수 있음
-    path: path.resolve(__dirname, "assets", "js"),
+    // [ mini-css-extract-plugin 문법 ] mini-css-extract-plugin 이 생성된 CSS 파일(즉, /assets/js/main.css)을 output 과 같은 위치인 assets/js/ 경로에 두고 있음
+    // path: path.resolve(__dirname, "assets", "js"),
+    path: path.resolve(__dirname, "assets"),
   },
 
   module: {
@@ -104,7 +133,9 @@ module.exports = {
         // https://www.npmjs.com/package/style-loader
         // [ WebPack 문법 & SCSS 문법 ] 일반 CSS 로 변환된 내용을 style-loader 통해서 웹사이트에 적용하기(즉, <head></head> 태그 내의 <style></style> 태그 내에 CSS 속성이 담겨짐)
         // npm install --save-dev style-loader
-        use: ["style-loader", "css-loader", "sass-loader"],
+        // use: ["style-loader", "css-loader", "sass-loader"],
+        // [ mini-css-extract-plugin 문법 & SCSS 문법 ] CSS 를 추출해서 별도의 파일로 만들기 위해서 style-loader 대신에 MiniCssExtractPlugin.loader 으로 대체하여 사용함
+        use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
       },
     ],
   },

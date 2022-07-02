@@ -14,6 +14,10 @@ html(lang="ko")
     //- (용어 약자 풀이 주의: MVP 디자인 패턴이 아님. Model View Presenter) Minimum Viable Product (MVP CSS) 
     //- Mobile friendly / Works out of the box / Easy to customize / Only semantic HTML / No class names / Perfect for an MVP
     link(rel="stylesheet" href="https://unpkg.com/mvp.css")
+    
+    //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] webpack.config.js 에서의 configuration 설정으로 인해 변환 처리된 CSS 파일을 mini-css-extract-plugin 통해서 /assets/css/styles.css 경로에 위치하도록 만든 후 해당 CSS 를 브라우저단의 Pug 템플릿에 연결시킴
+    //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] client 폴더의 파일은 WebPack 에 의해서만 로딩 가능함 / assets 폴더의 파일은 사용자, Pug, 브라우저에 의해서만 로딩 가능함
+    link(rel="stylesheet" href="/static/css/styles.css")
 
   body
     header
