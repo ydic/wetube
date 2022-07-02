@@ -1,0 +1,9 @@
+// [ WebPack 문법 & SCSS 문법 ] /client/scss/styles.scss 파일을 /src/client/js/main.js 로 import 해야함
+// [ SCSS 문법 ] styles.scss 가 참조하는 변수 값 모음
+@import './_variables';
+
+body {
+  // [ SCSS 문법 ] $변수명
+  background-color: $red;
+  color: white;
+}

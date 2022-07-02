@@ -74,6 +74,7 @@ module.exports = {
         // [ WebPack 문법 ] 실제 배포시에는 mode: "production" 으로 설정요 / 개발시에는 mode: "development" 설정하여 압축되지 않은 코드 형태로 코드를 다룰 수 있음
         // The 'mode' option has not been set, webpack will fallback to 'production' for this value.
 
+        // [ WebPack 문법 ] 파일 변환 장치인 loader 호출 방법 2가지(Object 객체 활용방식 / 역순 Array 배열 활용방식)
         use: {
           // [ WebPack & Babel 문법 ] https://github.com/babel/babel-loader
           loader: "babel-loader",
@@ -81,6 +82,29 @@ module.exports = {
             presets: [["@babel/preset-env", { targets: "defaults" }]],
           },
         },
+      },
+
+      {
+        // [ 정규표현식 ] test: /\.scss$/
+        test: /\.scss$/,
+
+        // [ WebPack 문법 ] SCSS 를 일반 CSS 파일로 변환 후 브라우저단에서 불러오기
+        // [ WebPack 문법 ] 파일 변환 장치인 loader 호출 방법 2가지(Object 객체 활용방식 / 역순 Array 배열 활용방식)
+
+        /* You may need an appropriate loader(loader 는 파일을 변환하는 장치) to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders
+        > @import './_variables'; */
+        // https://www.npmjs.com/package/sass-loader
+        // [ WebPack 문법 & SCSS 문법 ] sass-loader 통해서 SCSS 를 일반 CSS 로 변환하기
+        // npm install sass-loader sass --save-dev
+
+        // https://www.npmjs.com/package/css-loader
+        // [ WebPack 문법 & SCSS 문법 ] css-loader 통해서 @import / URL() / 폰트 같은 속성을 풀어서 해석 적용하기(즉, 변환 처리된 최종 javascript 코드에는 웹사이트에 입력되기 위해 CSS 가 컴파일된 형태로 담기게 됨)
+        // npm install --save-dev css-loader
+
+        // https://www.npmjs.com/package/style-loader
+        // [ WebPack 문법 & SCSS 문법 ] 일반 CSS 로 변환된 내용을 style-loader 통해서 웹사이트에 적용하기(즉, <head></head> 태그 내의 <style></style> 태그 내에 CSS 속성이 담겨짐)
+        // npm install --save-dev style-loader
+        use: ["style-loader", "css-loader", "sass-loader"],
       },
     ],
   },
