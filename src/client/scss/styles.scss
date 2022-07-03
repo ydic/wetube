@@ -4,6 +4,7 @@
 
 body {
   // [ SCSS 문법 ] $변수명
-  background-color: $red;
-  color: white;
+  background-color: $color-bg;
+      // color: white;
+  color: $color;
 }

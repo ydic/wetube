@@ -19,11 +19,17 @@
 // [ WebPack 문법 ] 변형된 Javascript 와 CSS 를 Pug 통해서 프론트엔드 템플릿(즉, /src/views/base.pug) 에 적용함
 // [ WebPack 문법 ] 변형된 Javascript 와 CSS 는 본 실습에서 server.js 에 express.static() 기능을 반영한 라우팅인 일명 /static URL 경로(즉, app.use('/static', express.static('assets); )를 통해서만 접근 가능하며 브라우저단에서 assets 폴더의 내용을 볼 수 있도록 정의됨
 
-// [ WebPack 문법 ] watch: true 설정해야 하고 2개 console 실행요(즉, package.json 의 scripts 에 설정한 실행 단축명령어 / client 파일 확인용 npm run assets / backend 파일 확인용 npm run dev)
+// [ WebPack 문법 ] watch: true 설정해야 하고 2개 console 실행요(즉, package.json 의 scripts 에 설정한 실행 단축명령어(프론트엔드 변경되도 백엔드 재시작되지 않도록 nodemon.json 에서 ignore 과 exec 설정한 상태 기준) / client 파일 확인용 npm run dev:assets / backend 파일 확인용 npm run dev:server)
 // [ WebPack 문법 ] 기능 정상 동작하지 않을 경우, WebPack console 실행했는지 확인요
 
+// [ WebPack 문법 ] 프론트엔드측 코드(Javascript & SCSS) 변경되어도 백엔드는 재시작되지 않도록 설정해야 함
+// [ WebPack 문법 ] package.json 파일이 있는 디렉토리 수준에서 nodemon.json 직접 생성하여 https://www.npmjs.com/package/nodemon 에서 Config files 부문의 코드 구성 참조(본 실습에서는 ignore 와 exec 항목만 사용함)
+// [ WebPack 문법 ] nodemon.json 으로 분할이관 이전 package.json 모습은  "scripts": {    "dev": "nodemon --exec babel-node src/init.js",    "assets": "webpack --config webpack.config.js"  }
+// [ WebPack 문법 ] nodemon.json 으로 분할이관 이후 package.json 모습은   "scripts": {    "dev:server": "nodemon",    "dev:assets": "webpack"  },
 // [ WebPack 문법 ] package.json 의 scripts 항목에 지정한 "dev:server": "nodemon" 속성이 실행되면 nodemon.json 파일의 configuration 내용을 읽도록 설정함(즉, 별도 json 파일로 이원화시켜 관리하되 내용은 여전히 package.json 에 종속되도록 함)
 // [ WebPack 문법 ] 이러한 맥락은 "dev:assets": "webpack" 속성 실행시에도 적용되는데 자동으로 webpack.config.js 파일을 찾게 됨
+// [ WebPack 문법 ] 실행명령어인 nodemon 실행하면 nodemon 자체적인 구동원리에 의해 자동적으로 nodemon.json 설정파일 호출함
+// [ WebPack 문법 ] 실행명령어인 webpack 실행하면 webpack 자체적인 구동원리에 의해 자동적으로 webpack.config.js 설정파일 호출함
 
 // [ mini-css-extract-plugin 문법 ] https://www.npmjs.com/package/mini-css-extract-plugin
 // [ mini-css-extract-plugin 문법 ] npm install --save-dev mini-css-extract-plugin
@@ -64,6 +70,10 @@ module.exports = {
   // [ WebPack 문법 ] 실제 배포시에는 mode: "production" 으로 설정요 / 개발시에는 mode: "development" 설정하여 압축되지 않은 코드 형태로 코드를 다룰 수 있음
   mode: "development",
 
+  // [ WebPack 문법 ] watch: true 설정 통해서 변경사항 실시간 자동반영(refresh 작업 & compile 작업)
+  // [ WebPack 문법 ] watch: true 설정 통해서 프론트엔드측 코드를 다루는 client 폴더(즉, Javascript 코드나 SCSS 코드) 변경시미다 npm run assets 명령어 수동으로 재실행하지 않아도 됨
+  watch: true,
+
   // [ WebPack 문법 ] output 의 filename 항목에는 변형 처리 결과물을 위한 파일명을 지정해야 함
   // [ WebPack 문법 ] 브라우저가 읽어들일 코드는 clients 폴더가 아니라 코드가 bundle 처리되어진 assets 폴더의 코드
   output: {
@@ -88,6 +98,9 @@ module.exports = {
     // [ mini-css-extract-plugin 문법 ] mini-css-extract-plugin 이 생성된 CSS 파일(즉, /assets/js/main.css)을 output 과 같은 위치인 assets/js/ 경로에 두고 있음
     // path: path.resolve(__dirname, "assets", "js"),
     path: path.resolve(__dirname, "assets"),
+
+    // [ WebPack 문법 ] WebPack 을 재시작하는 경우(즉, npm run dev:assets)에 한하여 ouput 폴더(여기서는 /assets )를 build 시작 전에 삭제(즉, clean) 시켜줌
+    clean: true,
   },
 
   module: {
