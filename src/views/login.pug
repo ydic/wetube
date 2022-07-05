@@ -19,14 +19,19 @@ block content
     //- input(name='password', type='password', placeholder='Password', )
     input(name='password', type='password', placeholder='Password', required)
     input(type='submit', value='Login')
+    
+    //- #10.2 Styles Part Two 깃헙강의코드북붙했으니재확인요
+    include partials/social-login
 
-    br
+    //- br
     //- [ Github OAuth API 문법] https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps
     //- [ Github OAuth API 문법] 사용자를 깃헙으로 보내기
-    a(href='/users/github/start') Continue with Github &rarr;
+    //- a(href='/users/github/start') Continue with Github &rarr;
 
-  hr
-  div 
+  //- hr
+  
+  //- #10.2 Styles Part Two 깃헙강의코드북붙했으니재확인요
+  div.auth-switch
     span Don't have an account? 
     a(href='/join') Create one now &rarr;
 

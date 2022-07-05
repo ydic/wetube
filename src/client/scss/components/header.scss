@@ -1,0 +1,43 @@
+//- [ CSS & /client/scss/ ] Pug 전용 /views 폴더에서 mixins 폴더나 partials 폴더 내에 생성한 파일명과 동일한 이름으로 SCSS 쪽에도 (즉, /client/scss/components/ 쪽에도) 파일을 만들어 놓은 후에 CSS 작업요 
+
+header {
+  padding: 20px 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .header__logo {
+    color: $red;
+    font-size: 38px;
+  }
+  ul {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    li {
+      margin-left: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    i {
+      font-size: 16px;
+    }
+  }
+  .header__btn {
+    background-color: white;
+    color: $bg;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  .header__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    
+    // 
+    font-size: 34px;
+  }
+  .header__space_btw_welcome_and_avatar {
+    margin-right: 20px;
+  }
+}

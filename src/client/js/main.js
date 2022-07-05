@@ -13,5 +13,6 @@
    > @import './_variables'; */
 import "../scss/styles.scss";
 
-alert("/client/js/main.js is transformed to bundled code by WebPack");
+// alert("/client/js/main.js is transformed to bundled code by WebPack");
+
 // console.log("hi");

@@ -43,7 +43,10 @@ block content
   //- [ Mongo DB & Mongoose 라이브러리 문법 ] 코드 원칙: DB 에 파일 저장 금지 / 폴더에만 파일 저장 / DB 에는 파일의 경로만 저장
 
                   //- form(method='POST')
-  form(method='POST', enctype='multipart/form-data')
+  //- form(method='POST', enctype='multipart/form-data')
+  //- #10.2 Styles Part Two 깃헙강의코드북붙했으니재확인요
+  form(method="POST", enctype="multipart/form-data").edit-profile__form
+
     //- [ Pug 라이브러리 문법 ] 본 코드 페이지에서는 계정을 새로 생성하는 것이 아니라 기존 계정의 정보를 수정하는 것이므로 사용자의 현재 프로필을 form 형식에서 브라우저에 보여주어야 하므로 input(value= ) 속성으로 사용자 정보 값을 읽어와야 함
     //- [ 코드 연게성 ] userController.js의 postLogin 함수에서 socialOnly: false (즉, wetube ID/PW 방식 가입) 회원의 userDbResult 를 req.session.userDbResult = userDbResult; 형태로 1차 전달함
     //- [ 코드 연게성 ] 그것을 middleware.js 의 localsMiddleware 함수에서 res.locals.loggedInUserDb = req.session.userDbResult; 형태로 값을 2차 전달함
@@ -71,6 +74,7 @@ block content
 
     //- [ Github OAuth API 연계 문법 ] Github OAuth 방식으로 wetube DB 에 계정 만든 사용자는 Wetube DB 내에 비밀번호 값이 없으므로 비밀번호 변경 페이지 자체를 보여주지 말아야 함
     if !loggedInUserDb.socialOnly
-      hr
+      //- hr
       //- 절대URL(즉, /users/change-password)로 적어도 되는데 상대URL(즉, change-password) 사용하여 /users/ 이하 부분의 경로값만 바뀌게 함
-      a(href='change-password') Change Password &rarr;
+      div.edit-profile__password
+        a(href='change-password') Change Password &rarr;

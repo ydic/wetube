@@ -13,64 +13,25 @@ html(lang="ko")
 
     //- (용어 약자 풀이 주의: MVP 디자인 패턴이 아님. Model View Presenter) Minimum Viable Product (MVP CSS) 
     //- Mobile friendly / Works out of the box / Easy to customize / Only semantic HTML / No class names / Perfect for an MVP
-    link(rel="stylesheet" href="https://unpkg.com/mvp.css")
+    //- [ CSS - fontawesome ] #10.0 제대로 된 CSS 구성을 시작할 것이므로 base.pug 에서 fontawesome CDN 경로를 첨부하고 임시로 사용해왔던 MVP CSS 참조를 중단함
+    //- [ CSS - fontawesome ] /client/scss/ 폴더 내에 config 폴더(_variables.scss, _reset.scss 등) / components 폴더(header, footer 등) / screens 폴더(home, search 등) 으로 폴더 구분하여 CSS 제작
+        //- link(rel="stylesheet" href="https://unpkg.com/mvp.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css")
     
     //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] webpack.config.js 에서의 configuration 설정으로 인해 변환 처리된 CSS 파일을 mini-css-extract-plugin 통해서 /assets/css/styles.css 경로에 위치하도록 만든 후 해당 CSS 를 브라우저단의 Pug 템플릿에 연결시킴
     //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] client 폴더의 파일은 WebPack 에 의해서만 로딩 가능함 / assets 폴더의 파일은 사용자, Pug, 브라우저에 의해서만 로딩 가능함
     link(rel="stylesheet" href="/static/css/styles.css")
 
   body
-    header
-      //- [Pug 문법] 태그= 문법은 #{} 문법과 달리 한 html 태그 자리에 오직 변수 자신의 값으로만 채우려는 경우에 사용 가능
-      h1=pageTitle
-      nav
-        ul
-          li
-            a(href="/") Home
-          
-          li 
-            a(href="/search") Search
-
-          //- 혼자 해볼 것들 (리팩토링): 로그인 안한 상태라면 nav 태그에서 Join 항목, Log in 항목 보여주고, 로그인 상태라면 Join 항목은 없애고, Log out 항목 보여주도록 리팩토링요
-          
-          //- [ Express-session 라이브러리 연계 문법 ] if !req.session.loggedIn 오류메시지: Cannot read property 'session' of undefined (즉, 누가 사용자인지 알 수 있더라도 그 정보를 pug 템플릿과 공유하지는 못하는 상황.) 
-          //- [ Express-session 라이브러리 연계 문법 ] Pug 템플릿에서 req.session.loggedIn 형태로는 session에 접근 불가. locals 활용해 접근 가능.
-          //- [ Express-session 라이브러리 연계 문법 ] Pug 템플릿이 전역(global) 변수인 locals에 접근할 수 있으므로, Pug와 Express가 서로 locals를 공유할 수 있도록 설정하여 사용자가 로그인 했는지 알 수 있게 만들어야 함. 
-          //- [ Express-session 라이브러리 연계 문법 ] locals 오브젝트는 이미 모든 Pug 템플릿에 import된 오브젝트임. Middlewares.js에서 res.locals.loggedIn = Boolean(req.session.loggedIn); 코드를 통해 session 로그인 상태를 받아서 locals에 로그인 상태를 전달(공유)함
-          
-          //- [ Express-session 라이브러리 연계 문법 ] Pug 템플릿에서 req.session.loggedIn 형태로는 session에 접근 불가. 별도의 전용 문법 없이 locals 활용해 접근 가능.
-          //- [ Express-session 라이브러리 연계 문법 ] middlewares.js의 localsMiddleware 함수 내의 res.locals.loggedIn = Boolean(req.session.loggedIn); 코드 값을 base.pug에서 별도의 전용 문법 없이 loggedIn 이라는 이름으로 접근함
-          if loggedIn
-            li
-              a(href="/videos/upload") Upload Video
-            li 
-              //- [ Express-session 라이브러리 연계 문법 ] userContoller.js 의 postLogin 함수 내의 req.session.userDbResult = userDbResult; 코드를 통해 session 으로 전달하고 middlewares.js의 localsMiddleware 함수 내의 res.locals.loggedInUserDb = req.session.userDbResult || {}; 코드 값을 base.pug에서 별도의 전용 문법 없이 loggedInUserDb._id 이라는 항목으로 접근함
-              //- [ Express-session 라이브러리 연계 문법 ] My Profile 페이지 연결은 비공개 상테에서도 전체공개 페이지이므로 아무나 열람 가능함. 
-              //- [ Express-session 라이브러리 연계 문법 ] 로그인한 사용자 당사자의 식별값을 userController.js 의 postJoin 함수 내의 await User.create({}) 쿼리문을 통해 MongoDB 에 의해 자체 부여된 _id 값으로 파악함
-              a(href=`/users/${loggedInUserDb._id}`) My Profile
-            li
-              a(href="/users/edit") Edit-Profile
-            li
-              a(href="/users/logout") Log Out
-            li Welcome #{loggedInUserDb.name} !
-
-            //- [ Express-session 라이브러리 연계 문법 ] session으로부터 locals에 전달(공유)된 값(즉, 전역 global 속성)을 별도의 전용 문법 없이 #{loggedInUser.name} 형태로 Pug에서 호출 가능함
-            //- [ Express-session 라이브러리 연계 문법 ] userController.js의 postLogin 함수 내의 userDbResult 정보를 locals로 전달(공유)해서 Pug 파일에서 그 값을 사용자에게 보여줌 (예-a(href="") #{loggedInUser.name} 님의 Profile)
-            //- [ Express-session 라이브러리 연계 문법 ] userContoller.js 의 postLogin 함수 내의 req.session.userDbResult = userDbResult; 코드를 통해 session 으로 전달하고 middlewares.js의 localsMiddleware 함수 내의 res.locals.loggedInUserDb = req.session.userDbResult || {}; 코드 값을 base.pug에서 별도의 전용 문법 없이 loggedInUserDb.name 이라는 이름으로 접근함            
-            //- li               
-              //- a(href="/my-profile") #{loggedInUserDb.name} 님의 Profile
-              
-          else
-            li 
-              a(href="/join") Join
-
-            li 
-              a(href="/login") Log in
+    //- [Pug 문법] include를 통해 모든 pug 페이지(extends)에 동일한 header 태그를 생성함
+    //- [ CSS & saas-loader ] Pug 전용 /views 폴더에서 mixins 폴더나 partials 폴더 내에 생성한 파일명과 동일한 이름으로 SCSS 쪽에도 (즉, /client/scss/components/ 쪽에도) 파일을 만들어 놓은 후에 CSS 작업요 
+    include partials/header
     
     main
       block content
 
       //- [Pug 문법] include를 통해 모든 pug 페이지(extends)에 동일한 footer 태그를 생성함
+      //- [ CSS & /client/scss/ ] Pug 전용 /views 폴더에서 mixins 폴더나 partials 폴더 내에 생성한 파일명과 동일한 이름으로 SCSS 쪽에도 (즉, /client/scss/components/ 쪽에도) 파일을 만들어 놓은 후에 CSS 작업요 
       include partials/footer.pug
       
       //- [ WebPack & Pug 문법 ] base.pug 가 bundle 처리된 /assets/js/main.js 파일을 불러올 수 있도록 연결해야 함 script(src='/static/js/main.js')

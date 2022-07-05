@@ -9,13 +9,26 @@ include mixins/video
 
 block content
   //- 검색을 위한 input form 이므로 GET 요청으로 지정
-  form(method='GET')
+  //- form(method='GET')
+  //- #10.2 Styles Part Two 깃헙강의코드북붙했으니재확인요
+  form(method="GET").search__form
     input(name='keyword', type='text', placeholder='Search by title', required)
-    input(type='submit' value='Search now')
+    //- input(type='submit' value='Search now')
+    //- #10.2 Styles Part Two 깃헙강의코드북붙했으니재확인요
+    button
+      i.fas.fa-search
 
   //- videoController.js의 search 함수 코드에서 keyword 검색결과가 searchResults에 담겨 search.pug로 render 되도록 함
   //- [Pug 문법] array (즉, searchResults)에 담긴 검색결과를 mixin 지정해 놓은 템플릿 코드에 넣어서 페이지에 보여줌
-  div
+    
+  //- div
+  //- #10.2 Styles Part Two 깃헙강의코드북붙했으니재확인요
+  div.video-grid
+
     each searchedVideoItem in searchResults
       //- [Pug 문법] include mixins/video 로부터 자체 제작 및 작명한 mixin 모델인 videoMixin 모델을 +videoMixin(파라미터명) 형태의 Pug 문법으로 불러와 재사용함
       +videoMixin(searchedVideoItem)
+      //- #10.2 Styles Part Two 깃헙강의코드북붙했으니재확인요
+      //- [Pug 문법] 주석 내용 들여쓰기 더 안했더니 unexpected token "else"
+    else
+      span.empty__message No videos found 

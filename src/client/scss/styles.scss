@@ -1,10 +1,45 @@
 // [ WebPack 문법 & SCSS 문법 ] /client/scss/styles.scss 파일을 /src/client/js/main.js 로 import 해야함
 // [ SCSS 문법 ] styles.scss 가 참조하는 변수 값 모음
-@import './_variables';
+
+// --- Config ---
+@import './config/_variables';
+// [ CSS - reset css ] 모든 설정을 0 으로 되돌림(즉, padding, margin 등의 모든 값이 0 )
+@import './config/_reset';
+
+// --- Components ---
+@import './components/header';
+@import "./components/footer.scss";
+@import "./components/video.scss";
+@import "./components/shared.scss";
+@import "./components/forms.scss";
+@import "./components/social-login.scss";
+
+// --- Screens ---
+@import "./screens/search.scss";
+@import "./screens/profile.scss";
+@import "./screens/edit-profile.scss";
+
+// --- Defaults ---
 
 body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   // [ SCSS 문법 ] $변수명
-  background-color: $color-bg;
-      // color: white;
-  color: $color;
+  background-color: $bg;
+  color: white;
+
+  // [ SCSS 문법 ] 일반 CSS 문법인 body a {} 형식 대신에 코드 적듯이 body { a { } } 형식으로 CSS 작업 가능
+  a {
+    // [ CSS ] 하이퍼링크 색상 제거 color: inherit;
+    color: inherit;
+    // [ CSS ] 하이퍼링크 밑줄 제거 text-decoration: none;
+    text-decoration: none;
+  }
 }
+
+main {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 50px;
+}
+

@@ -2,22 +2,32 @@
 //- [Pug 문법] mixin 모델 자체 제작하는 문법은 mixin 작명한mixin모델명(파리미터명) 형태로 만들어야 함
 //- [Pug 문법] 예시) include mixins/video 경로와 같이 자체 제작 및 작명한 mixin 모델인 videoMixin 모델을 +videoMixin(파라미터명) 형태의 Pug 문법으로 불러와 재사용함
 mixin videoMixin(videoItem)
-  div 
+
+  //- #10.2 Styles Part Two 깃헙강의코드북붙했으니재확인요
+  a(href=`/videos/${videoItem.id}`).video-mixin
+    div.video-mixin__thumb
+    div.video-mixin__data
+        span.video-mixin__title=videoItem.title
+        div.video-mixin__meta
+            span #{videoItem.owner.name} • 
+            span #{videoItem.meta.views} 회
+
+  //- div 
     
-    h4
-      //- [ Pug 문법 ] 비디오 목록의 비디오 타이틀을 클릭하면 해당 비디오 상세페이지로 이동하도록 함
-      //- [ Pug 문법 ] ${ } 기호 사용하는 Pug 문법은 attribute에는 사용가능. variable과 텍스트를 섞어서 표현할 때는 사용불가 (즉, #{ })
-      a(href=`/videos/${videoItem.id}`)=videoItem.title
+  //-   h4
+  //-     //- [ Pug 문법 ] 비디오 목록의 비디오 타이틀을 클릭하면 해당 비디오 상세페이지로 이동하도록 함
+  //-     //- [ Pug 문법 ] ${ } 기호 사용하는 Pug 문법은 attribute에는 사용가능. variable과 텍스트를 섞어서 표현할 때는 사용불가 (즉, #{ })
+  //-     a(href=`/videos/${videoItem.id}`)=videoItem.title
 
-      p=videoItem.description
+  //-     p=videoItem.description
 
-      ul
-        each hashtag in videoItem.hashtags
-          li=hashtag
+  //-     ul
+  //-       each hashtag in videoItem.hashtags
+  //-         li=hashtag
       
-      small=videoItem.createdAt
+  //-     small=videoItem.createdAt
       
-      hr
+  //-     hr
 
                 //- ul
                 //-   //- [ Pug 문법 ] #{ } 기호 사용하는 Pug 문법은 attribute에는 사용불가(즉, ${ }). variable과 텍스트를 섞어서 표현할 때는 사용가능
