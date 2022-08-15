@@ -34,5 +34,10 @@ html(lang="ko")
       //- [ CSS & /client/scss/ ] Pug 전용 /views 폴더에서 mixins 폴더나 partials 폴더 내에 생성한 파일명과 동일한 이름으로 SCSS 쪽에도 (즉, /client/scss/components/ 쪽에도) 파일을 만들어 놓은 후에 CSS 작업요 
       include partials/footer.pug
       
-      //- [ WebPack & Pug 문법 ] base.pug 가 bundle 처리된 /assets/js/main.js 파일을 불러올 수 있도록 연결해야 함 script(src='/static/js/main.js')
-      script(src='/static/js/main.js')
+          //- [ WebPack & Pug 문법 ] base.pug 가 bundle 처리된 /assets/js/main.js 파일을 불러올 수 있도록 연결해야 함 script(src='/static/js/main.js')
+          //- script(src='/static/js/main.js')
+
+    //- [ WebPack 문법 ] ★★★★★ entry 진입점 항목을 다원화 하여 output 항목의 설정대로 bundle 처리되는 코드 파일을 다원화 하는 이유는 예- videoPlayer 기능에 관한 코드는 검색 페이지 화면에서 로드 될 필요가 없고 영상 시청 페이지 화면에서만 로드되면 되기 때문(즉, 비디오 페이지에 갔을 때만 비디오 플레이어 코드를 로드 시킴)
+    //- [ WebPack 문법 & Pug 문법 ] ★★★★★ webpack.config.js 에서 bundle 처리된 코드 결과물이 브라우저단에 반영된 상태는 아니므로 pug페이지들에 html 기본 구성 골격을 리턴해 주는 extends base.pug 파일 내에서 block 태그(예- block scripts)를 만들어 각 pug페이지별 용도에 맞게 script(src="") 형식의 코드를 통해 목적에 맞는 bundle 처리된 코드를 pug 페이지 내로 불러와야 함
+    //- [Pug 문법] block을 통해 base.pug 레이아웃 기반으로 html 내용 재구성
+    block scripts

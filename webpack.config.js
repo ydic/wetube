@@ -53,7 +53,7 @@ module.exports = {
   // [ mini-css-extract-plugin 문법 ] https://www.npmjs.com/package/mini-css-extract-plugin
   // [ mini-css-extract-plugin & WebPack 문법 ] filename 속성에 폴더명 표기를 더하여 변환 처리된 파일 결과물의 저장 경로를 재구성 하려는 경우, 기존의 assets 폴더는 지운 상태에서 npm run assets 실행요
   // [ mini-css-extract-plugin 문법 & SCSS 문법 ] CSS 를 추출해서 별도의 파일로 만들기 위해서 style-loader 대신에 MiniCssExtractPlugin.loader 으로 대체하여 사용함
-  // [ WebPack 문법 ] /assets/js/main.js 코드 내의 CSS 속성을 다루는 주체는 CSS 가 아닌 Javascript 이며, CSS 파일은 별도로 다른 곳에 만듦(즉, plugins: [new MiniCssExtractPlugin({ filename: 'css/styles.css', } )] 통해서 /asset/css/styles.css 경로 형태로 CSS 파일 만듦)
+  // [ WebPack 문법 ] /assets/js/main.js 코드 내의 CSS 속성을 다루는 주체는 CSS 가 아닌 Javascript 이며, CSS 파일은 별도로 다른 곳에 만듦(즉, plugins: [new MiniCssExtractPlugin({ filename: 'css/styles.css', } )] 통해서 /assets/css/styles.css 경로 형태로 CSS 파일 만듦)
   // [ mini-css-extract-plugin 문법 & WebPack 문법 ] 즉, output : { filename: "main.js" } 로 파일명만 설정했던 기존 속성에 폴더명 표기를 더한 output : { filename: "js/main.js" } 형태로 기재하여 bundle 처리된 main.js 를 /assets/js/main.js 에 위치시킴
   // [ mini-css-extract-plugin 문법 ] webpack.config.js 의 module.export = { plugins: [new MiniCssExtractPlugin()] } 함수 내에 폴더명 표기를 더한 filename: "css/styles.css" 형태로 기재하여 styles.css 를 /assets/css/styles.css 에 위치시킴
   //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] webpack.config.js 에서의 configuration 설정으로 인해 변환 처리된 CSS 파일을 mini-css-extract-plugin 통해서 /assets/css/styles.css 경로에 위치하도록 만든 후 해당 CSS 를 브라우저단의 Pug 템플릿에 연결시킴
@@ -64,8 +64,15 @@ module.exports = {
     }),
   ],
 
-  // [ WebPack 문법 ] entry 항목에는 WebPack 통해 변형시키려는 원본 소스 코드의 경로를 기재함
-  entry: "./src/client/js/main.js",
+  // [ WebPack 문법 ] entry 항목에는 WebPack 통해 변형시키려는 원본 소스 코드(즉, bundle 처리 되기 전인 코드)의 경로를 기재함
+        // entry: "./src/client/js/main.js",
+  entry: {
+
+    // [ WebPack 문법 ] ★★★★★ entry 진입점 항목을 다원화 하여 output 항목의 설정대로 bundle 처리되는 코드 파일을 다원화 하는 이유는 예- videoPlayer 기능에 관한 코드는 검색 페이지 화면에서 로드 될 필요가 없고 영상 시청 페이지 화면에서만 로드되면 되기 때문(즉, 비디오 페이지에 갔을 때만 비디오 플레이어 코드를 로드 시킴)
+    // [ WebPack 문법 ] 즉, 여러 다른 파일들을 WebPack 으로 포함시키는 방법에 해당함
+    main: "./src/client/js/main.js",
+    videoPlayer: "./src/client/js/videoPlayer.js"
+  },
 
   // [ WebPack 문법 ] 실제 배포시에는 mode: "production" 으로 설정요 / 개발시에는 mode: "development" 설정하여 압축되지 않은 코드 형태로 코드를 다룰 수 있음
   mode: "development",
@@ -85,10 +92,20 @@ module.exports = {
     // [ mini-css-extract-plugin 문법 ] webpack.config.js 의 module.export = { plugins: [new MiniCssExtractPlugin()] } 함수 내에 폴더명 표기를 더한 filename: "css/styles.css" 형태로 기재하여 styles.css 를 /assets/css/styles.css 에 위치시킴
     //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] webpack.config.js 에서의 configuration 설정으로 인해 변환 처리된 CSS 파일을 mini-css-extract-plugin 통해서 /assets/css/styles.css 경로에 위치하도록 만든 후 해당 CSS 를 브라우저단의 Pug 템플릿에 연결시킴
     //- [ mini-css-extract-plugin 문법 & WebPack 문법 & Pug 문법 ] client 폴더의 파일은 WebPack 에 의해서만 로딩 가능함 / assets 폴더의 파일은 사용자, Pug, 브라우저에 의해서만 로딩 가능함
-    filename: "js/main.js",
 
-    // [ WebPack 문법 ] Invalid configuration object. configuration.output.path: The provided value "./assets/js" is not an absolute path!
-    // path: './assets/js'
+    // [ WebPack 문법 ] ★★★★★ entry 진입점 항목을 다원화 하여 output 항목의 설정대로 bundle 처리되는 코드 파일을 다원화 하는 이유는 예- videoPlayer 기능에 관한 코드는 검색 페이지 화면에서 로드 될 필요가 없고 영상 시청 페이지 화면에서만 로드되면 되기 때문(즉, 비디오 페이지에 갔을 때만 비디오 플레이어 코드를 로드 시킴)
+    // [ WebPack 문법 ] 단일했던 entry 진입점 항목(즉, entry: "./src/client/js/main.js", )을 다원화 시킨 상태로 webpack 코드 재실행(즉, npm run dev:assets)하면 여러 코드에 대해 동일한 파일명으로 assets (즉, bundle 처리된 코드)를 생성했다는 오류 발생 
+    // [ WebPack 문법 ] [webpack-cli] Error: Conflict: Multiple chunks emit assets to the same filename js/main.js (chunks main and videoPlayer)
+    // [ WebPack 문법 ] https://webpack.js.org/configuration/output/
+    // [ WebPack 문법 ] output 항목 속 filename 항목에 [name] 이라는 문법을 적용한 filename: "js/[name].js", 표기법을 통해 entry 항목에서 지정한 파일명대로 각각 bundle 처리된 코드 결과물이 assets/js/ 디렉토리에 생성되도록 함
+    // [ WebPack 문법 ] 즉, 여러 다른 파일들을 WebPack 으로 포함시키는 방법에 해당함
+    // [ WebPack 문법 & Pug 문법 ] ★★★★★ webpack.config.js 에서 bundle 처리된 코드 결과물이 브라우저단에 반영된 상태는 아니므로 pug페이지들에 html 기본 구성 골격을 리턴해 주는 extends base.pug 파일 내에서 block 태그(예- block scripts)를 만들어 각 pug페이지별 용도에 맞게 script(src="") 형식의 코드를 통해 목적에 맞는 bundle 처리된 코드를 pug 페이지 내로 불러와야 함
+
+              // filename: "js/main.js",
+    filename: "js/[name].js",
+
+              // [ WebPack 문법 ] Invalid configuration object. configuration.output.path: The provided value "./assets/js" is not an absolute path!
+              // path: './assets/js'
     // [ Github 라이브러리 문법 ] .gitignore 에 /assets 표기함
     // [ WebPack 문법 ] 주의! 폴더명 assets 는 본 실습을 위해 작명됨
     // [ WebPack 문법 ] output 의 path 항목에는 변형 처리 결과물을 저장할 경로를 지정해야 함
@@ -96,7 +113,7 @@ module.exports = {
     // [ Nodejs 문법 ] path.resolve() 는 파트들을 모아서 경로를 만들어 줌
     // [ Nodejs 문법 ] __dirnmae 통해서 코드파일 자신이 위치한 파일 경로를 알 수 있음
     // [ mini-css-extract-plugin 문법 ] mini-css-extract-plugin 이 생성된 CSS 파일(즉, /assets/js/main.css)을 output 과 같은 위치인 assets/js/ 경로에 두고 있음
-    // path: path.resolve(__dirname, "assets", "js"),
+              // path: path.resolve(__dirname, "assets", "js"),
     path: path.resolve(__dirname, "assets"),
 
     // [ WebPack 문법 ] WebPack 을 재시작하는 경우(즉, npm run dev:assets)에 한하여 ouput 폴더(여기서는 /assets )를 build 시작 전에 삭제(즉, clean) 시켜줌

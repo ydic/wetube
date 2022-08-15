@@ -12,6 +12,7 @@ block content
   //- [ Multer 라이브러리 연계 문법 & Express 문법 ★★★] video(src=video.fileUrl) 로 작성하면 상대경로(즉, /videos/uploads/videos/랜덤파일명) 처리되므로 video(src='/' + video.fileUrl) 로 작성하여 절대경로 (즉, /uploads/videos/랜덤파일명) 처리되도록 해야함(Multer 를 통한 파일 저장경로가 video/uploads/videos 가 아니라 uploads/videos 이기 때문)
   video(src='/' + video.fileUrl, controls)
 
+//- 일시적으로 주석처리함220815
   //- [ Pug 문법 + JavaScript문법 ] 삼항연산자를 활용해 영문법 단수view / 복수views 단위 구분함
             //- h3 #{video.views} #{video.views < 2 ? "view" : "views"}
   div
@@ -46,4 +47,11 @@ block content
     a(href=`${video.id}/edit`) Edit Video &rarr;
     br
     a(href=`${video.id}/delete`) Delete Video &rarr;
-  
+
+//- [ WebPack 문법 & Pug 문법 ] ★★★★★ webpack.config.js 에서 bundle 처리된 코드 결과물이 브라우저단에 반영된 상태는 아니므로 pug페이지들에 html 기본 구성 골격을 리턴해 주는 extends base.pug 파일 내에서 block 태그(예- block scripts)를 만들어 각 pug페이지별 용도에 맞게 script(src="") 형식의 코드를 통해 목적에 맞는 bundle 처리된 코드를 pug 페이지 내로 불러와야 함
+//- 본 구간에서 들여쓰기 하면 본 위치 상단에 적힌 코드인 block content 에 종속되는 block scripts 가 되어버리므로 들여쓰기 없어야 함
+//- [Pug 문법] block을 통해 base.pug 레이아웃 기반으로 html 내용 재구성
+block scripts
+  //- [ WebPack & 시큐어 보안 코딩 & Express 라이브러리 문법 ] webpack.config.js 설정을 마쳤다면 server.js 에서 express.static('노출시키려는 폴더명') 코드로 Express를 통해 assets 폴더 공개하기 (즉, 기본적으로 폴더들은 비공개이므로)
+  //- [ WebPack & 시큐어 보안 코딩 & Express 라이브러리 문법 ] /static/어쩌구 페이지 주소로 접근 요청할 경우 server.js 에서 설정해 놓은 assets app.use("/static", express.static("assets")); 라우터에 의해 assets 폴더가 공개되어 있으므로 그 폴더로 접근시켜줌
+  script(src="/static/js/videoPlayer.js")
