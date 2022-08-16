@@ -12,6 +12,15 @@ block content
   //- [ Multer 라이브러리 연계 문법 & Express 문법 ★★★] video(src=video.fileUrl) 로 작성하면 상대경로(즉, /videos/uploads/videos/랜덤파일명) 처리되므로 video(src='/' + video.fileUrl) 로 작성하여 절대경로 (즉, /uploads/videos/랜덤파일명) 처리되도록 해야함(Multer 를 통한 파일 저장경로가 video/uploads/videos 가 아니라 uploads/videos 이기 때문)
   video(src='/' + video.fileUrl, controls)
 
+  div
+    button#playBtn Play
+    button#muteBtn Mute 
+    span#time 00:00/00:00
+
+    //- [ SCSS 문법 & CSS 문법 ] src/client/scss/forms.scss 내에서 input 태그에 관한 속성 적용 범위를 input:not(input[type="range"]), 어쩌구 { 생략 } 형태로 수정함
+    //- [ SCSS 문법 & CSS 문법 ] input:not() 문법 통해서 input[type="range"] 인 input 태그는 적용 배제하고 input[type="submit"] 인 input 태그에 한하여 적용시킴
+    input(type='range', step='0.1', min='0', max='1')#volume
+
 //- 일시적으로 주석처리함220815
   //- [ Pug 문법 + JavaScript문법 ] 삼항연산자를 활용해 영문법 단수view / 복수views 단위 구분함
             //- h3 #{video.views} #{video.views < 2 ? "view" : "views"}

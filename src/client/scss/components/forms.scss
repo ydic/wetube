@@ -1,6 +1,7 @@
 form {
   max-width: 420px;
   margin: 0 auto;
+
   &:not(.search__form) {
     padding: 30px;
     background-color: rgba($color: $bg, $alpha: 0.7);
@@ -9,6 +10,8 @@ form {
   }
 }
 
+// [ SCSS 문법 & CSS 문법 ] /src/client/scss/forms.scss 내에서 input 태그에 관한 속성 적용 범위를 input:not(input[type="range"]), 어쩌구 { 생략 } 형태로 수정함
+// [ SCSS 문법 & CSS 문법 ] input:not() 문법 통해서 input[type="range"] 인 input 태그는 적용 배제하고 input[type="submit"] 인 input 태그에 한하여 적용시킴
 input:not(input[type="range"]),
 input[type="submit"] {
   all: unset;
@@ -20,6 +23,7 @@ input[type="submit"] {
   font-size: 16px;
   color: white;
   width: 90%;
+
   &::placeholder {
     color: rgba(255, 255, 255, 0.7);
   }
@@ -29,15 +33,22 @@ input[type="submit"],
 .social__btn {
   border-radius: 5px;
   padding: 12px 20px;
+
+  // [ SCSS 문법 & CSS 문법 ] CSS는 같은 속성을 여러 번 정의했을 때, 가장 나중에 설정한 값이 적용됩니다. 
+  // [ SCSS 문법 & CSS 문법 ] 속성값 뒤에 !important를 붙이면 가장 나중에 설정한 값이 적용되지 않도록 보호해 줍니다.
+  // [ SCSS 문법 & CSS 문법 ] 다시 속성값을 재설정하고 싶으면 !important를 다시 붙입니다. 
   background-color: white !important;
   color: rgba($color: $red, $alpha: 1) !important;
   text-align: center !important;
+
   cursor: pointer;
   display: block;
   border: none;
+
   &:focus {
     outline: none;
   }
+
   &:disabled {
     opacity: 0.5;
     pointer-events: none;
