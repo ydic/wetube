@@ -7,10 +7,10 @@
 const playBtn = document.querySelector('#playBtn');
 const muteBtn = document.querySelector('#muteBtn');
 const time = document.querySelector('#time');
-const volume = document.querySelector('#volume');
+const volumeRange = document.querySelector('#volumeRange');
 const video = document.querySelector('video');
 
-// console.log(playBtn,  muteBtn,  time,  volume, video);
+// console.log(playBtn,  muteBtn,  time,  volumeRange, video);
 
 const handlePlayClick = (e) => {
   // [ Web API 문법 ] https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
@@ -18,19 +18,41 @@ const handlePlayClick = (e) => {
   if(video.paused){
     video.play(); // 메서드
     
-          // [ Web API 문법 ] function 내에서 텍스트 변경해도 되지만 본 실습에서는 이벤트리스너를 활용함
+          // [ Web API 문법 ] OLD코드--- function 내에서 텍스트 변경해도 되지만 본 실습에서는 이벤트리스너를 활용함 (즉, 하나의 function 이 하나의 일만 하도록 코드 만들기)
+          // [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함 
           // playBtn.innerText = 'Pause';
   } else {
     video.pause(); // 메서드 Pauses the media playback.
     
-          // [ Web API 문법 ] function 내에서 텍스트 변경해도 되지만 본 실습에서는 이벤트리스너를 활용함
+          // [ Web API 문법 ] OLD코드--- function 내에서 텍스트 변경해도 되지만 본 실습에서는 이벤트리스너를 활용함 (즉, 하나의 function 이 하나의 일만 하도록 코드 만들기)
+          // [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
           // playBtn.innerText = 'Play';
   }
+
+  // [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
+  playBtn.innerText = video.paused ? 'Play' : 'Pause'
 }
 
-// [ Web API 문법 ] function 내에서 button 태그에 대한 텍스트 변경해도 되지만 본 실습에서는 이벤트리스너를 활용함
-const handlePause = () => playBtn.innerText = 'Play';
-const handlePlay = () => playBtn.innerText = 'Pause';
+// [ Web API 문법 ] OLD코드--- function 내에서 button 태그에 대한 텍스트 변경해도 되지만 본 실습에서는 이벤트리스너를 활용함
+// [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
+// const handlePause = () => playBtn.innerText = 'Play';
+// const handlePlay = () => playBtn.innerText = 'Pause';
+
+const handleMuteClick = () => {
+  if(video.muted){
+    video.muted = false;
+    // muteBtn.innerText = 'Mute';
+
+  } else {
+    video.muted = true;
+    // muteBtn.innerText = 'Unmute';
+
+  }
+
+  // [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
+  muteBtn.innerText = video.muted ? 'Unmute' : 'Mute';
+  volumeRange.value = video.muted ? 0 : 0.5;
+}
 
 playBtn.addEventListener('click', handlePlayClick);
 
@@ -38,5 +60,8 @@ playBtn.addEventListener('click', handlePlayClick);
 // [ Web API 문법 ] 이벤트리스너에서 감지할 수 있는 이벤트 중에는 pause 이벤트와 play 이벤트도 있음
 // [ Web API 문법 ] https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
 // [ Web API 문법 ] puase 이벤트에 대한 설명- Fired when a request to pause play is handled and the activity has entered its paused state, most commonly occurring when the media's HTMLMediaElement.pause() method is called.
-video.addEventListener('pause', handlePause);
-video.addEventListener('play', handlePlay);
+// video.addEventListener('pause', handlePause);
+// video.addEventListener('play', handlePlay);
+// [ Web API 문법 ] OLD코드--- function 내에서 button 태그에 대한 텍스트 변경해도 되지만 본 실습에서는 이벤트리스너를 활용함
+// [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
+muteBtn.addEventListener('click', handleMuteClick);

@@ -1,5 +1,10 @@
 import express from "express";
 
+//////////////////////////////////////////////////////////////////
+//// 221006 yd 자체 보완(Not mongoose)(현재 주석처리) ////////////
+/////////////////////////////////////////////////////////////////
+// import {watch, getEdit, postEdit, getUpload, postUpload, deleteVideo, deleteVideoElementFromUser} from "../controllers/videoController.js"
+
 // import 하기 전에 export 처리 먼저 해주어야 함
 import {watch, getEdit, postEdit, getUpload, postUpload, deleteVideo} from "../controllers/videoController.js"
 import { videoUpload, protectorMiddleware } from '../middlewares.js';
@@ -35,6 +40,12 @@ videoRouter.get('/:id([0-9a-f]{24})', watch);
 // [ 코드 연계성 ] video model과 user model을 연결(즉, videoController 에서 video 마다 소유자를 지정해 소유자(wetube db 계정이 있고, 로그인 상태인 사용자 - 즉, middlewares.js 의 protectorMiddleware 함수에 부합하는 사용자)에게만 video 업로드 권한 부여, 해당 소유자가 아니라면 video 수정 및 삭제 권한 접근제한)
 videoRouter.route('/:id([0-9a-f]{24})/edit').all(protectorMiddleware).get(getEdit).post(postEdit);
 videoRouter.route('/:id([0-9a-f]{24})/delete').all(protectorMiddleware).get(deleteVideo);
+
+//////////////////////////////////////////////////////////////////
+//// 221006 yd 자체 보완(Not mongoose)(현재 주석처리) ////////////
+/////////////////////////////////////////////////////////////////
+// videoRouter.route('/:id([0-9a-f]{24})/delete').all(protectorMiddleware).get(deleteVideoElementFromUser, deleteVideo);
+
 
 videoRouter.route('/upload').all(protectorMiddleware).get(getUpload).post(videoUpload.single('videoByMulter'), postUpload);
 

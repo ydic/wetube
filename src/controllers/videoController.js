@@ -236,6 +236,23 @@ export const postEdit = async (req, res) => {
 
   console.log(req.body);
   return res.redirect(`/videos/${idVideo}`);
+
+    /* 
+    // Dear professor!
+    // In the postEdit function, I used res.render('watch', ~) instead of return res.redirect(`/videos/${idVideo}`);
+    // I thought it also showed the updated information like when I used res.redirect(), but it didn't.
+    // In the video collection, the information was updated successfully. However, the updated information isn't shown at all in the browser when I use res.render() instead of res.redirect(). It only shows the information before being updated.
+    // I don't know What I am missing. Please help me~ 
+    // hashtags: Video.formatHashtags(hashtags) })
+    // ★★★★★★★ 
+    // That is because by default findByIdAndUpdate will return the old model.
+    // hashtags: Video.formatHashtags(hashtags) }, { new: true })
+    // You can do this and it will return the newest updated version:
+    const video = await Video.findByIdAndUpdate(id, { 
+      title, description, 
+      hashtags: Video.formatHashtags(hashtags) }, { new: true })
+    res.render('watch', { pageTitle: `Watch: ${video.title}`, video})
+    */
 };
 
 // [ Express 문법 ] express 스스로는 form의 body를 처리할 줄 모름. express.urlencode() 내장함수를 통해 express에게 form을 처리하고 싶다고 알려줘야 함
@@ -350,6 +367,40 @@ export const postUpload = async (req, res) => {
     });
   }
 };
+
+/*
+//////////////////////////////////////////////////////////////////
+//// 221006 yd 자체 보완(Not mongoose)(현재 주석처리) ////////////
+/////////////////////////////////////////////////////////////////
+// [ 클론코딩 허점 보완요 ★★★ ] #8.14 deleteVideo 에서 User 의 videos 에서도 제거해주는 게 나을 듯요? 에러는 안 날 것 같긴 한데
+// [ 클론코딩 허점 보완요 ★★★ ] #8.14 음 그러게요 delete 해도 에러는 안나는데 Users DB에 남아있는게 거슬리네요
+export const deleteVideoElementFromUser = async(req, res, next) => {
+  const { id } = req.params;
+  
+  const video = await Video.findById(id)
+
+  const user = await User.findById(video.owner)
+
+  let videosArr = user.myUploadedVideos;
+  console.log('user.myUploadedVideos ------------', user.myUploadedVideos)
+  
+  console.log('videoArr ------- BEFORE ---------', videosArr)
+
+  for(let i = 0; i < videosArr.length; i++){ 
+    if ((videosArr[i]).toString() === (video._id).toString()) { 
+      videosArr.splice(i, 1); 
+      i--; 
+    }
+  }
+
+  console.log('videoArr ------- AFTER ---------', videosArr)
+
+  await User.findByIdAndUpdate(user._id, { myUploadedVideos: videosArr})
+
+  next()
+}
+*/
+
 
 // [ 클론코딩 허점 보완요 ★★★ ] #8.14 deleteVideo 에서 User 의 videos 에서도 제거해주는 게 나을 듯요? 에러는 안 날 것 같긴 한데
 // [ 클론코딩 허점 보완요 ★★★ ] #8.14 음 그러게요 delete 해도 에러는 안나는데 Users DB에 남아있는게 거슬리네요

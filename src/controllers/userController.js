@@ -2,6 +2,7 @@
 // express 엔진은 NodeJS를 실행시켜주는 package.json 파일 위치(cwd) 기준으로 views 폴더(src/views)를 바라보기 때문에 별도의 import, export 불필요
 
 // User.js에서 export default User; 한 것을 import 함
+// import User, { hashingPassword } from '../models/User';
 import User from "../models/User";
 // import Video from '../models/video';
 
@@ -80,6 +81,8 @@ export const postJoin = async (req, res) => {
       email,
       username,
       password,
+      // password: await User.hashingPassword(password),
+      // password: hashingPassword(password),
       location,
     });
 
@@ -208,6 +211,9 @@ export const finishGithubLogin = async (req, res) => {
       method: "POST",
       // [ Github OAuth API 문법 ] 권한 부여 가이드 페이지(2. Users are redirected back to your site by GitHub)에서 지정한 accept 파라미터 사용법임. You can also receive the response in different formats if you provide the format in the Accept header.
       headers: {
+        // Content-Type 헤더와 Accept 헤더 둘 다 데이터 타입(MIME)을 다루는 헤더이다. 
+        // 하지만  Content-Type 헤더는 현재 전송하는 데이터가 어떤 타입인지에 대한 설명을 하는 개념이고 
+        // Accept 헤더는 클라이언트가 서버에게 어떤 특정한 데이터 타입을 보낼때 클라이언트가 보낸 특정 데이터 타입으로만 응답을 해야한다. 
         Accept: "application/json",
       },
     })
@@ -573,9 +579,25 @@ export const postChangePassword = async (req, res) => {
     });
   }
 
+  // 버전 AAA postChangePassword WITHOUT PRE('SAVE', ) ★★★★★★★★★★★★★★★★★★
+  // const passwordUpdatedUser = await User.findByIdAndUpdate(_id, { password: await User.hashingPassword(newPassword) }, { new: true})
+  // console.log('pohstChangePassword --- passwordUpdatedUser ----', passwordUpdatedUser)
+  // req.session.loggedInUser.password = passwordUpdatedUser.password;
+  // console.log('req.session.loggedInUser = passwordUpdatedUser --------', req.session.loggedInUser)
+
+  // 버전 BBB postChangePassword WITH PRE('SAVE', ) ★★★★★★★★★★★★★★★★★★
+  const passwordUpdatedUser = await User.findByIdAndUpdate(_id, { password: newPassword }, { new: true})
+  await passwordUpdatedUser.save()
+  req.session.loggedInUser.password = passwordUpdatedUser.password;
+
+  // 버전 CCC postChangePassword WITH PRE('SAVE', ) ★★★★★★★★★★★★★★★★★★
+  // const existingUser = await User.findById({_id})
+  // existingUser.password = newPassword;
+  // await existingUser.save();
+  // req.session.loggedInUser.password = existingUser.password;
+
   // 작업 05단계: [ Express-session & Mongoose & Bcrpyt 연계 문법 ] userController.js 의 postChangePassword 함수 내에서 session 속에 들어있는 사용자 식별값인 _id 값을 불러와서 그 사용자의 password 값에 newPassword 값을 대입해 비밀번호를 변경함
   // 방식A - 로그인한 사용자의 session 으로부터 사용자를 식별해 password 값에 newPassword 값을 대입하고자 await User.findById(_id) 코드로 wetube DB 검색함
-  // const user = await User.findById(_id);
   console.log("old password -----", user.password);
   user.password = newPassword;
 

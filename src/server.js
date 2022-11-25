@@ -19,7 +19,6 @@ import rootRouter from "./routers/rootRouter";
 import userRouter from "./routers/userRouter";
 import videoRouter from "./routers/videoRouter";
 import { localsMiddleware } from "./middlewares";
-import { application } from "express";
 
 // const express = require('express');
 const app = express();
@@ -47,6 +46,7 @@ app.use(logger);
 // [ Express 문법 ] express 스스로는 form의 body(즉, value)를 처리할 줄 모름.
 // [ Express 문법 ] route들을 사용하기 전에 middleware를 사용해야 함
 // [ Express 문법 ] server.js에서 express.urlencoded() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
+// [ express ] This object will contain key-value pairs, where the value can be a string or array (when extended is false), or any type (when extended is true).
 app.use(express.urlencoded({ extended: true }));
 
 // console.log('server.js ------', process.env.COOKIE_SECRET);
@@ -82,11 +82,16 @@ app.use(
 
     // [ Express-session 라이브러리 연계 문법 ] cookie: { maxAge: 1/1000초 단위 } 설정으로 쿠키 유지 기간 설정 가능
     // cookie: {
-    //   maxAge: 10000,
-    // }
-  })
-);
+      //   maxAge: 10000,
+      // }
+    })
+  );
 
+// [ Express-session 라이브러리 연계 문법 ] locals를 통해 누가 로그인했는지 공유함 (Pug와 Express가 서로 res.locals 값을 공유할 수 있도록(즉, res.render 없이도 Pug 템플릿 쪽으로 변수롤 전역적으로 보낼 수 있음) 기본 설정되어 있음)
+// 주의: server.js에서 localsMiddleware가 코드 순서상 Express-session middleware ( 즉, app.use(session({}) )다음에 오기 때문에 가능함
+// 주의: middlewares.js의 localMiddleware 함수는 session 오브젝트를 받아와야 그 값을 기반으로 res.locals. 값을 생성해 Pug 템플릿에서도 전역으로 값을 받아와 사용 가능해짐
+app.use(localsMiddleware);
+    
 // [ Express-session 라이브러리 연계 문법 ] session을 메모리에 저장하는 경우, 서버 재시작하면 req.sessionStore.all((error, sessions) => {}) 코드에 잡히는 모든 세션 로그값이 휘발되어 버림 (따라서 back-end가 session을 기억(? req에 담긴 cookie)하도록 session을 MongoDB와 연결요)
 /*
         app.use((req, res, next) => {
@@ -104,10 +109,8 @@ app.use(
         })
         */
 
-// [ Express-session 라이브러리 연계 문법 ] locals를 통해 누가 로그인했는지 공유함 (Pug와 Express가 서로 res.locals 값을 공유할 수 있도록(즉, res.render 없이도 Pug 템플릿 쪽으로 변수롤 전역적으로 보낼 수 있음) 기본 설정되어 있음)
-// 주의: server.js에서 localsMiddleware가 코드 순서상 Express-session middleware ( 즉, app.use(session({}) )다음에 오기 때문에 가능함
-// 주의: middlewares.js의 localMiddleware 함수는 session 오브젝트를 받아와야 그 값을 기반으로 res.locals. 값을 생성해 Pug 템플릿에서도 전역으로 값을 받아와 사용 가능해짐
-app.use(localsMiddleware);
+
+
 
 // route들을 사용하기 전에 middleware를 사용해야 함
 app.use("/", rootRouter);

@@ -97,7 +97,7 @@ export const postEdit = (req, res) => {
   
   // [ Express 문법 ] express 스스로는 form의 body(즉, value)를 처리할 줄 모름. 
   // [ Express 문법 ] route들을 사용하기 전에 middleware를 사용해야 함
-  // [ Express 문법 ] server.js에서 express.urlencoded() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
+  // [ Express 문법 ] server.js에서 express.urlencoded() 내장함수를 middleware로써 기능하도록 app.use(express.urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
   const titleVideo = req.body.titleVideoInput;
   
   // [ 주의 : mutation, Javascript, object 작동원리 ] Javascript에서 가짜 DB가 실제로 업데이트되지는 않음(즉, 서버 재시작하면 메모리 휘발). 단지, 코드 논리로는 아래 코드와 같이 작성하면 가짜 DB인 fakeArrayVideos에 사용자가 바꾼 제목으로 title이 바뀌어짐

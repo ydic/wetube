@@ -47,7 +47,7 @@ const videoSchema = new mongoose.Schema({
           videoSchema.pre('save', async function(){
             // [ Javascript 문법 ] .split(), .map() 내장함수 체이닝 하지 않은 hashtags에는 사용자가 쉼표(,)로 구분해 입력한 값들이 ['a,b,c']와 같은 array[0] 값(1 string element)으로만 처리 됨
             // 주의 : 본 Middleware 코드(즉, VideoSchema.pre())는 upload 작업에만 유효하므로 edit(즉, update) 작업을 위한 Middleware가 하나 더 필요함
-            // 즉, input에 입력된 값이 하나의 emelment로 array에 입력되기 때문에 그 하나의 element(예- ['a,b,c'])를 .split().map() 내장함수를 체이닝시켜서 여러 element를 가진 array로 변환(예- ['a','b','c'])시켜야 함
+            // 즉, input에 입력된 값이 하나의 element로 array에 입력되기 때문에 그 하나의 element(예- ['a,b,c'])를 .split().map() 내장함수를 체이닝시켜서 여러 element를 가진 array로 변환(예- ['a','b','c'])시켜야 함
             this.hashtags = this.hashtags[0].split(',').map((word) => word.startsWith('#') ? word : `#${word}` )
           })
       */

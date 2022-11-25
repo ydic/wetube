@@ -30,6 +30,8 @@ export const localsMiddleware = (req, res, next) => {
   res.locals.loggedInUserDb = req.session.userDbResult || {};
         // console.log('로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult);
   
+console.log('★★★★★★★★ res.locals.loggedInUserDb ///////////////',res.locals.loggedInUserDb )
+
   // * * * * 주의: next()를 호출하지 않으면 웹사이트가 정상 작동하지 않음
   next()
 }
