@@ -10,8 +10,15 @@ const time = document.querySelector('#time');
 const volumeRange = document.querySelector('#volumeRange');
 const video = document.querySelector('video');
 
+// [ Javascript 문법 & Node 문법 ] 브라우저단 input(type='range' value='0.5') 초기값과 같은 맥락에서 서버단에서도 초기값으로 video.volume 을 0.5 라고 설정함
+// [ Javascript 문법 ] let volumeValue; f라는 전역 변수(즉, 직전(또는 현재 실시간 변경되고 있는) video.volume 값 담아놓을 전역 변수)를 만들어 놓고 Mute 처리 전에 volumeRange.value 값을 미리 받아두었다가 Unmute 시에 그 값을 다시 volumeRange.value 에 부여해줌 (이때, volumeRange 마우스로 드래그하여 변경시 음량 변경되지 않으므로 volumeRange.addEventListener('input', 어쩌구) 로 별도 처리함)
+let volumeValue = 0.5;
+video.volume = volumeValue;
+
 // console.log(playBtn,  muteBtn,  time,  volumeRange, video);
 
+
+// ★★★★★ 코드보완요 ----- 영상 재생종료 되더라도 playBtn.innerText 값이 여전히 Pause  라고 표시되고 있으므로 영상 재생종료 시점 감지해 playBtn.innerText 값을 Play 로 변경되로록 코드 보완요
 const handlePlayClick = (e) => {
   // [ Web API 문법 ] https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
   // [ Web API 문법 ] HTMLMediaElement.paused 는 Returns a boolean that indicates whether the media element is paused.
@@ -46,12 +53,75 @@ const handleMuteClick = () => {
   } else {
     video.muted = true;
     // muteBtn.innerText = 'Unmute';
-
+    
   }
 
   // [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
   muteBtn.innerText = video.muted ? 'Unmute' : 'Mute';
-  volumeRange.value = video.muted ? 0 : 0.5;
+
+  // (즉, 음소거 해제시 직전(또는 현재 실시간 변경되고 있는) 볼륨 값으로 video.volume 에 반영하기 위함)
+  volumeRange.value = video.muted ? 0 : volumeValue;
+}
+
+// ★★★★★ 코드보완요 ----- input(type='input' value=0.5) 태그를 움직여 volumeRange.value = 0 되도록 volumeRange.addEventListner('input', 어쩌구) 동작하더라도 muteBtn.innerText 는 여전히 Mute 라고 표시될 뿐, volumeRange.value 값이 0 에 달했으니 Unmute 라고 표시하도록 제어하는 코드는 만들어야 함(코드보완시 기존 값들과 충돌나는데 다른 각도로 접근요)
+/*
+    1. volume을 0으로 설정했을 때 버튼 innerText가 계속 mute 상태인 문제 해결
+    2. volume이 0인 상태에서 Unmute 버튼을 눌러도 mute 상태인 문제 해결
+
+    const clickedMuteBtn = () => {
+    if (video.muted) {
+    video.muted = false;
+    video.volume = 0.5;
+    } else {
+    video.muted = true;
+    video.volume = 0;
+    }
+    muteBtn.innerText = video.muted ? "Unmute" : "Mute";
+    volumeRange.value = video.muted ? 0 : 0.5;
+    };
+
+    const inputVolumeRange = (event) => {
+    const {
+    target: { value },
+    } = event;
+    if (video.muted) {
+    video.muted = false;
+    muteBtn.innerText = "Mute";
+    }
+
+    video.volume = value;
+
+    if (Number(value) === 0) {
+    muteBtn.innerText = "Unmute";
+    video.muted = true;
+    } else {
+    video.muted = false;
+    muteBtn.innerText = "Mute";
+    }
+    };
+*/
+
+const handleVolumeChange = (event)=>{
+
+  // const {
+    //   target: 
+    //     { value }
+    //   } = event;
+
+  // ★★★★★ video.muted = true 상태일 때는 input(type='range' value='어쩌구') 기반으로 .addEventListent('input', 어쩌구) 함수 만들어서 video.volmue 수치를 올리더라도 video.muted = false 라고 변경하기 전까지는 전혀 소리가 나지 않게되므로 주의
+  if(video.muted){
+    video.muted = false;
+    muteBtn.innerText = 'Mute';
+  }
+
+  // 여기서 event.target.value 값을 volumeValue 에 담아놓아야 음소거 해제 됐을 때 전역 변수 초기할당값 let volumeValue = 0.5; 로 무조건 복원되지 않고 음소거 설정하기 전의 볼륨값으로 복원시켜 줄 수 있음
+  volumeValue = event.target.value;
+  
+  // 볼륨 조절할 때의 값을 실시간으로 video.volume 에 반영
+  // (즉, 음소거 해제시 직전(또는 현재 실시간 변경되고 있는) 볼륨 값으로 video.volume 에 반영하기 위함)
+  video.volume = event.target.value;
+
+  console.log(video.muted, video.volume, volumeRange.value, event.target.value);
 }
 
 playBtn.addEventListener('click', handlePlayClick);
@@ -65,3 +135,7 @@ playBtn.addEventListener('click', handlePlayClick);
 // [ Web API 문법 ] OLD코드--- function 내에서 button 태그에 대한 텍스트 변경해도 되지만 본 실습에서는 이벤트리스너를 활용함
 // [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
 muteBtn.addEventListener('click', handleMuteClick);
+
+// [ HTML 문법 & Javascript 문법 ] input(type='range') 형식의 경우 change 이벤트는 마우스로 range 이동과 무관하고 마우스 버튼을 뗄 때 이벤트로 인식되므로 미채택
+// [ HTML 문법 & Javascript 문법 ] input(type='range') 형식의 경우 input 이벤트는 마우스로 range 이동할 때 실시간으로 이벤트로 인식되므로 채택
+volumeRange.addEventListener('input', handleVolumeChange)
