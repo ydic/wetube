@@ -6,14 +6,19 @@
 
 const playBtn = document.querySelector('#playBtn');
 const muteBtn = document.querySelector('#muteBtn');
-const time = document.querySelector('#time');
+const currentTime = document.querySelector('#currentTime');
+const totalTime = document.querySelector('#totalTime');
 const volumeRange = document.querySelector('#volumeRange');
 const video = document.querySelector('video');
 
 // [ Javascript 문법 & Node 문법 ] 브라우저단 input(type='range' value='0.5') 초기값과 같은 맥락에서 서버단에서도 초기값으로 video.volume 을 0.5 라고 설정함
 // [ Javascript 문법 ] let volumeValue; f라는 전역 변수(즉, 직전(또는 현재 실시간 변경되고 있는) video.volume 값 담아놓을 전역 변수)를 만들어 놓고 Mute 처리 전에 volumeRange.value 값을 미리 받아두었다가 Unmute 시에 그 값을 다시 volumeRange.value 에 부여해줌 (이때, volumeRange 마우스로 드래그하여 변경시 음량 변경되지 않으므로 volumeRange.addEventListener('input', 어쩌구) 로 별도 처리함)
 let volumeValue = 0.5;
+
+// [ Javascript 문법 ] video.volume = volumeValue; 실시간 연동 개념의 변수값 대입이 아니라 초기값 지정 용도의 코드
+// [ Javascript 문법 ] let volumeValue = 0; video.volume = volumeValue; 조합해 놓으면 Pug단의 input(type='range' value='1') 상태여도 영상재생시 video.volume 초기설정값이 0 이므로 소리나지 않게 됨(단, 이때 video.volume 값이 0 이라고 해서 video.muted 값이 자동으로 true 되지 않음 / 즉, 두 속성은 별개의 속성)
 video.volume = volumeValue;
+// console.log(`video.muted: ${video.muted}, video.volume: ${video.volume}, volumeValue: ${volumeValue}, volumeRange.value:${volumeRange.value}`)
 
 // console.log(playBtn,  muteBtn,  time,  volumeRange, video);
 
@@ -124,6 +129,20 @@ const handleVolumeChange = (event)=>{
   console.log(video.muted, video.volume, volumeRange.value, event.target.value);
 }
 
+const formatTime = (seconds) => {
+  return new Date(seconds * 1000).toISOString().substring(14, 19);
+}
+
+const handleLoadedmetadata = () => {
+  totalTime.innerHTML = formatTime(Math.floor(video.duration));
+}
+
+const handleTimeupdate = () => {
+  // console.log(video.currentTime, typeof video);
+  // console.log(new Date(video.currentTime * 1000).toISOString().substring(14, 19));
+  currentTime.innerHTML = formatTime(Math.floor(video.currentTime))
+}
+
 playBtn.addEventListener('click', handlePlayClick);
 
 // [ Web API 문법 ] "무슨 이벤트를 줄지 아직 잘 모르니까 공식 문서에서 이벤트 종류를 찾아보자. 비디오가 멈추면 알려주는 이벤트가 있나?"
@@ -139,3 +158,7 @@ muteBtn.addEventListener('click', handleMuteClick);
 // [ HTML 문법 & Javascript 문법 ] input(type='range') 형식의 경우 change 이벤트는 마우스로 range 이동과 무관하고 마우스 버튼을 뗄 때 이벤트로 인식되므로 미채택
 // [ HTML 문법 & Javascript 문법 ] input(type='range') 형식의 경우 input 이벤트는 마우스로 range 이동할 때 실시간으로 이벤트로 인식되므로 채택
 volumeRange.addEventListener('input', handleVolumeChange)
+
+video.addEventListener('loadedmetadata', handleLoadedmetadata);
+
+video.addEventListener('timeupdate', handleTimeupdate);
