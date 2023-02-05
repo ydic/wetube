@@ -10,6 +10,7 @@ const currentTime = document.querySelector('#currentTime');
 const totalTime = document.querySelector('#totalTime');
 const volumeRange = document.querySelector('#volumeRange');
 const video = document.querySelector('video');
+const timeline = document.querySelector('#timeline');
 
 // [ Javascript 문법 & Node 문법 ] 브라우저단 input(type='range' value='0.5') 초기값과 같은 맥락에서 서버단에서도 초기값으로 video.volume 을 0.5 라고 설정함
 // [ Javascript 문법 ] let volumeValue; f라는 전역 변수(즉, 직전(또는 현재 실시간 변경되고 있는) video.volume 값 담아놓을 전역 변수)를 만들어 놓고 Mute 처리 전에 volumeRange.value 값을 미리 받아두었다가 Unmute 시에 그 값을 다시 volumeRange.value 에 부여해줌 (이때, volumeRange 마우스로 드래그하여 변경시 음량 변경되지 않으므로 volumeRange.addEventListener('input', 어쩌구) 로 별도 처리함)
@@ -50,6 +51,8 @@ const handlePlayClick = (e) => {
 // const handlePause = () => playBtn.innerText = 'Play';
 // const handlePlay = () => playBtn.innerText = 'Pause';
 
+let eVolumeValue;
+
 const handleMuteClick = () => {
   if(video.muted){
     video.muted = false;
@@ -64,11 +67,17 @@ const handleMuteClick = () => {
   // [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
   muteBtn.innerText = video.muted ? 'Unmute' : 'Mute';
 
+  // [ Web API 문법 - 자체보완 ] 사용자가 볼륨조절바 움직여 volumeRange.value = 0 로 만들었을 때, muteBtn.innerText 가 Unmute 로 표현되도록 한 뒤에 사용자가 음소거 해제하려고 Unmute 버튼 누르면, 원본 영상의 소리값과 볼륨조절바 소리값을 0.5 로 적용하여 소리 나게 함
+  if( eVolumeValue == '0'){
+    video.volume = '0.5';
+    volumeValue = '0.5';
+  }
+
   // (즉, 음소거 해제시 직전(또는 현재 실시간 변경되고 있는) 볼륨 값으로 video.volume 에 반영하기 위함)
   volumeRange.value = video.muted ? 0 : volumeValue;
 }
 
-// ★★★★★ 코드보완요 ----- input(type='input' value=0.5) 태그를 움직여 volumeRange.value = 0 되도록 volumeRange.addEventListner('input', 어쩌구) 동작하더라도 muteBtn.innerText 는 여전히 Mute 라고 표시될 뿐, volumeRange.value 값이 0 에 달했으니 Unmute 라고 표시하도록 제어하는 코드는 만들어야 함(코드보완시 기존 값들과 충돌나는데 다른 각도로 접근요)
+// ★★★★★ 코드보완요 [자체보완완료 230205 YEAH] ----- input(type='input' value=0.5) 태그를 움직여 volumeRange.value = 0 되도록 volumeRange.addEventListner('input', 어쩌구) 동작하더라도 muteBtn.innerText 는 여전히 Mute 라고 표시될 뿐, volumeRange.value 값이 0 에 달했으니 Unmute 라고 표시하도록 제어하는 코드는 만들어야 함(코드보완시 기존 값들과 충돌나는데 다른 각도로 접근요)
 /*
     1. volume을 0으로 설정했을 때 버튼 innerText가 계속 mute 상태인 문제 해결
     2. volume이 0인 상태에서 Unmute 버튼을 눌러도 mute 상태인 문제 해결
@@ -121,6 +130,12 @@ const handleVolumeChange = (event)=>{
 
   // 여기서 event.target.value 값을 volumeValue 에 담아놓아야 음소거 해제 됐을 때 전역 변수 초기할당값 let volumeValue = 0.5; 로 무조건 복원되지 않고 음소거 설정하기 전의 볼륨값으로 복원시켜 줄 수 있음
   volumeValue = event.target.value;
+
+  // [ Web API 문법 - 자체보완 ] 사용자가 볼륨조절바 움직여 volumeRange.value = 0 로 만들었을 때, muteBtn.innerText 가 Unmute 로 표현되도록 함
+  if(event.target.value === '0'){
+    eVolumeValue = event.target.value;
+    handleMuteClick();
+  }
   
   // 볼륨 조절할 때의 값을 실시간으로 video.volume 에 반영
   // (즉, 음소거 해제시 직전(또는 현재 실시간 변경되고 있는) 볼륨 값으로 video.volume 에 반영하기 위함)
@@ -135,12 +150,31 @@ const formatTime = (seconds) => {
 
 const handleLoadedmetadata = () => {
   totalTime.innerHTML = formatTime(Math.floor(video.duration));
+
+  // [ Web API 문법 ] loadedmetadata 이벤트 발생시 감지되는 영상 길이의 값을 타임라인바 input 의 max 속성에 반영시킴
+  timeline.max = Math.floor(video.duration);
 }
 
 const handleTimeupdate = () => {
   // console.log(video.currentTime, typeof video);
   // console.log(new Date(video.currentTime * 1000).toISOString().substring(14, 19));
   currentTime.innerHTML = formatTime(Math.floor(video.currentTime))
+
+  // [ Web API 문법 ] timeupdate 이벤트 발생시 감지되는 현재 영상 재생 위치 값을 타임라인바 input 의 value 속성에 반영시킴
+  timeline.value = Math.floor(video.currentTime);
+}
+
+const handleTimelineChange = (event) => {
+
+  // [ Web API 문법 ] .currnetTime 은 getter 기능 뿐만 아니라 setter 기능으로도 조작 가능함
+  // [ Web API 문법 ] input 이벤트 발생시 감지되는 타임라인바 재생시점 값(즉, event.target.value)을 영상 재생시점 속성(즉, video.currentTime)에 반영시킴
+  // video.currentTime = event.target.value;
+
+  const {
+    target: { value },
+  } = event;
+  
+  video.currentTime = value;
 }
 
 playBtn.addEventListener('click', handlePlayClick);
@@ -162,3 +196,5 @@ volumeRange.addEventListener('input', handleVolumeChange)
 video.addEventListener('loadedmetadata', handleLoadedmetadata);
 
 video.addEventListener('timeupdate', handleTimeupdate);
+
+timeline.addEventListener('input', handleTimelineChange);
