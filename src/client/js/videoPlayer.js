@@ -11,6 +11,8 @@ const totalTime = document.querySelector('#totalTime');
 const volumeRange = document.querySelector('#volumeRange');
 const video = document.querySelector('video');
 const timeline = document.querySelector('#timeline');
+const fullscreenBtn = document.querySelector('#fullScreen');
+const videoContainer = document.querySelector('#videoContainer');
 
 // [ Javascript 문법 & Node 문법 ] 브라우저단 input(type='range' value='0.5') 초기값과 같은 맥락에서 서버단에서도 초기값으로 video.volume 을 0.5 라고 설정함
 // [ Javascript 문법 ] let volumeValue; f라는 전역 변수(즉, 직전(또는 현재 실시간 변경되고 있는) video.volume 값 담아놓을 전역 변수)를 만들어 놓고 Mute 처리 전에 volumeRange.value 값을 미리 받아두었다가 Unmute 시에 그 값을 다시 volumeRange.value 에 부여해줌 (이때, volumeRange 마우스로 드래그하여 변경시 음량 변경되지 않으므로 volumeRange.addEventListener('input', 어쩌구) 로 별도 처리함)
@@ -177,6 +179,28 @@ const handleTimelineChange = (event) => {
   video.currentTime = value;
 }
 
+const handleFullscreen = () => {
+  
+  // [ Web API 문법 ] https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API
+  // [ Web API 문법 ] fullscreen 모드가 동작 상태면 document.fullscreenElement 조회시 현재 fullscreen 모드로 보여지는 element 를 파악할 수 있음
+  // [ Web API 문법 ] fullscreen 모드가 미동작 상태면 null 반환됨
+  let fullscreenElement = document.fullscreenElement;
+  
+  if(fullscreenElement){
+    // [ Web API 문법 ] 문법원칙상 적용대상은 element 가 아닌 document 임 / Document.exitFullscreen()
+    document.exitFullscreen();    
+
+    fullscreenBtn.innerText = 'Enter Full Screen'
+  } else {
+    // [ Web API 문법 & Javascript 문법 ] 자체제작한 controls 들도 fullscreen 모디 적용에 반영시키기 위해 video 요소와 controls 들을 div#videoContainer 태그로 묶음
+    // [ Web API 문법 ] 문법원칙상 적용대상은 document 가 아닌 element 임 / Element.requestFullscreen()
+    // video.requestFullscreen();
+    videoContainer.requestFullscreen();
+    
+    fullscreenBtn.innerText = 'Exit Full Screen'
+  }
+}
+
 playBtn.addEventListener('click', handlePlayClick);
 
 // [ Web API 문법 ] "무슨 이벤트를 줄지 아직 잘 모르니까 공식 문서에서 이벤트 종류를 찾아보자. 비디오가 멈추면 알려주는 이벤트가 있나?"
@@ -198,3 +222,5 @@ video.addEventListener('loadedmetadata', handleLoadedmetadata);
 video.addEventListener('timeupdate', handleTimeupdate);
 
 timeline.addEventListener('input', handleTimelineChange);
+
+fullscreenBtn.addEventListener('click', handleFullscreen);
