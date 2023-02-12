@@ -9,13 +9,14 @@ block content
   //- ??? mvp.css 패딩 마진 속성 문제로 추정
 
 
-  //- [ Web API 문법 & Javascript 문법 ] 자체제작한 controls 들도 fullscreen 모디 적용에 반영시키기 위해 video 요소와 controls 들을 div#videoContainer 태그로 묶음
+  //- [ Web API 문법 & Javascript 문법 ] 자체제작한 controls 들도 fullscreen 모드 적용에 반영시키기 위해 video 요소와 controls 들을 div#videoContainer 태그로 묶음
   div#videoContainer
     //- [ Multer 라이브러리 연계 문법 ] videoRouter.js 의 videoRouter.get('/:id([0-9a-f]{24})', watch); 라우팅 코드를 거쳐 videoController.js 의 watch 함수에서 await Video.findById(idVideo) 쿼리문의 결과값을 video 에 담아 return res.render('watch', { pageTitle: video.title, video}); 코드를 통해 Pug 템플릿으로 전달함
     //- [ Multer 라이브러리 연계 문법 & Express 문법 ★★★] video(src=video.fileUrl) 로 작성하면 상대경로(즉, /videos/uploads/videos/랜덤파일명) 처리되므로 video(src='/' + video.fileUrl) 로 작성하여 절대경로 (즉, /uploads/videos/랜덤파일명) 처리되도록 해야함(Multer 를 통한 파일 저장경로가 video/uploads/videos 가 아니라 uploads/videos 이기 때문)
     video(src='/' + video.fileUrl, )
 
-    div
+    //- [ Web API 문법 & Javascript 문법 ] mousemove 및 mouseleave 이벤트에 따라 controls 보이거나 사라지도록 조작하기 위해 div#videoControls 라고 식별값 부여함
+    div#videoControls
       button#playBtn Play
       button#muteBtn Mute 
       div

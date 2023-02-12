@@ -13,6 +13,7 @@ const video = document.querySelector('video');
 const timeline = document.querySelector('#timeline');
 const fullscreenBtn = document.querySelector('#fullScreen');
 const videoContainer = document.querySelector('#videoContainer');
+const videoControls = document.querySelector('#videoControls');
 
 // [ Javascript 문법 & Node 문법 ] 브라우저단 input(type='range' value='0.5') 초기값과 같은 맥락에서 서버단에서도 초기값으로 video.volume 을 0.5 라고 설정함
 // [ Javascript 문법 ] let volumeValue; f라는 전역 변수(즉, 직전(또는 현재 실시간 변경되고 있는) video.volume 값 담아놓을 전역 변수)를 만들어 놓고 Mute 처리 전에 volumeRange.value 값을 미리 받아두었다가 Unmute 시에 그 값을 다시 volumeRange.value 에 부여해줌 (이때, volumeRange 마우스로 드래그하여 변경시 음량 변경되지 않으므로 volumeRange.addEventListener('input', 어쩌구) 로 별도 처리함)
@@ -25,6 +26,7 @@ video.volume = volumeValue;
 
 // console.log(playBtn,  muteBtn,  time,  volumeRange, video);
 
+let controlsTimeout = null;
 
 // ★★★★★ 코드보완요 ----- 영상 재생종료 되더라도 playBtn.innerText 값이 여전히 Pause  라고 표시되고 있으므로 영상 재생종료 시점 감지해 playBtn.innerText 값을 Play 로 변경되로록 코드 보완요
 const handlePlayClick = (e) => {
@@ -201,6 +203,28 @@ const handleFullscreen = () => {
   }
 }
 
+// [ Web API 문법 ] video 태그에 mousemove 이벤트 발생시 videoControls 보여줌
+const handleMousemove = () => {
+  // [ Web API 문법 ] 전역변수인 controlsTimeout 에 handleMouseleave 함수 내의 setTimeout() 함수 동작시 생성되는 고유식별값을 저장해 놓았음
+  // [ Web API 문법 ] controlsTimeout 값이 null 상태가 아니라면 clearTimeout() 적용하여 handleMouseleave 함수 내의 setTimeout() 동작을 취소시킨 후 전역변수인 controlTimeout 에 저장되어 있는 setTimeout 고유식별값도 null 상태로 재지정하여 초기화 시킴
+  if(controlsTimeout){
+    clearTimeout(controlsTimeout);
+    controlsTimeout = null;
+  }
+
+  // [ Web API 문법 ] showing 클래스를 div#videoControls 에 부착함
+  videoControls.classList.add('showing');
+}
+
+// [ Web API 문법 ] video 태그에 mouseleave 이벤트 발생시 videoControls 사라지게 만듦
+const handleMouseleave = () => {
+  // [ Web API 문법 ] mouseleave 이벤트 발생시 setTimeout() 함수에서 지정한 시간 경과 후에 showing 클래스를 div#videoControls 에서 제거함
+  controlsTimeout = setTimeout(() => {
+    videoControls.classList.remove('showing');
+  }, 3000);
+  console.log('handleMouseleave ---- controlsTimeout ----', controlsTimeout);
+}
+
 playBtn.addEventListener('click', handlePlayClick);
 
 // [ Web API 문법 ] "무슨 이벤트를 줄지 아직 잘 모르니까 공식 문서에서 이벤트 종류를 찾아보자. 비디오가 멈추면 알려주는 이벤트가 있나?"
@@ -224,3 +248,7 @@ video.addEventListener('timeupdate', handleTimeupdate);
 timeline.addEventListener('input', handleTimelineChange);
 
 fullscreenBtn.addEventListener('click', handleFullscreen);
+
+video.addEventListener('mousemove', handleMousemove);
+
+video.addEventListener('mouseleave', handleMouseleave);
