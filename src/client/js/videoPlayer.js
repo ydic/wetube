@@ -28,6 +28,9 @@ video.volume = volumeValue;
 
 let controlsTimeout = null;
 
+// [ Web API 문법 ] 전역변수(즉, controlsMovementTimeout) 만든 이유는  setTimeout() 함수 고유생성값을 clearTimeout() 함수의 파라미터로 넣을 때 사용하기 위함 
+let controlsMovementTimeout = null;
+
 // ★★★★★ 코드보완요 ----- 영상 재생종료 되더라도 playBtn.innerText 값이 여전히 Pause  라고 표시되고 있으므로 영상 재생종료 시점 감지해 playBtn.innerText 값을 Play 로 변경되로록 코드 보완요
 const handlePlayClick = (e) => {
   // [ Web API 문법 ] https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
@@ -203,6 +206,9 @@ const handleFullscreen = () => {
   }
 }
 
+// [ Web API 문법 ] handleMousemove 및 handleMouselaeave 함수 내에서 반복 사용되어서 별도 함수로 처리함
+const hideControls = () => videoControls.classList.remove('showing');
+
 // [ Web API 문법 ] video 태그에 mousemove 이벤트 발생시 videoControls 보여줌
 const handleMousemove = () => {
   // [ Web API 문법 ] 전역변수인 controlsTimeout 에 handleMouseleave 함수 내의 setTimeout() 함수 동작시 생성되는 고유식별값을 저장해 놓았음
@@ -212,16 +218,37 @@ const handleMousemove = () => {
     controlsTimeout = null;
   }
 
+// [ Web API 문법 ] video 화면 내에서 마우스 움직임 멈추면 controls 가 숨겨지도록 구성함
+// [ Web API 문법 ] video 화면 내에서 마우스 움직이는 순간부터 직전에 생성한 setTimeout() 을 clearTimeout() 시키고 새로운 setTimeout() 시작함
+// [ Web API 문법 ] 전역변수(즉, controlsMovementTimeout) 만든 이유는  setTimeout() 함수 고유생성값을 clearTimeout() 함수의 파라미터로 넣을 때 사용하기 위함 
+  if(controlsMovementTimeout){
+    // [ Web API 문법 ] 코드 배치 순서1. setTimeout() 코드 다음 줄에 clearTimeout() 배치하면 timeout 생성하는 동시에 취소해버리는 꼴이 되므로 그 순서를 정반대로 달리함.
+    // [ Web API 문법 ] 코드 배치 순서2. 마우스 움직임 있을 때만 clearTimeout() 촉발되도록 코드를 선제적으로 구성
+    clearTimeout(controlsMovementTimeout);
+    controlsMovementTimeout = null;
+  }
+
   // [ Web API 문법 ] showing 클래스를 div#videoControls 에 부착함
   videoControls.classList.add('showing');
+
+  // [ Web API 문법 ] 코드 배치 순서3.  마우스 움직임 없으면 setTimeout() 함수가 취소되지 않고 가동되며, 마우스 움직임 없 이 3초 경과하면 controls 가 사라지도록 함
+  controlsMovementTimeout = setTimeout(() => {
+    hideControls }, 3000);
+
+  // 1. 아무것도 없는 상태에서 비디오 위로 마우스 움직임.
+  // 2. 즉시 showing이라는 클래스가 추가되고 3초짜리 showing을 지우는 타이머를 시작시킴.
+  // 3. 2초후 마우스를 다시 움직임.
+  // 4. if문 구절 때문에 3초짜리 showing을 지우는 타이머가 사라져 버리고, 타이머 값이 null로 바뀜 즉 타이머 사라짐.
+  // 5. 그대로 클래스 showing만들고 다시 또다른 3초짜리 showing을 지우는 타이머 시작!.
+  // 그다음에는 무한 반복
+  // 만약 3초가 지났다? 그러면 타이머가 작동해서 showing을 지움
 }
 
 // [ Web API 문법 ] video 태그에 mouseleave 이벤트 발생시 videoControls 사라지게 만듦
 const handleMouseleave = () => {
   // [ Web API 문법 ] mouseleave 이벤트 발생시 setTimeout() 함수에서 지정한 시간 경과 후에 showing 클래스를 div#videoControls 에서 제거함
-  controlsTimeout = setTimeout(() => {
-    videoControls.classList.remove('showing');
-  }, 3000);
+  controlsTimeout = setTimeout( () => { 
+    hideControls }, 3000);
   console.log('handleMouseleave ---- controlsTimeout ----', controlsTimeout);
 }
 
