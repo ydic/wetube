@@ -16,24 +16,39 @@ block content
     video(src='/' + video.fileUrl, )
 
     //- [ Web API 문법 & Javascript 문법 ] mousemove 및 mouseleave 이벤트에 따라 controls 보이거나 사라지도록 조작하기 위해 div#videoControls 라고 식별값 부여함
-    div#videoControls
-      button#playBtn Play
-      button#muteBtn Mute 
-      div
-        span#currentTime 00:00
-        span /
-        sapn#totalTime 00:00
+    //- div#videoControls
+    //-   button#playBtn Play
+    //-   button#muteBtn Mute 
+    //-   div
+    //-     span#currentTime 00:00
+    //-     span /
+    //-     sapn#totalTime 00:00
+    div#videoControls.videoControls
+      div.videoControls__play
+        span#playBtn.videoControls__playBtn
+          i.fas.fa-play
+        div.videoControls__time
+          span#currentTime 00:00
+          span  / 
+          span#totalTime 00:00
+        
+      //- [ Pug 문법 + Javascript 문법 ] 타임라인바의 영상 길이 값에 해당하는 input 의 max 속성은 videoPlayer.js 의 handleLoadedmetadata 이벤트에서 감지한 video.duration 값으로 적용함
+      //- input(type='range', step='1', value='0' min='0')#timeline
+      input(type="range",step="1", value="0", min="0")#timeline.videoControls__timeline
 
       //- [ SCSS 문법 & CSS 문법 ] src/client/scss/forms.scss 내에서 input 태그에 관한 속성 적용 범위를 input:not(input[type="range"]), 어쩌구 { 생략 } 형태로 수정함
       //- [ SCSS 문법 & CSS 문법 ] input:not() 문법 통해서 input[type="range"] 인 input 태그는 적용 배제하고 input[type="submit"] 인 input 태그에 한하여 적용시킴
       //- [ Pug 문법 + Javascript 문법 ] range 타입의 input 태그 브라우저단 초기값을 value='0.5' 로 지정함
-      input(type='range', step='0.1', value='0.5' min='0', max='1')#volumeRange
-      
-      //- [ Pug 문법 + Javascript 문법 ] 타임라인바의 영상 길이 값에 해당하는 input 의 max 속성은 videoPlayer.js 의 handleLoadedmetadata 이벤트에서 감지한 video.duration 값으로 적용함
-      input(type='range', step='1', value='0' min='0')#timeline
+      //- input(type='range', step='0.1', value='0.5' min='0', max='1')#volumeRange
+      div.videoControls__volume
+        input(type="range",step="0.1", value=0.5, min="0", max="1")#volumeRange
+        span#muteBtn
+          i.fas.fa-volume-up
 
       div 
-        button#fullScreen Enter Full Screen
+        //- button#fullScreen Enter Full Screen
+        span#fullScreen
+          i.fas.fa-expand
 
 //- 일시적으로 주석처리함220815
   //- [ Pug 문법 + JavaScript문법 ] 삼항연산자를 활용해 영문법 단수view / 복수views 단위 구분함

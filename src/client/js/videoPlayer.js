@@ -15,6 +15,11 @@ const fullscreenBtn = document.querySelector('#fullScreen');
 const videoContainer = document.querySelector('#videoContainer');
 const videoControls = document.querySelector('#videoControls');
 
+const playBtnIcon = playBtn.querySelector("i");
+const muteBtnIcon = muteBtn.querySelector("i");
+const fullScreenIcon = fullscreenBtn.querySelector("i");
+
+
 // [ Javascript 문법 & Node 문법 ] 브라우저단 input(type='range' value='0.5') 초기값과 같은 맥락에서 서버단에서도 초기값으로 video.volume 을 0.5 라고 설정함
 // [ Javascript 문법 ] let volumeValue; f라는 전역 변수(즉, 직전(또는 현재 실시간 변경되고 있는) video.volume 값 담아놓을 전역 변수)를 만들어 놓고 Mute 처리 전에 volumeRange.value 값을 미리 받아두었다가 Unmute 시에 그 값을 다시 volumeRange.value 에 부여해줌 (이때, volumeRange 마우스로 드래그하여 변경시 음량 변경되지 않으므로 volumeRange.addEventListener('input', 어쩌구) 로 별도 처리함)
 let volumeValue = 0.5;
@@ -32,6 +37,8 @@ let controlsTimeout = null;
 let controlsMovementTimeout = null;
 
 // ★★★★★ 코드보완요 ----- 영상 재생종료 되더라도 playBtn.innerText 값이 여전히 Pause  라고 표시되고 있으므로 영상 재생종료 시점 감지해 playBtn.innerText 값을 Play 로 변경되로록 코드 보완요
+// ★★★★★ 코드보완요 ----- 영상 화면부 클릭시 일시정지/재생재개 되도록 구현요
+// ★★★★★ 코드보완요 ----- 스페이스바 눌렀을 때 일시정지/재생재개 되도록 구현요
 const handlePlayClick = (e) => {
   // [ Web API 문법 ] https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
   // [ Web API 문법 ] HTMLMediaElement.paused 는 Returns a boolean that indicates whether the media element is paused.
@@ -50,7 +57,9 @@ const handlePlayClick = (e) => {
   }
 
   // [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
-  playBtn.innerText = video.paused ? 'Play' : 'Pause'
+  // playBtn.innerText = video.paused ? 'Play' : 'Pause'
+  playBtnIcon.classList = video.paused ? "fas fa-play" : "fas fa-pause";
+
 }
 
 // [ Web API 문법 ] OLD코드--- function 내에서 button 태그에 대한 텍스트 변경해도 되지만 본 실습에서는 이벤트리스너를 활용함
@@ -72,7 +81,10 @@ const handleMuteClick = () => {
   }
 
   // [ Javascript 문법 ] 이벤트리스너 기반으로 버튼의 innerText 값을 삼항연산자로 처리함
-  muteBtn.innerText = video.muted ? 'Unmute' : 'Mute';
+  // muteBtn.innerText = video.muted ? 'Unmute' : 'Mute';
+  muteBtnIcon.classList = video.muted
+    ? "fas fa-volume-mute"
+    : "fas fa-volume-up";
 
   // [ Web API 문법 - 자체보완 ] 사용자가 볼륨조절바 움직여 volumeRange.value = 0 로 만들었을 때, muteBtn.innerText 가 Unmute 로 표현되도록 한 뒤에 사용자가 음소거 해제하려고 Unmute 버튼 누르면, 원본 영상의 소리값과 볼륨조절바 소리값을 0.5 로 적용하여 소리 나게 함
   if( eVolumeValue == '0'){
@@ -132,7 +144,8 @@ const handleVolumeChange = (event)=>{
   // ★★★★★ video.muted = true 상태일 때는 input(type='range' value='어쩌구') 기반으로 .addEventListent('input', 어쩌구) 함수 만들어서 video.volmue 수치를 올리더라도 video.muted = false 라고 변경하기 전까지는 전혀 소리가 나지 않게되므로 주의
   if(video.muted){
     video.muted = false;
-    muteBtn.innerText = 'Mute';
+    // muteBtn.innerText = 'Mute';
+    muteBtnIcon.classList = "fas fa-volume-mute";
   }
 
   // 여기서 event.target.value 값을 volumeValue 에 담아놓아야 음소거 해제 됐을 때 전역 변수 초기할당값 let volumeValue = 0.5; 로 무조건 복원되지 않고 음소거 설정하기 전의 볼륨값으로 복원시켜 줄 수 있음
@@ -142,11 +155,19 @@ const handleVolumeChange = (event)=>{
   if(event.target.value === '0'){
     eVolumeValue = event.target.value;
     handleMuteClick();
+  } else {
+    // 볼륨 조절할 때의 값을 실시간으로 video.volume 에 반영
+    // (즉, 음소거 해제시 직전(또는 현재 실시간 변경되고 있는) 볼륨 값으로 video.volume 에 반영하기 위함)
+    video.volume = event.target.value;
+
+    // ★★★★★ 코드보완요(자체보완함) ---- volumeRange 수동 조절로 볼륨값 0 되면 음량이 0 될 뿐만 아니라 이 볼륨수치 자체가 음소거로 감지되어 handleMuteClick() 함수 호출하도록 코드를 자체보완 했었음
+    // ★★★★★ 코드보완요(자체보완함) ---- 그러나 볼륨값 0 상태에서 volumeRange 수동 조절해 볼륨을 키웠을 때, 음소거는 해제되고 조절한 만큼의 음량으로 소리 들려주지만, 소리 아이콘은 여전히 음소거 된 상태의 아이콘을 보여주고 있는 버그를 확인함.
+    // ★★★★★ 코드보완요(자체보완함) ----   if(event.target.value === '0'){ } 코드에 else { } 구문 형태로 조건문 구체화하여 해당 버그 자체보완함
+
+    muteBtnIcon.classList = "fas fa-volume-up";
   }
   
-  // 볼륨 조절할 때의 값을 실시간으로 video.volume 에 반영
-  // (즉, 음소거 해제시 직전(또는 현재 실시간 변경되고 있는) 볼륨 값으로 video.volume 에 반영하기 위함)
-  video.volume = event.target.value;
+
 
   console.log(video.muted, video.volume, volumeRange.value, event.target.value);
 }
@@ -184,6 +205,7 @@ const handleTimelineChange = (event) => {
   video.currentTime = value;
 }
 
+// ★★★★★ 코드보완요 ---- 브라우저 창 최대화 아닌 크기에서 풀스크린 활성화하면, 현 브라우저 창 크기 기준으로 영상을 풀스크린 시키지 못하고 모니터 꽉 차게 풀스크린 시키는 버그 보완요
 const handleFullscreen = () => {
   
   // [ Web API 문법 ] https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API
@@ -195,21 +217,24 @@ const handleFullscreen = () => {
     // [ Web API 문법 ] 문법원칙상 적용대상은 element 가 아닌 document 임 / Document.exitFullscreen()
     document.exitFullscreen();    
 
-    fullscreenBtn.innerText = 'Enter Full Screen'
+    // fullscreenBtn.innerText = 'Enter Full Screen'
+    fullScreenIcon.classList = "fas fa-expand";
+
   } else {
     // [ Web API 문법 & Javascript 문법 ] 자체제작한 controls 들도 fullscreen 모디 적용에 반영시키기 위해 video 요소와 controls 들을 div#videoContainer 태그로 묶음
     // [ Web API 문법 ] 문법원칙상 적용대상은 document 가 아닌 element 임 / Element.requestFullscreen()
     // video.requestFullscreen();
     videoContainer.requestFullscreen();
     
-    fullscreenBtn.innerText = 'Exit Full Screen'
+    // fullscreenBtn.innerText = 'Exit Full Screen'
+    fullScreenIcon.classList = "fas fa-compress";
   }
 }
 
 // [ Web API 문법 ] handleMousemove 및 handleMouselaeave 함수 내에서 반복 사용되어서 별도 함수로 처리함
 const hideControls = () => videoControls.classList.remove('showing');
 
-// [ Web API 문법 ] video 태그에 mousemove 이벤트 발생시 videoControls 보여줌
+// [ Web API 문법 ] videoContainer 태그에 (video 태그와 div#videControls 를 감싸는 부모 태그임) mousemove 이벤트 발생시 videoControls 보여줌
 const handleMousemove = () => {
   // [ Web API 문법 ] 전역변수인 controlsTimeout 에 handleMouseleave 함수 내의 setTimeout() 함수 동작시 생성되는 고유식별값을 저장해 놓았음
   // [ Web API 문법 ] controlsTimeout 값이 null 상태가 아니라면 clearTimeout() 적용하여 handleMouseleave 함수 내의 setTimeout() 동작을 취소시킨 후 전역변수인 controlTimeout 에 저장되어 있는 setTimeout 고유식별값도 null 상태로 재지정하여 초기화 시킴
@@ -252,6 +277,22 @@ const handleMouseleave = () => {
   console.log('handleMouseleave ---- controlsTimeout ----', controlsTimeout);
 }
 
+// ★★★★★ 코드보완(자체보완함) ---- 영상 총길이 분량의 재생이 종료되었음을 ended 이벤트로 감지하여, 재생 버튼을 초기화 시키고 풀스크린 모드로 종료된 상태면 풀스크린 모드를 해제 시키도록 코드 자체보완함
+const handleEnded = () => {
+
+  playBtnIcon.classList = "fas fa-play";
+
+  let fullscreenElement = document.fullscreenElement;
+  
+  if(fullscreenElement){
+    // [ Web API 문법 ] 문법원칙상 적용대상은 element 가 아닌 document 임 / Document.exitFullscreen()
+    document.exitFullscreen();    
+
+    // fullscreenBtn.innerText = 'Enter Full Screen'
+    fullScreenIcon.classList = "fas fa-expand";
+  }
+}
+
 playBtn.addEventListener('click', handlePlayClick);
 
 // [ Web API 문법 ] "무슨 이벤트를 줄지 아직 잘 모르니까 공식 문서에서 이벤트 종류를 찾아보자. 비디오가 멈추면 알려주는 이벤트가 있나?"
@@ -269,6 +310,8 @@ muteBtn.addEventListener('click', handleMuteClick);
 volumeRange.addEventListener('input', handleVolumeChange)
 
 video.addEventListener('loadedmetadata', handleLoadedmetadata);
+// ???? ---- #11.11 Styles Recap 강좌에서 loadeddata 이벤트로 수정했던데 이유는?
+// video.addEventListener('loadeddata', handleLoadedmetadata);
 
 video.addEventListener('timeupdate', handleTimeupdate);
 
@@ -276,6 +319,11 @@ timeline.addEventListener('input', handleTimelineChange);
 
 fullscreenBtn.addEventListener('click', handleFullscreen);
 
-video.addEventListener('mousemove', handleMousemove);
 
-video.addEventListener('mouseleave', handleMouseleave);
+// ★★★★★ 코드보완by강사 ------ 비디오 위의 표면에서(즉, video.addEventListener('mousemove', 어쩌구); ) 마우스 커서 움직임 있어야만 컨트롤바가 사라지도록 코드되어 있어서, 비디오 위의 컨트롤바 위의 표면에서 마우스 커서 움직임 지속되어도 mousemove 이벤트 감지되지 않는 코드 구성이라 3초 후 컨트롤바 사라짐. 컨트롤바 표면에서(즉, videoContainer.addEventListener('mousemove', 어쩌구); )  마우스 커서 움직이고 있으면 3초 후 사라지지 않도록 코드 변경함
+videoContainer.addEventListener('mousemove', handleMousemove);
+
+videoContainer.addEventListener('mouseleave', handleMouseleave);
+
+// ★★★★★ 코드보완(자체보완함) ---- 영상 총길이 분량의 재생이 종료되었음을 ended 이벤트로 감지하여, 재생 버튼을 초기화 시키고 풀스크린 모드로 종료된 상태면 풀스크린 모드를 해제 시키도록 코드 자체보완함
+video.addEventListener('ended', handleEnded);
