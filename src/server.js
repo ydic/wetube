@@ -18,6 +18,7 @@ import MongoStore from "connect-mongo";
 import rootRouter from "./routers/rootRouter";
 import userRouter from "./routers/userRouter";
 import videoRouter from "./routers/videoRouter";
+import apiRouter from "./routers/apiRouter";
 import { localsMiddleware } from "./middlewares";
 
 // const express = require('express');
@@ -116,6 +117,7 @@ app.use(localsMiddleware);
 app.use("/", rootRouter);
 app.use("/videos", videoRouter);
 app.use("/users", userRouter);
+app.use('/api', apiRouter);
 
 // [ 시큐어 보안 코딩 & Express 라이브러리 문법 ] 브라우저가 uploads 폴더에 있는 파일 내용을 볼 수 있도록 route 경로 설정
 // [ 시큐어 보안 코딩 & Express 라이브러리 문법 ] 브라우저가 서버의 어떤 폴더로든 아무런 제한 없이 접근하는 것은 보안에 취약함
