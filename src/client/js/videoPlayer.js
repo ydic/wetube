@@ -258,7 +258,7 @@ const handleMousemove = () => {
 
   // [ Web API 문법 ] 코드 배치 순서3.  마우스 움직임 없으면 setTimeout() 함수가 취소되지 않고 가동되며, 마우스 움직임 없 이 3초 경과하면 controls 가 사라지도록 함
   controlsMovementTimeout = setTimeout(() => {
-    hideControls }, 3000);
+    hideControls() }, 3000);
 
   // 1. 아무것도 없는 상태에서 비디오 위로 마우스 움직임.
   // 2. 즉시 showing이라는 클래스가 추가되고 3초짜리 showing을 지우는 타이머를 시작시킴.
@@ -273,7 +273,7 @@ const handleMousemove = () => {
 const handleMouseleave = () => {
   // [ Web API 문법 ] mouseleave 이벤트 발생시 setTimeout() 함수에서 지정한 시간 경과 후에 showing 클래스를 div#videoControls 에서 제거함
   controlsTimeout = setTimeout( () => { 
-    hideControls }, 3000);
+    hideControls() }, 3000);
   console.log('handleMouseleave ---- controlsTimeout ----', controlsTimeout);
 }
 
