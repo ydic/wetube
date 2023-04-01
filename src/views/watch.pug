@@ -10,7 +10,8 @@ block content
 
 
   //- [ Web API 문법 & Javascript 문법 ] 자체제작한 controls 들도 fullscreen 모드 적용에 반영시키기 위해 video 요소와 controls 들을 div#videoContainer 태그로 묶음
-  div#videoContainer
+  //- [ Web API 문법 ] videoPlayer.js 내의 handleEnded 함수가 비디오id 값을 얻을 수 있는 통로가 없는 상황이므로 템플릿을 렌더링 하는 watch.pug 내에 비디오에 대한 정보를 남기도록 data-작명(즉, div#videoContainer(data-videoid=video._id) 및 dataset 문법 조합을 적용하여 백엔드 거치지 않고도 프론트엔드단에서 비디오id 값을 얻을 수 있도록 함
+  div#videoContainer(data-videoid=video._id)
     //- [ Multer 라이브러리 연계 문법 ] videoRouter.js 의 videoRouter.get('/:id([0-9a-f]{24})', watch); 라우팅 코드를 거쳐 videoController.js 의 watch 함수에서 await Video.findById(idVideo) 쿼리문의 결과값을 video 에 담아 return res.render('watch', { pageTitle: video.title, video}); 코드를 통해 Pug 템플릿으로 전달함
     //- [ Multer 라이브러리 연계 문법 & Express 문법 ★★★] video(src=video.fileUrl) 로 작성하면 상대경로(즉, /videos/uploads/videos/랜덤파일명) 처리되므로 video(src='/' + video.fileUrl) 로 작성하여 절대경로 (즉, /uploads/videos/랜덤파일명) 처리되도록 해야함(Multer 를 통한 파일 저장경로가 video/uploads/videos 가 아니라 uploads/videos 이기 때문)
     video(src='/' + video.fileUrl, )

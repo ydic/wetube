@@ -136,7 +136,7 @@ export const watch = async (req, res) => {
 // id 에 해당되는 영상의 조회수 증가 시키기
 // [ Web API & Express 문법 ] 템플릿을 렌더링 하지 않는 일종의 API view 만들기(즉, 프론트엔드와 백엔드 간 서버 통해 통신)
 // 본 클론 코딩은 기본적으로는 SSR(Server Side Rendering) 구성이어서 서버가 템플릿 렌더링까지 처리 (참고: CSR(Client Side Rendering) 과 다름(즉, React 기반 프론트엔드) )
-
+// [ Web API & Express 문법 ] 실제 YouTube 는 ended 이벤트 기반이 아니라 timeupdate 이벤트 기반으로 사용자의 영상 시청 관련한 각종 이용 사항(조회수 증가 포함)을 포착하도록 코딩되어 있음(즉, 개발자도구 네트워크 탭에서 그러한 작업 관련 요소를 발견할 수 있음)
 export const registerView = async (req, res) => {
 
   // [ Express 문법 ] 라우트 (즉, apiRouter.post('/videos/:id([0-9a-f]{24})/view', registerView) ) 로부터 현재 시청중인 영상의 id값을 받아옴
@@ -159,10 +159,11 @@ export const registerView = async (req, res) => {
   // [ Mongoose 문법 ] await video.save(); 통해 DB 에 update 된 사항을 반영함
   await video.save();
 
-  // [ Express 문법 ] 상태코드를 return res.status(200); 으로 처리함
+  // [ Express 문법 ] 상태코드를 return res.status(200); 으로 처리하면 .render() 하기 전에 상태 코드가 정해짐
+  // [ Express 문법 ] return res.sendStatus() 문법 사용해야 템플릿 렌더링 하는 .render() 없이도 실제로 응답하는 return 발생시킬 수 있으며 요청/응답 연결도 종료시켜줌
   // [ Web API & Express 문법 ] fetch() 통해 URL 바뀌지 않아도 페이지에서 변화(즉, interactivity) 발생하도록 구성
   // [ Web API & Express 문법 ] (즉, 클라이언트 단의 javascript(즉, client 폴더 내의 videoPlayer.js) 로 URL 을 요청하도록 구성)
-  return res.status(200);
+  return res.sendStatus(200);
 };
 
 // getEdit 함수는 브라우저에 form을 보여줌

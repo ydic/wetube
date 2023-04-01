@@ -277,9 +277,12 @@ const handleMouseleave = () => {
   console.log('handleMouseleave ---- controlsTimeout ----', controlsTimeout);
 }
 
+// [ WebAPI & Express 문법 ] 영상 끝까지 재생 완료 시 조회수 +1 증가하는 작업에도 ended 이벤트 활용함
 // ★★★★★ 코드보완(자체보완함) ---- 영상 총길이 분량의 재생이 종료되었음을 ended 이벤트로 감지하여, 재생 버튼을 초기화 시키고 풀스크린 모드로 종료된 상태면 풀스크린 모드를 해제 시키도록 코드 자체보완함
+console.log('videoContainer.dataset ---- ', videoContainer.dataset);
 const handleEnded = () => {
 
+  // 작업1 - 영상 시청 끝났으므로 fullscreen 자동 해제 하기
   playBtnIcon.classList = "fas fa-play";
 
   let fullscreenElement = document.fullscreenElement;
@@ -291,6 +294,18 @@ const handleEnded = () => {
     // fullscreenBtn.innerText = 'Enter Full Screen'
     fullScreenIcon.classList = "fas fa-expand";
   }
+
+  // 작업2 - 영상 시청 끝났으므로 API view(즉, POST 요청기반 fetch() 적용) 통해 DB에 조회수 +1 증가 처리 반영하기
+  // console.log('video finished');
+  // [ Web API 문법 ] videoPlayer.js 내의 handleEnded 함수가 비디오id 값을 얻을 수 있는 통로가 없는 상황이므로 템플릿을 렌더링 하는 watch.pug 내에 비디오에 대한 정보를 남기도록 data-작명(즉, div#videoContainer(data-videoid=video._id) 및 dataset 문법 조합을 적용하여 백엔드 거치지 않고도 프론트엔드단에서 비디오id 값을 얻을 수 있도록 함
+  const { videoid } = videoContainer.dataset;
+
+  // [ Web API & Express 문법 ] URL 바꿀 필요 없음 / 클릭할 필요 없음 / 이벤트 발생할 때까지 기다리면 javascript 가 백엔드에 요청 보냄
+  // apiRouter.js 내의 apiRouter.post('/videos/:id([0-9a-f]{24})/view', registerView) 라우트 코드 기반해 videoController.js 내의 registerView 함수 실행해 DB에 video 조회수 +1 증가 처리 반영함
+  fetch(`/api/videos/${videoid}/view`, {
+    // [ WebAPI 문법 ] fetch() 기본 요청값은 GET요청 이므로 method: "POST" 명기해야 DB내 영상 조회수 +1 증가 처리 반영 가능함
+    method: "POST",
+  })
 }
 
 playBtn.addEventListener('click', handlePlayClick);
@@ -325,5 +340,6 @@ videoContainer.addEventListener('mousemove', handleMousemove);
 
 videoContainer.addEventListener('mouseleave', handleMouseleave);
 
+// [ WebAPI & Express 문법 ] 영상 끝까지 재생 완료 시 조회수 +1 증가하는 작업에도 ended 이벤트 활용함
 // ★★★★★ 코드보완(자체보완함) ---- 영상 총길이 분량의 재생이 종료되었음을 ended 이벤트로 감지하여, 재생 버튼을 초기화 시키고 풀스크린 모드로 종료된 상태면 풀스크린 모드를 해제 시키도록 코드 자체보완함
 video.addEventListener('ended', handleEnded);
