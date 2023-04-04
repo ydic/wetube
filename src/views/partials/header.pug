@@ -60,10 +60,15 @@ header
         
         //- [ Pug 문법 ] #10.3 말은 되지만 실상 인식불가 코드 if loggedInUserDb.avatarUrl === '' 등록된 avatarUrl 값이 없는 로그인 사용자의 경우 기본 이모지를 보여줌
         //- [ Pug 문법 ] #10.3 (수강생 보완 코드) if !loggedInUserDb.avatarUrl
+          //- 자체보완완료 --- ★★★ --- User.js 모델 내의 socialOnly : false 인 사용자는 avatarUrl : 항목에 담기는 값의 총 글자수가 48자(예- uploads\avatars\89a7577a465d529796065b886a8cd7ff ) 로 고정되어 있어서 48자 여부(사이트직접가입계정/GitHub계정)에 따라 아바타이미지 불러오는 주소값을 다르게 식별하도록 처리함
+          //- 자체보완완료 --- ★★★ --- 기반코드1 middlewares.js 내의 export const avatarUpload = multer({ dest: 'uploads/avatars/', limits: { fileSize: 3000000, }, });
+          //- 자체보완완료 --- ★★★ --- 기반코드2 edit-profile.pug 내의 label(for='avatarSection') Avatar 와 input(id='avatarSection', name='avatarByMulter', type='file', accept='image/*')
         if !loggedInUserDb.avatarUrl
           span.header__avatar 😊
-        else
+        else if loggedInUserDb.avatarUrl.length == 48
           img.header__avatar(src='/' + loggedInUserDb.avatarUrl)
+        else
+          img.header__avatar(src=loggedInUserDb.avatarUrl)
 
       else
         li 
