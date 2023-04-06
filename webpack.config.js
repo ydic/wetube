@@ -71,7 +71,8 @@ module.exports = {
     // [ WebPack 문법 ] ★★★★★ entry 진입점 항목을 다원화 하여 output 항목의 설정대로 bundle 처리되는 코드 파일을 다원화 하는 이유는 예- videoPlayer 기능에 관한 코드는 검색 페이지 화면에서 로드 될 필요가 없고 영상 시청 페이지 화면에서만 로드되면 되기 때문(즉, 비디오 페이지에 갔을 때만 비디오 플레이어 코드를 로드 시킴)
     // [ WebPack 문법 ] 즉, 여러 다른 파일들을 WebPack 으로 포함시키는 방법에 해당함
     main: "./src/client/js/main.js",
-    videoPlayer: "./src/client/js/videoPlayer.js"
+    videoPlayer: "./src/client/js/videoPlayer.js",
+    recorder: "./src/client/js/recorder.js"
   },
 
   // [ WebPack 문법 ] 실제 배포시에는 mode: "production" 으로 설정요 / 개발시에는 mode: "development" 설정하여 압축되지 않은 코드 형태로 코드를 다룰 수 있음

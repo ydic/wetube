@@ -4,6 +4,11 @@
 extends base.pug
 
 block content
+
+  //- [ HTML 문법 ] 카메라 녹화 기능 동작시키는 프론트엔드단 버튼
+  div
+    button#startBtn Start Recording
+
   //- videoController.js 코드 내의 postUpload 컨트롤러에서 try {} catch {} 문법으로 잡아낸 오류가 있을 경우, upload.pug 템플릿에서 에러 메시지를 받을 수 있도록 { errorMessage: error._message } 형태로 보내줌
   if errorMessage
     span=errorMessage
@@ -31,3 +36,8 @@ block content
     input(name="hashtags", type="text", placeholder="Hashtags, separated by comma.", required)
     
     input(type="submit" value="Upload Video")
+  
+block scripts
+  //- [ Web API 문법 ] 스트림 데이터 다루는 코드가 담긴 recorder.js 파일을 upload.pug 에서 호출하여 카메라 녹화 기능 적용
+  //- [ Web API 문법 ] 즉, await navigator.mediaDevices.getUserMedia({ audio: true, video: true,})
+  script(src="/static/js/recorder.js")

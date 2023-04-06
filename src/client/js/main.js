@@ -16,4 +16,7 @@ import "../scss/styles.scss";
 // alert("/client/js/main.js is transformed to bundled code by WebPack");
 
 // console.log("hi");
-console.log('main');
+console.log('main.js --- base.pug 확인용');
+
+// [ regenerator-runtime 문법 ] 프론트엔드단에서 async / await 사용하려면(즉, recorder.js 파일 내의 async / await 문법) regenerator-runtime 필설치 해야 한다고?
+// import regeneratorRuntime from "regenerator-runtime";

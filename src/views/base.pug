@@ -37,6 +37,13 @@ html(lang="ko")
           //- [ WebPack & Pug 문법 ] base.pug 가 bundle 처리된 /assets/js/main.js 파일을 불러올 수 있도록 연결해야 함 script(src='/static/js/main.js')
           //- script(src='/static/js/main.js')
 
+    //- [ WebPack & 시큐어 보안 코딩 & Express 라이브러리 문법 ] webpack.config.js 설정을 마쳤다면 server.js 에서 express.static('노출시키려는 폴더명') 코드로(즉, app.use("/static", express.static("assets")); 코드) Express를 통해 assets 폴더 공개하기 (즉, 기본적으로 폴더들은 비공개이므로)
+    //- [ WebPack & 시큐어 보안 코딩 & Express 라이브러리 문법 ] base.pug 내의 script(src="static/js/main.js") 코드 통해 main.js 내의 import regeneratorRuntime from "regenerator-runtime"; 코드가 모든 pug 파일에 기본 반영되어 프론트엔드단에서 (즉, recorder.js 파일 내의) async / await 동작하도록 만듦(? 그때는 필요했고 지금은 없어도 된다?)
+    //- [ WebPack & 시큐어 보안 코딩 & Express 라이브러리 문법 ] webpack.config.js 내의 entry 에 main: "./src/client/js/main.js", 코드 주입한 후, path: path.resolve(__dirname, "assets") 코드 통해 assets 폴더 내에 번들된 output 결과물이 생성되고, app.use("/static", express.static("assets")); 코드 통해 assets 폴더를 /static/어쩌구 주소값 형태로 라우트하여 접근하도록 설정했음
+    //- 재확인요 --- ★★★ --- main.js 파일을 base.pug 내의 block scripts 하위값으로 호출하지 않고 동일한 계층 레벨로 코드를 작성하여 모든 pug 파일에 기본 반영됨(즉, block scripts 하위값으로 main.js 호출하는 코드를 적으면, 다른 pug 파일에서 extends base.pug 한 이후에 block scripts 형식으로 명기한 pug 파일들에 한해서만 main.js 호출이 유효하기 때문??? )
+    //- 단지, 모든 pug 단 파일에 regenerator-runtime 기본 적용하려는 차원으로 base.pug 상에 main.js 호출?
+    //- script(src="/static/js/main.js")
+
     //- [ WebPack 문법 ] ★★★★★ entry 진입점 항목을 다원화 하여 output 항목의 설정대로 bundle 처리되는 코드 파일을 다원화 하는 이유는 예- videoPlayer 기능에 관한 코드는 검색 페이지 화면에서 로드 될 필요가 없고 영상 시청 페이지 화면에서만 로드되면 되기 때문(즉, 비디오 페이지에 갔을 때만 비디오 플레이어 코드를 로드 시킴)
     //- [ WebPack 문법 & Pug 문법 ] ★★★★★ webpack.config.js 에서 bundle 처리된 코드 결과물이 브라우저단에 반영된 상태는 아니므로 pug페이지들에 html 기본 구성 골격을 리턴해 주는 extends base.pug 파일 내에서 block 태그(예- block scripts)를 만들어 각 pug페이지별 용도에 맞게 script(src="") 형식의 코드를 통해 목적에 맞는 bundle 처리된 코드를 pug 페이지 내로 불러와야 함
     //- [Pug 문법] block을 통해 base.pug 레이아웃 기반으로 html 내용 재구성
