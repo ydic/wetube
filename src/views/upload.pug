@@ -5,8 +5,13 @@ extends base.pug
 
 block content
 
-  //- [ HTML 문법 ] 카메라 녹화 기능 동작시키는 프론트엔드단 버튼
   div
+    //- [ HTML 문법 ] recoder.js 내의 video.srcObject = stream; video.play(); 코드 통해 카메라 화면 보여주기
+    //- [ Pug 문법 ] 비디오의 source 속성값을 video(src='') 형태와 같이 명시하지 않는 이유는 watch.pug 에서와는 다르게 recorder.js 내의 await navigator.mediaDevices.getUserMedia({}) 코드 통해 얻어지는 카메라 데이터 스트림값이 비디오의 source 로 활용될 것이기 때문
+    video#preview
+
+    //- [ HTML 문법 ] 카메라 녹화 기능 동작시키는 프론트엔드단 버튼
+    //- button#flip-button Front/Rear
     button#startBtn Start Recording
 
   //- videoController.js 코드 내의 postUpload 컨트롤러에서 try {} catch {} 문법으로 잡아낸 오류가 있을 경우, upload.pug 템플릿에서 에러 메시지를 받을 수 있도록 { errorMessage: error._message } 형태로 보내줌
