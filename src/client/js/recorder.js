@@ -1,5 +1,14 @@
 // alert('record');
 
+
+// [ FFmpeg.WASM 문법 ] 비디오 변환(.webm -> .mp4) 위해 브라우저에서 사용자 컴퓨터의 처리 능력을 사용함(즉, 백엔드 서버단의 처리 능력을 사용하는 것이 아님)
+// [ FFmpeg.WASM 문법 ] npm install @ffmpeg/ffmpeg @ffmpeg/core
+// [ FFmpeg.WASM 문법 ] https://github.com/ffmpegwasm/ffmpeg.wasm
+// [ FFMpeg.WASM 문법 ] https://ffmpeg.org/ffmpeg.html
+// [ FFmpeg.WASM 문법 ] WebAssembly 자체를 본 실습에서 다루지 않으며, 단지 WebAssembly 로 컴파일 되는 코드(즉, FFmpeg.WASM)를 다룸
+// [ FFMpeg.WASM 문법 ] WebAssembly 통해 프론트엔드단에서 Javascript 외의 다른 종류의 프로그램(즉, 실행 비용 큰 프로그램) 사용 가능해짐
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+
 const startBtn = document.querySelector('#startBtn');
 const video = document.querySelector('#preview');
 
@@ -25,7 +34,31 @@ const handleReadyToStart = () => {
     video.play();
 }
 
-const handleDownload = () => {
+const handleDownload = async () => {
+
+    // [ FFmpeg.WASM 문법 ] 비디오 변환(.webm -> .mp4) 위해 브라우저에서 사용자 컴퓨터의 처리 능력을 사용함(즉, 백엔드 서버단의 처리 능력을 사용하는 것이 아님)
+    // [ FFmpeg.WASM 문법 ] npm install @ffmpeg/ffmpeg @ffmpeg/core
+    // [ FFmpeg.WASM 문법 ] https://github.com/ffmpegwasm/ffmpeg.wasm
+    // [ FFmpeg.WASM 문법 ] WebAssembly 자체를 본 실습에서 다루지 않으며, 단지 WebAssembly 로 컴파일 되는 코드(즉, FFmpeg.WASM)를 다룸
+    // [ FFMpeg.WASM 문법 ] WebAssembly 통해 프론트엔드단에서 Javascript 외의 다른 종류의 프로그램(즉, 실행 비용 큰 프로그램) 사용 가능해짐
+    const ffmpeg = createFFmpeg({ 
+        // [ FFMpeg.WASM 문법 ] log: true 통해 FFmpeg.WASM 작동 상태를 콘솔에서 확인
+        log: true 
+    });
+
+    // [ FFMpeg.WASM 문법 ] await ffmpeg.load() 통해 사용자 컴퓨터에서 본 소프트웨어 사용 가능하도록 설정함 When calling ffmpeg.load(), by default it looks for http://localhost:3000/node_modules/@ffmpeg/core/dist/ to download essential files (ffmpeg-core.js, ffmpeg-core.wasm, ffmpeg-core.worker.js). It is necessary to make sure you have those files served there.
+    await ffmpeg.load();
+
+    // [ FFMpeg.WASM 문법 ] ffmpeg.FS('writeFile', ) 통해 FFmpeg 라는 가상 영역에 파일 생성 (즉, 실존하진 않아도 폴더/파일이 컴퓨터 메모리에 저장된 상태이므로 프론트엔드에 파일 생성됨)
+    // [ FFMpeg.WASM 문법 ] await fetchFile(videoFile) 통해 파일 생성 시 파일 내용을 이룰 binary data 값이 들어있는 videoFile (즉, blob 파일)을 활용함
+    ffmpeg.FS('writeFile', 'recording.webm', await fetchFile(videoFile));
+
+    // [ FFMpeg.WASM 문법 ] https://ffmpeg.org/ffmpeg.html
+    // [ FFMpeg.WASM 문법 ] -i url (input) --- input file url
+    // [ FFMpeg.WASM 문법 ] -r[:stream_specifier] fps (input/output,per-stream)
+    // [ FFMpeg.WASM 문법 ] await ffmpeg.run('-i', 가상 생성한 파일의 이름, '-r', 초당프레임, 변환된 결과물에 부여할 파일명); 통해 가상 파일 시스템 상에 변환된 결과물(즉, output.mp4 파일) 생성됨
+    await ffmpeg.run('-i', 'recording.webm', '-r', '60', 'output.mp4');
+
     const a = document.createElement('a');
 
     // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
@@ -89,7 +122,7 @@ const handleStart = () => {
         // console.log(e); // 녹화된 영상을 비롯한 각종 데이터가 담긴 BlobEvent 객체
         console.log('event.data --- ', event.data); // BlobEvent 객체 내의 Blob 객체(즉, 녹화된 영상)
 
-        // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일을 가리키는 URL 생성
+        // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일(즉, binary data)을 가리키는 URL 생성
         // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 생성된 URL 은 브라우저 메모리 영역에서만 이용 가능 (즉, 웹사이트 상에 존재하는 URL 속성이 아님)
         // [ Web API 문법 ] 즉, 실제 호스팅 URL 만든 것이 아니라 브라우저 메모리 상에 녹화된 영상 파일을 저장해 두고, 브라우저가 그 파일에 접글할 수 있는 URL(즉, 주소값) 을 발행해 주었음
         videoFile = URL.createObjectURL(event.data);
