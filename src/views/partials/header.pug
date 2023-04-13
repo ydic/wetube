@@ -68,7 +68,10 @@ header
         else if loggedInUserDb.avatarUrl.length == 48
           img.header__avatar(src='/' + loggedInUserDb.avatarUrl)
         else
-          img.header__avatar(src=loggedInUserDb.avatarUrl)
+          //- [ Javascript 문법 ] 오류 - Uncaught (in promise) ReferenceError: SharedArrayBuffer is not defined
+          //- [ Javascript 문법 ] 오류 해결(2/2) - And add crossorigin to the github avatar in header.pug
+          //- img.header__avatar(src=loggedInUserDb.avatarUrl)
+          img.header__avatar(src=loggedInUserDb.avatarUrl, crossorigin)
 
       else
         li 

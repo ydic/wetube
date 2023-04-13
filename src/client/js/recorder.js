@@ -59,19 +59,49 @@ const handleDownload = async () => {
     // [ FFMpeg.WASM 문법 ] await ffmpeg.run('-i', 가상 생성한 파일의 이름, '-r', 초당프레임, 변환된 결과물에 부여할 파일명); 통해 가상 파일 시스템 상에 변환된 결과물(즉, output.mp4 파일) 생성됨
     await ffmpeg.run('-i', 'recording.webm', '-r', '60', 'output.mp4');
 
+    // [ FFMpeg.WASM 문법 ] ffmpeg.FS('readFile', ) 통해 브라우저 메모리 상의 output.mp4 파일 불러오기
+    // [ FFMpeg.WASM 문법 ] mp4File 은 이상한 숫자들로 구성된 한 개의 배열(즉, Uint8Array 자료형)이고, 배열의 각 요소값은 실제 파일(즉, videoFile)의 데이터임
+    // [ FFMpeg.WASM 문법 ] Uint8Array / 양의 정수(Unsigned integer)로 된 배열 
+    // [ FFMpeg.WASM 문법 ] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
+    const mp4File = ffmpeg.FS('readFile', 'output.mp4');
+    console.log('★★★ handleDownload --- mp4File ---', mp4File);
+
+    // [ FFMpeg.WASM 문법 & Web API 문법 ] mp4File.buffer 로부터 Blob 만들기 (주의 - ArrayBuffer 데이터는 활용가능 / Unit8Array 데이터는 활용불가)
+    // [ FFMpeg.WASM 문법 & Web API 문법 ] 핵심 - binary data 사용하려면 buffer 를 사용해야 함
+    // [ FFMpeg.WASM 문법 ] raw binary data 나타내는 Object 인 mp4File.buffer 통해 실제 파일(즉, videoFile)의 데이터가 담긴 mp4File 배열의 binary data 에 접근 가능함(즉, 실제 영상을 나타내는 bytes 배열)
+    // [ FFMpeg.WASM 문법 ] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer
+    // [ FFMpeg.WASM 문법 & Web API 문법 ] https://developer.mozilla.org/en-US/docs/Web/API/Blob
+    // [ FFMpeg.WASM 문법 & Web API 문법 ] Blob 은 Javascript 세계에서 binary 정보를 가지고 있는 파일 같은 객체를 만드는 방법임
+    // [ FFMpeg.WASM 문법 & Web API 문법 ] Blob 객체는 파일류의 불변하는 미가공 데이터를 나타냅니다. 텍스트와 이진 데이터의 형태로 읽을 수 있음
+    // [ FFMpeg.WASM 문법 & Web API 문법 ] Blob() 생성자 통해 블롭이 아닌 객체와 데이터로 Blob을 생성함
+    console.log('★★★ handleDownload --- mp4File.buffer ---', mp4File.buffer);
+    const mp4Blob = new Blob(
+        [ mp4File.buffer ], // 배열 안에서 배열 받기
+        { type: 'video/mp4' }
+    );
+
+    console.log('★★★ typeof mp4Blob ----', typeof mp4Blob); // 오브젝트 자료형
+    console.log('★★★ mp4Blob --- ', mp4Blob);
+
+    // [ Web API 문법 ] URL.createObjectURL(mp4Blob); 통해 mp4 자료형으로 변환된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
+    console.log('★★★ mp4Url --- ', mp4Url);
+    const mp4Url = URL.createObjectURL(mp4Blob);
+
     const a = document.createElement('a');
 
     // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
-    // [ Javascript 문법 ] a.href = videoFile; 통해, 사용자가 startBtn.innerText = 'Download Recording'; 클릭 시, 녹화된 영상 파일을 가리키는 URL 값을 가짜 a태그의 href 속성에 주입함
+    // [ Javascript 문법 ] a.href = mp4Url; (폐기 - a.href = videoFile;) 통해, 사용자가 startBtn.innerText = 'Download Recording'; 클릭 시, 녹화된 영상 파일을 가리키는 URL 값을 가짜 a태그의 href 속성에 주입함
     // [ Web API 문법 ] a태그 href 속성에 담기는 URL 값 예- blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3
-    a.href = videoFile;
-
+        // a.href = videoFile;   
+    a.href = mp4Url;
+    
     // [ Javascript 문법 ] a태그에 .download 속성 적용을 통해, a.click(); 통해 a태그 클릭을 가짜로 발생시켜, 녹화된 영상이 다운로드 되도록 함
     // [ Javascript 문법 ] a.download = 'MyRecording.webm'; 라고 사전 지정했으므로 파일명은 MyRecording / 파일확장자는 .webm 으로 저장됨
     // [ Javascript 문법 ] 즉, 사용자가 직접 영상 요소 위에서 마우스 우클릭하여 저장하듯이 기능하도록, a.click(); 통해 a태그 클릭을 가짜로 발생시켜 .download 속성을 동작시킴
     // [ Web API 문법 ] a태그의 href 속성과 download 속성에 담기는 값 예- <a href="blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3" download="MyRecording.webm"></a>
-    a.download = 'MyRecording.webm';
-    // [ FFmpeg & Web API 문법 ] 브라우저단 비호환으로 폐기된 코드 a.download = 'MyRecording.mp4';
+        // a.download = 'MyRecording.webm';
+    // [ FFmpeg.WASM & Web API 문법 ] 저장시 표기될 파일명과 확장자를 'MyRecording.mp4' 라고 지정함
+    a.download = 'MyRecording.mp4';
     
     // [ Javascript 문법 ] 가짜 클릭 발생시키는 용도의 a태그이므로, 프론트엔드단 전후맥락/부모관계 전혀 따질 필요없이 HTML body 단에 a태그 생성시키기
     document.body.appendChild(a);
@@ -120,13 +150,13 @@ const handleStart = () => {
     
         // console.log('recording done --- ');
         // console.log(e); // 녹화된 영상을 비롯한 각종 데이터가 담긴 BlobEvent 객체
-        console.log('event.data --- ', event.data); // BlobEvent 객체 내의 Blob 객체(즉, 녹화된 영상)
+        console.log('★★★ event.data --- ', event.data); // BlobEvent 객체 내의 Blob 객체(즉, 녹화된 영상)
 
         // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일(즉, binary data)을 가리키는 URL 생성
         // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 생성된 URL 은 브라우저 메모리 영역에서만 이용 가능 (즉, 웹사이트 상에 존재하는 URL 속성이 아님)
         // [ Web API 문법 ] 즉, 실제 호스팅 URL 만든 것이 아니라 브라우저 메모리 상에 녹화된 영상 파일을 저장해 두고, 브라우저가 그 파일에 접글할 수 있는 URL(즉, 주소값) 을 발행해 주었음
         videoFile = URL.createObjectURL(event.data);
-        console.log('URL.createObjectURL(event.data); --- ', videoFile);
+        console.log('★★★ URL.createObjectURL(event.data); --- ', videoFile);
 
         // [ Web API 문법 ] video.src = videoFile; 통해서 video 태그(즉, HTML) 에 대해 녹화된 영상 파일을 주입하고, video.srcObject = null; 통해서 기존에 연결돼 있던 실시간 카메라 스트림 데이터는 차단함
         // [ Web API 문법 ] 코드 적용 결과 --- <video id="preview" src="blob:http://localhost:4000/dcefb7c0-fd2c-4f1a-b44e-e00b4e60717b" loop=""></video>
@@ -191,7 +221,7 @@ const init = async () => {
     // [ regenerator-runtime 문법 ] 프론트엔드단에서 async / await 사용하려면 regenerator-runtime 필설치 해야 한다고? console.log(stream); 확인시 프론트엔드 브라우저단 콘솔에서 regeneratorRuntime is not defined 오류(즉, async / await) 감지되지 않음(? 그때는 필요했고 지금은 없어도 된다?)
     // [ regenerator-runtime 문법 ] npm i regenerator-runtime
     // [ regenerator-runtime 문법 ] https://www.npmjs.com/package/regenerator-runtime
-    console.log(stream);
+    console.log('★★★ init --- stream --- ', stream);
 }
 
 init();

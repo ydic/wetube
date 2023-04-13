@@ -41,6 +41,14 @@ app.set("view engine", "pug");
 // app.set('views', 'src/views');
 app.set("views", process.cwd() + "/src/views");
 
+// [ Javascript 문법 ] 오류 - Uncaught (in promise) ReferenceError: SharedArrayBuffer is not defined
+// [ Javascript 문법 ] 오류 해결(1/2) - Add this before your routers.
+app.use((req, res, next) => {
+  res.header("Cross-Origin-Embedder-Policy", "require-corp");
+  res.header("Cross-Origin-Opener-Policy", "same-origin");
+  next();
+});
+
 // route들을 사용하기 전에 middleware를 사용해야 함
 app.use(logger);
 
