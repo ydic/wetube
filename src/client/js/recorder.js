@@ -153,6 +153,21 @@ const handleDownload = async () => {
 
     thumbA.click();
 
+    // [ FFMpeg.WASM 문법 ] 브라우저 속도 저하 방지해야 하므로 브라우저 메모리 상의 파일 삭제하여 링크 해제
+    // [ FFMpeg.WASM 문법 ] * ffmpeg.FS('unlink', 'video.map'): delete file from MEMFS(In-memory file-system).
+    ffmpeg.FS('unlink', files.output);
+    ffmpeg.FS('unlink', files.thumb);
+    ffmpeg.FS('unlink', files.input);
+    
+    // [ FFMpeg.WASM 문법 ] 브라우저 속도 저하 방지해야 하므로 브라우저 메모리 상의 URL 값 삭제
+    // [ FFMpeg.WASM 문법 ] URL.revokeObjectURL(); 통해, URL.createObjectURL(); 코드로 생성했던 브라우저 메모리상의 URL 값을 삭제함
+    // [ FFMpeg.WASM 문법 ] 브라우저 상에 소스파일 videoFile 의 URL (즉, webm Blob URL 값) / mp4Url / thumbUrl
+    URL.revokeObjectURL(videoFile);
+    URL.revokeObjectURL(mp4Url);
+    URL.revokeObjectURL(thumbUrl);
+
+    console.log(`★★★ videoFile --- ${videoFile} / mp4Url --- ${mp4Url} / thumbUrl --- ${thumbUrl}`);
+
     // 자체보완함 --- ★★★ --- 녹화된 영상 다운로드 후에 새로운 녹화가 가능한 환경으로 재세팅함 (즉, 녹화 버튼 UI 및 비디오 스트림 데이터)
     handleReadyToStart();
 }
