@@ -1,6 +1,5 @@
 // alert('record');
 
-
 // [ FFmpeg.WASM 문법 ] 비디오 변환(.webm -> .mp4) 위해 브라우저에서 사용자 컴퓨터의 처리 능력을 사용함(즉, 백엔드 서버단의 처리 능력을 사용하는 것이 아님)
 // [ FFmpeg.WASM 문법 ] npm install @ffmpeg/ffmpeg @ffmpeg/core
 // [ FFmpeg.WASM 문법 ] https://github.com/ffmpegwasm/ffmpeg.wasm
@@ -18,10 +17,16 @@ let stream;
 // [ Javascript 문법 ] MediaRecorder 값을 받는 recorder 변수를 여러 함수에서 용도에 맞게 사용하기 위해 전역 변수인 let recorder; 형태로 코드 최상단에 선언하는 방식으로 개선함
 let recorder;
 
-
 // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
 // [ Javascript 문법 ] 녹화된 영상 파일을 가리키는 URL 값을 여러 함수에서 용도에 맞게 사용하기 위해 전역 변수인 let videoFile; 형태로 코드 최상단에 선언하는 방식으로 개선함
 let videoFile;
+
+// [ Javascript 문법 ] Object 자료형에 상수 변수 담아 관리하기 (즉, 오타방지용)
+const files = {
+    input: 'recording.webm',
+    output: 'output.mp4',
+    thumb: 'thumbnail.jpg',
+}
 
 // 자체보완함 --- ★★★ --- 녹화된 영상 다운로드 후에 새로운 녹화가 가능한 환경으로 초기화 되도록 자체보완함 (즉, 녹화 버튼 UI 및 비디오 스트림 데이터)
 const handleReadyToStart = () => {
@@ -51,19 +56,19 @@ const handleDownload = async () => {
 
     // [ FFMpeg.WASM 문법 ] ffmpeg.FS('writeFile', ) 통해 FFmpeg 라는 가상 영역에 파일 생성 (즉, 실존하진 않아도 폴더/파일이 컴퓨터 메모리에 저장된 상태이므로 프론트엔드에 파일 생성됨)
     // [ FFMpeg.WASM 문법 ] await fetchFile(videoFile) 통해 파일 생성 시 파일 내용을 이룰 binary data 값이 들어있는 videoFile (즉, blob 파일)을 활용함
-    ffmpeg.FS('writeFile', 'recording.webm', await fetchFile(videoFile));
+    ffmpeg.FS('writeFile', files.input, await fetchFile(videoFile));
 
     // [ FFMpeg.WASM 문법 ] https://ffmpeg.org/ffmpeg.html
     // [ FFMpeg.WASM 문법 ] -i url (input) --- input file url
     // [ FFMpeg.WASM 문법 ] -r[:stream_specifier] fps (input/output,per-stream)
     // [ FFMpeg.WASM 문법 ] await ffmpeg.run('-i', 가상 생성한 파일의 이름, '-r', 초당프레임, 변환된 결과물에 부여할 파일명); 통해 가상 파일 시스템 상에 변환된 결과물(즉, output.mp4 파일) 생성됨
-    await ffmpeg.run('-i', 'recording.webm', '-r', '60', 'output.mp4');
+    await ffmpeg.run('-i', files.input, '-r', '60', files.output);
 
     // [ FFMpeg.WASM 문법 ] ffmpeg.FS('readFile', ) 통해 브라우저 메모리 상의 output.mp4 파일 불러오기
     // [ FFMpeg.WASM 문법 ] mp4File 은 이상한 숫자들로 구성된 한 개의 배열(즉, Uint8Array 자료형)이고, 배열의 각 요소값은 실제 파일(즉, videoFile)의 데이터임
     // [ FFMpeg.WASM 문법 ] Uint8Array / 양의 정수(Unsigned integer)로 된 배열 
     // [ FFMpeg.WASM 문법 ] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
-    const mp4File = ffmpeg.FS('readFile', 'output.mp4');
+    const mp4File = ffmpeg.FS('readFile', files.output);
     console.log('★★★ handleDownload --- mp4File ---', mp4File);
 
     // [ FFMpeg.WASM 문법 & Web API 문법 ] mp4File.buffer 로부터 Blob 만들기 (주의 - ArrayBuffer 데이터는 활용가능 / Unit8Array 데이터는 활용불가)
@@ -84,8 +89,8 @@ const handleDownload = async () => {
     console.log('★★★ mp4Blob --- ', mp4Blob);
 
     // [ Web API 문법 ] URL.createObjectURL(mp4Blob); 통해 mp4 자료형으로 변환된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
-    console.log('★★★ mp4Url --- ', mp4Url);
     const mp4Url = URL.createObjectURL(mp4Blob);
+    console.log('★★★ mp4Url --- ', mp4Url);
 
     const a = document.createElement('a');
 
@@ -108,6 +113,45 @@ const handleDownload = async () => {
     
     // [ Javascript 문법 ] a.click(); 통해 a태그 클릭을 가짜로 발생시켜, 녹화된 영상이 다운로드 되도록 함
     a.click();
+
+    // [ FFMpeg.WASM 문법 ] await ffmpeg.run('-i', files.input, '-ss', '00:00:01', '-frames:v', '1', files.thumb); 통해 files.input(즉, 녹화된 영상인 output.webm ) 영상의 1초 지점(즉,  '-ss', '00:00:01' )에서 첫 프레임의 스크린샷(즉, '-frames:v', '1')을 잡아내어 thumbnail.japg (즉, files.thumb) 라고 작명한 jpg 파일을 생성함
+    await ffmpeg.run(
+        '-i', files.input, 
+        
+        // https://ffmpeg.org/ffmpeg.html
+        // [ FFMpeg.WASM 문법 ] -ss position (input/output)
+        // [ FFMpeg.WASM 문법 ] position must be a time duration specification
+        '-ss', '00:00:01', 
+
+        // [ FFMpeg.WASM 문법 ] -vframes number (output)
+        // [ FFMpeg.WASM 문법 ] Set the number of video frames to output. This is an obsolete alias for -frames:v, which you should use instead.
+        '-frames:v', '1', 
+        
+        files.thumb
+    );
+    
+    // [ FFMpeg.WASM 문법 ] ffmpeg.FS('readFile', ) 통해 이미지 데이터를 읽어오면 Uint8Array 자료형(자바스크립트가 제공)의 데이터가 됨
+    const thumbFile = ffmpeg.FS('readFile', files.thumb);
+    
+    // [ FFMpeg.WASM 문법 ] Uint8Array 자료형(자바스크립트가 제공)으로 된 이미지 데이터 내의 buffer 값(즉, binary 파일) 기반으로 Blob 자료형(유사 파일 객체)으로 변환함
+    const thumbBlob = new Blob(
+        [ thumbFile.buffer ], // binary 파일
+        { type: 'image/jpg' }
+    );
+
+    // [ Web API 문법 ] URL.createObjectURL(thumbBlob); 통해 jpg 자료형으로 변환된 이미지 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
+    // [ Web API 문법 ] 즉, Blob 자료형(유사 파일 객체) 값인 thumbBlob 을 브라우저 메모리상의 URL 값으로 변환 생성
+    const thumbUrl = URL.createObjectURL(thumbBlob);
+
+    const thumbA = document.createElement('a');
+
+    thumbA.href = thumbUrl;
+
+    thumbA.download = 'MyThumbnail.jpg';
+
+    document.body.appendChild(thumbA);
+
+    thumbA.click();
 
     // 자체보완함 --- ★★★ --- 녹화된 영상 다운로드 후에 새로운 녹화가 가능한 환경으로 재세팅함 (즉, 녹화 버튼 UI 및 비디오 스트림 데이터)
     handleReadyToStart();
