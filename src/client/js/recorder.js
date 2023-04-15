@@ -8,7 +8,7 @@
 // [ FFMpeg.WASM 문법 ] WebAssembly 통해 프론트엔드단에서 Javascript 외의 다른 종류의 프로그램(즉, 실행 비용 큰 프로그램) 사용 가능해짐
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 
-const startBtn = document.querySelector('#startBtn');
+const actionBtn = document.querySelector('#actionBtn');
 const video = document.querySelector('#preview');
 
 // [ Javascript 문법 ] stream 변수에 든 카메라 데이터 스트림값을 여러 함수에서 각 용도에 맞게 사용해야 하므로, 특정한 함수 내에서 선언/정의 상태였던 const stream = await navigator.mediaDevices.getUserMedia({}) 를 전역변수 let stream 형태로 선언하고, stream = await navigator.mediaDevices.getUserMedia({}) 형태로 정의함
@@ -28,23 +28,23 @@ const files = {
     thumb: 'thumbnail.jpg',
 }
 
-// 자체보완함 --- ★★★ --- 녹화된 영상 다운로드 후에 새로운 녹화가 가능한 환경으로 초기화 되도록 자체보완함 (즉, 녹화 버튼 UI 및 비디오 스트림 데이터)
-const handleReadyToStart = () => {
-    startBtn.innerText = 'Start Recording';
-    startBtn.removeEventListener('click', handleDownload);
-    startBtn.addEventListener('click', handleStart);
-        
-    video.src = null;
-    video.srcObject = stream;
-    video.play();
-}
+        // 자체보완함 --- ★★★ --- 녹화된 영상 다운로드 후에 새로운 녹화가 가능한 환경으로 초기화 되도록 자체보완함 (즉, 녹화 버튼 UI 및 비디오 스트림 데이터)
+        // const handleReadyToStart = () => {
+        //     actionBtn.innerText = 'Start Recording';
+        //     actionBtn.removeEventListener('click', handleDownload);
+        //     actionBtn.addEventListener('click', handleStart);
+                
+        //     video.src = null;
+        //     video.srcObject = stream;
+        //     video.play();
+        // }
 
 // [ Javascript 문법 ] 녹화본/스크린샷 다운로드 수행 위한 가짜 클릭용 a태그 동작 코드 함수화
 const downloadFile = (fileUrl, fileName) => {
     const a = document.createElement('a');
     
     // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
-    // [ Javascript 문법 ] a.href = mp4Url; (폐기 - a.href = videoFile;) 통해, 사용자가 startBtn.innerText = 'Download Recording'; 클릭 시, 녹화된 영상 파일을 가리키는 URL 값을 가짜 a태그의 href 속성에 주입함
+    // [ Javascript 문법 ] a.href = mp4Url; (폐기 - a.href = videoFile;) 통해, 사용자가 actionBtn.innerText = 'Download Recording'; 클릭 시, 녹화된 영상 파일을 가리키는 URL 값을 가짜 a태그의 href 속성에 주입함
     // [ Web API 문법 ] a태그 href 속성에 담기는 URL 값 예- blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3
         // a.href = videoFile;   
         // a.href = mp4Url;
@@ -68,6 +68,10 @@ const downloadFile = (fileUrl, fileName) => {
 }
 
 const handleDownload = async () => {
+
+    actionBtn.removeEventListener('click', handleDownload);
+    actionBtn.innerText = 'Transcoding';
+    actionBtn.disabled = true;
 
     // [ FFmpeg.WASM 문법 ] 비디오 변환(.webm -> .mp4) 위해 브라우저에서 사용자 컴퓨터의 처리 능력을 사용함(즉, 백엔드 서버단의 처리 능력을 사용하는 것이 아님)
     // [ FFmpeg.WASM 문법 ] npm install @ffmpeg/ffmpeg @ffmpeg/core
@@ -126,7 +130,7 @@ const handleDownload = async () => {
             // const a = document.createElement('a');
 
             // // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
-            // // [ Javascript 문법 ] a.href = mp4Url; (폐기 - a.href = videoFile;) 통해, 사용자가 startBtn.innerText = 'Download Recording'; 클릭 시, 녹화된 영상 파일을 가리키는 URL 값을 가짜 a태그의 href 속성에 주입함
+            // // [ Javascript 문법 ] a.href = mp4Url; (폐기 - a.href = videoFile;) 통해, 사용자가 actionBtn.innerText = 'Download Recording'; 클릭 시, 녹화된 영상 파일을 가리키는 URL 값을 가짜 a태그의 href 속성에 주입함
             // // [ Web API 문법 ] a태그 href 속성에 담기는 URL 값 예- blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3
             //     // a.href = videoFile;   
             // a.href = mp4Url;
@@ -202,16 +206,20 @@ const handleDownload = async () => {
 
     console.log(`★★★ videoFile --- ${videoFile} / mp4Url --- ${mp4Url} / thumbUrl --- ${thumbUrl}`);
 
+    actionBtn.innerText = 'Record Again';
+    actionBtn.disabled = false;
+    actionBtn.addEventListener('click', handleStart);
+
     // 자체보완함 --- ★★★ --- 녹화된 영상 다운로드 후에 새로운 녹화가 가능한 환경으로 재세팅함 (즉, 녹화 버튼 UI 및 비디오 스트림 데이터)
-    handleReadyToStart();
+    // handleReadyToStart();
 }
 
 const handleStop = () => {
     // [ Javascript 문법 ] .removeEventListener() 및 .addEventListner() 통해 Toggle 방식으로 동작하도록 UI 와 Event 구성
-    // [ Javascript 문법 ] (즉, startBtn 요소에 클릭이벤트 발생시, 실행시킬 함수가 교대로 교체되어 연계되도록 구성)
-    startBtn.innerText = 'Download Recording';
-    startBtn.removeEventListener('click', handleStop);
-    startBtn.addEventListener('click', handleDownload);
+    // [ Javascript 문법 ] (즉, actionBtn 요소에 클릭이벤트 발생시, 실행시킬 함수가 교대로 교체되어 연계되도록 구성)
+    actionBtn.innerText = 'Download Recording';
+    actionBtn.removeEventListener('click', handleStop);
+    actionBtn.addEventListener('click', handleDownload);
 
     // [ Web API & Javascript 문법 ] handleStop 함수에 recorder.stop(); 코드를 배치하여 녹화 중지 버튼 누르면 녹화 종료되도록 코드 수정함
     // [ Web API & Javascript 문법 ] 즉, 녹화 시작 버튼 누르고 10초 경과 후 setTimeout(() => { recorder.stop(); }, 10000) 코드 통해 녹화 종료시키는 방식은 폐기함
@@ -222,10 +230,10 @@ const handleStop = () => {
 const handleStart = () => {
 
     // [ Javascript 문법 ] .removeEventListener() 및 .addEventListner() 통해 Toggle 방식으로 동작하도록 UI 와 Event 구성
-    // [ Javascript 문법 ] (즉, startBtn 요소에 클릭이벤트 발생시, 실행시킬 함수가 교대로 교체되어 연계되도록 구성)
-    startBtn.innerText = 'Stop Recording';
-    startBtn.removeEventListener('click', handleStart);
-    startBtn.addEventListener('click', handleStop);
+    // [ Javascript 문법 ] (즉, actionBtn 요소에 클릭이벤트 발생시, 실행시킬 함수가 교대로 교체되어 연계되도록 구성)
+    actionBtn.innerText = 'Stop Recording';
+    actionBtn.removeEventListener('click', handleStart);
+    actionBtn.addEventListener('click', handleStop);
     
     // [ Web API 문법 ] 녹화 후 저장되게 만들거니까 녹화 작업 먼저 수행해야 함
     // [ Web API 문법 ] new MediaRecorder(stream) 통해 카메라 데이터 스트림 stream 값을 MediaRecorder 에 넣어줌
@@ -319,4 +327,4 @@ const init = async () => {
 
 init();
 
-startBtn.addEventListener('click', handleStart);
+actionBtn.addEventListener('click', handleStart);
