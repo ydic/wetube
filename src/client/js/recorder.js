@@ -39,6 +39,34 @@ const handleReadyToStart = () => {
     video.play();
 }
 
+// [ Javascript 문법 ] 녹화본/스크린샷 다운로드 수행 위한 가짜 클릭용 a태그 동작 코드 함수화
+const downloadFile = (fileUrl, fileName) => {
+    const a = document.createElement('a');
+    
+    // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
+    // [ Javascript 문법 ] a.href = mp4Url; (폐기 - a.href = videoFile;) 통해, 사용자가 startBtn.innerText = 'Download Recording'; 클릭 시, 녹화된 영상 파일을 가리키는 URL 값을 가짜 a태그의 href 속성에 주입함
+    // [ Web API 문법 ] a태그 href 속성에 담기는 URL 값 예- blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3
+        // a.href = videoFile;   
+        // a.href = mp4Url;
+        a.href = fileUrl;
+    
+    // [ Javascript 문법 ] a태그에 .download 속성 적용을 통해, a.click(); 통해 a태그 클릭을 가짜로 발생시켜, 녹화된 영상이 다운로드 되도록 함
+    // [ Javascript 문법 ] a.download = 'MyRecording.webm'; 라고 사전 지정했으므로 파일명은 MyRecording / 파일확장자는 .webm 으로 저장됨
+    // [ Javascript 문법 ] 즉, 사용자가 직접 영상 요소 위에서 마우스 우클릭하여 저장하듯이 기능하도록, a.click(); 통해 a태그 클릭을 가짜로 발생시켜 .download 속성을 동작시킴
+    // [ Web API 문법 ] a태그의 href 속성과 download 속성에 담기는 값 예- <a href="blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3" download="MyRecording.webm"></a>
+        // a.download = 'MyRecording.webm';
+        // [ FFmpeg.WASM & Web API 문법 ] 저장시 표기될 파일명과 확장자를 'MyRecording.mp4' 라고 지정함
+        // a.download = 'MyRecording.mp4';
+    a.download = fileName;
+
+    
+    // [ Javascript 문법 ] 가짜 클릭 발생시키는 용도의 a태그이므로, 프론트엔드단 전후맥락/부모관계 전혀 따질 필요없이 HTML body 단에 a태그 생성시키기
+    document.body.appendChild(a);
+    
+    // [ Javascript 문법 ] a.click(); 통해 a태그 클릭을 가짜로 발생시켜, 녹화된 영상이 다운로드 되도록 함
+    a.click();
+}
+
 const handleDownload = async () => {
 
     // [ FFmpeg.WASM 문법 ] 비디오 변환(.webm -> .mp4) 위해 브라우저에서 사용자 컴퓨터의 처리 능력을 사용함(즉, 백엔드 서버단의 처리 능력을 사용하는 것이 아님)
@@ -92,27 +120,30 @@ const handleDownload = async () => {
     const mp4Url = URL.createObjectURL(mp4Blob);
     console.log('★★★ mp4Url --- ', mp4Url);
 
-    const a = document.createElement('a');
+    // [ Javascript 문법 ] 녹화본/스크린샷 다운로드 수행 위한 가짜 클릭용 a태그 동작 코드 함수화
+    downloadFile(mp4Url, 'MyRecording.mp4');
 
-    // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
-    // [ Javascript 문법 ] a.href = mp4Url; (폐기 - a.href = videoFile;) 통해, 사용자가 startBtn.innerText = 'Download Recording'; 클릭 시, 녹화된 영상 파일을 가리키는 URL 값을 가짜 a태그의 href 속성에 주입함
-    // [ Web API 문법 ] a태그 href 속성에 담기는 URL 값 예- blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3
-        // a.href = videoFile;   
-    a.href = mp4Url;
-    
-    // [ Javascript 문법 ] a태그에 .download 속성 적용을 통해, a.click(); 통해 a태그 클릭을 가짜로 발생시켜, 녹화된 영상이 다운로드 되도록 함
-    // [ Javascript 문법 ] a.download = 'MyRecording.webm'; 라고 사전 지정했으므로 파일명은 MyRecording / 파일확장자는 .webm 으로 저장됨
-    // [ Javascript 문법 ] 즉, 사용자가 직접 영상 요소 위에서 마우스 우클릭하여 저장하듯이 기능하도록, a.click(); 통해 a태그 클릭을 가짜로 발생시켜 .download 속성을 동작시킴
-    // [ Web API 문법 ] a태그의 href 속성과 download 속성에 담기는 값 예- <a href="blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3" download="MyRecording.webm"></a>
-        // a.download = 'MyRecording.webm';
-    // [ FFmpeg.WASM & Web API 문법 ] 저장시 표기될 파일명과 확장자를 'MyRecording.mp4' 라고 지정함
-    a.download = 'MyRecording.mp4';
-    
-    // [ Javascript 문법 ] 가짜 클릭 발생시키는 용도의 a태그이므로, 프론트엔드단 전후맥락/부모관계 전혀 따질 필요없이 HTML body 단에 a태그 생성시키기
-    document.body.appendChild(a);
-    
-    // [ Javascript 문법 ] a.click(); 통해 a태그 클릭을 가짜로 발생시켜, 녹화된 영상이 다운로드 되도록 함
-    a.click();
+            // const a = document.createElement('a');
+
+            // // [ Web API 문법 ] URL.createObjectURL(event.data); 통해 녹화된 영상 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
+            // // [ Javascript 문법 ] a.href = mp4Url; (폐기 - a.href = videoFile;) 통해, 사용자가 startBtn.innerText = 'Download Recording'; 클릭 시, 녹화된 영상 파일을 가리키는 URL 값을 가짜 a태그의 href 속성에 주입함
+            // // [ Web API 문법 ] a태그 href 속성에 담기는 URL 값 예- blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3
+            //     // a.href = videoFile;   
+            // a.href = mp4Url;
+            
+            // // [ Javascript 문법 ] a태그에 .download 속성 적용을 통해, a.click(); 통해 a태그 클릭을 가짜로 발생시켜, 녹화된 영상이 다운로드 되도록 함
+            // // [ Javascript 문법 ] a.download = 'MyRecording.webm'; 라고 사전 지정했으므로 파일명은 MyRecording / 파일확장자는 .webm 으로 저장됨
+            // // [ Javascript 문법 ] 즉, 사용자가 직접 영상 요소 위에서 마우스 우클릭하여 저장하듯이 기능하도록, a.click(); 통해 a태그 클릭을 가짜로 발생시켜 .download 속성을 동작시킴
+            // // [ Web API 문법 ] a태그의 href 속성과 download 속성에 담기는 값 예- <a href="blob:http://localhost:4000/9904ec82-f144-4622-a96f-a93ca0314fb3" download="MyRecording.webm"></a>
+            //     // a.download = 'MyRecording.webm';
+            // // [ FFmpeg.WASM & Web API 문법 ] 저장시 표기될 파일명과 확장자를 'MyRecording.mp4' 라고 지정함
+            // a.download = 'MyRecording.mp4';
+            
+            // // [ Javascript 문법 ] 가짜 클릭 발생시키는 용도의 a태그이므로, 프론트엔드단 전후맥락/부모관계 전혀 따질 필요없이 HTML body 단에 a태그 생성시키기
+            // document.body.appendChild(a);
+            
+            // // [ Javascript 문법 ] a.click(); 통해 a태그 클릭을 가짜로 발생시켜, 녹화된 영상이 다운로드 되도록 함
+            // a.click();
 
     // [ FFMpeg.WASM 문법 ] await ffmpeg.run('-i', files.input, '-ss', '00:00:01', '-frames:v', '1', files.thumb); 통해 files.input(즉, 녹화된 영상인 output.webm ) 영상의 1초 지점(즉,  '-ss', '00:00:01' )에서 첫 프레임의 스크린샷(즉, '-frames:v', '1')을 잡아내어 thumbnail.japg (즉, files.thumb) 라고 작명한 jpg 파일을 생성함
     await ffmpeg.run(
@@ -142,16 +173,19 @@ const handleDownload = async () => {
     // [ Web API 문법 ] URL.createObjectURL(thumbBlob); 통해 jpg 자료형으로 변환된 이미지 파일을 가리키는 URL 생성(즉, 브라우저 메모리상 존재하는 URL 값)
     // [ Web API 문법 ] 즉, Blob 자료형(유사 파일 객체) 값인 thumbBlob 을 브라우저 메모리상의 URL 값으로 변환 생성
     const thumbUrl = URL.createObjectURL(thumbBlob);
+    
+    // [ Javascript 문법 ] 녹화본/스크린샷 다운로드 수행 위한 가짜 클릭용 a태그 동작 코드 함수화
+    downloadFile(thumbUrl, 'MyThumbnail.jpg');
 
-    const thumbA = document.createElement('a');
+            // const thumbA = document.createElement('a');
 
-    thumbA.href = thumbUrl;
+            // thumbA.href = thumbUrl;
 
-    thumbA.download = 'MyThumbnail.jpg';
+            // thumbA.download = 'MyThumbnail.jpg';
 
-    document.body.appendChild(thumbA);
+            // document.body.appendChild(thumbA);
 
-    thumbA.click();
+            // thumbA.click();
 
     // [ FFMpeg.WASM 문법 ] 브라우저 속도 저하 방지해야 하므로 브라우저 메모리 상의 파일 삭제하여 링크 해제
     // [ FFMpeg.WASM 문법 ] * ffmpeg.FS('unlink', 'video.map'): delete file from MEMFS(In-memory file-system).
