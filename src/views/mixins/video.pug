@@ -8,6 +8,7 @@ mixin videoMixin(videoItem)
     //- [ Javascript & 정규식 RegEx 문법 ] 수강생삽질구간 #14.6 --- ★★★ --- 방법1. Windows의 path는 백슬래시 (즉, \\ )를 사용
     //- [ Javascript & 정규식 RegEx 문법 ] videoController.js 내의 await Video.create({ thumbUrl: thumbByMulter[0].path.replace(/\\/g, '/'), 생략 })
     //- #14.6 ??? 질문 - src 속성이 아닌 background-image 속성을 사용한 이유는 무엇? 이것이 유일한 적용 조합 방법인지?
+    //- 코드보완요 --- ★★★ --- 카메라 녹화가 아닌 단일 영상 업로드 시에도 FFmpeg.WASM 통해 Thumbnail 추출되어 다운로드를 시키든, 업로드 버튼 클릭시 자동으로 해당 썸네일 이미지가 Video model 의 thumbUrl 에 저장되도록 코드 보완요
     div.video-mixin__thumb(
       style=`background-image: url(/${videoItem.thumbUrl});background-size:cover;background-position:center;`
     )

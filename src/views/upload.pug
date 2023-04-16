@@ -33,6 +33,7 @@ block content
       //- [ HTML 문법 ] 또는, <label> 안에 <input> 을 중첩시킬 수 있습니다. 이 경우 연관이 암시적이므로 for 및 id속성이 필요없습니다.
       label(for='videoSection') Video File    
       //- [ HTML 문법 ] input( required ) 속성 명시해서 파일 지정해야만 input(type='submit') 태그의 업로드 버튼이 동작하도록 제한함
+      //- 코드보완요 --- ★★★ --- 카메라 녹화가 아닌 단일 영상 업로드 시에도 FFmpeg.WASM 통해 Thumbnail 추출되어 다운로드를 시키든, 업로드 버튼 클릭시 자동으로 해당 썸네일 이미지가 Video model 의 thumbUrl 에 저장되도록 코드 보완요
       input(id='videoSection', name='videoByMulter', type='file', accept='video/*', required)
       
       //- HTML input reference 안에 minlength, maxlength 기능이 있음

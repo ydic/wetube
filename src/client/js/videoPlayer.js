@@ -205,6 +205,7 @@ const handleTimelineChange = (event) => {
   video.currentTime = value;
 }
 
+// ★★★★★ 코드보완요 ---- 4:3 비율 영상(640*480) fullscreen 시 16:9 비율로 전체화면 재생되는 현상 보완요
 // ★★★★★ 코드보완요 ---- 브라우저 창 최대화 아닌 크기에서 풀스크린 활성화하면, 현 브라우저 창 크기 기준으로 영상을 풀스크린 시키지 못하고 모니터 꽉 차게 풀스크린 시키는 버그 보완요
 const handleFullscreen = () => {
   

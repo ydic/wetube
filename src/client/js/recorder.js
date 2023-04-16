@@ -148,7 +148,8 @@ const handleDownload = async () => {
             
             // // [ Javascript 문법 ] a.click(); 통해 a태그 클릭을 가짜로 발생시켜, 녹화된 영상이 다운로드 되도록 함
             // a.click();
-
+    
+    // 코드보완요 --- ★★★ --- 카메라 녹화가 아닌 단일 영상 업로드 시에도 FFmpeg.WASM 통해 Thumbnail 추출되어 다운로드를 시키든, 업로드 버튼 클릭시 자동으로 해당 썸네일 이미지가 Video model 의 thumbUrl 에 저장되도록 코드 보완요
     // [ FFMpeg.WASM 문법 ] await ffmpeg.run('-i', files.input, '-ss', '00:00:01', '-frames:v', '1', files.thumb); 통해 files.input(즉, 녹화된 영상인 output.webm ) 영상의 1초 지점(즉,  '-ss', '00:00:01' )에서 첫 프레임의 스크린샷(즉, '-frames:v', '1')을 잡아내어 thumbnail.japg (즉, files.thumb) 라고 작명한 jpg 파일을 생성함
     await ffmpeg.run(
         '-i', files.input, 
@@ -213,34 +214,41 @@ const handleDownload = async () => {
     // 자체보완함 --- ★★★ --- 녹화된 영상 다운로드 후에 새로운 녹화가 가능한 환경으로 재세팅함 (즉, 녹화 버튼 UI 및 비디오 스트림 데이터)
     // handleReadyToStart();
 }
+        /*
+        // [ Web API & FFmpeg.WASM 문법 ] 영상 녹화 길이가 길어질수록 사용자 디바이스 리소스 기반으로 하는 FFmpeg.WASM 통한 파일 변환(webm -> mp4) 작업이 오래 걸리므로, setTimout() 통해 녹화 길이를 5초로 제한시켰고, 따라서 handleStop() 함수는 불필요해짐
+        const handleStop = () => {
+            // [ Javascript 문법 ] .removeEventListener() 및 .addEventListner() 통해 Toggle 방식으로 동작하도록 UI 와 Event 구성
+            // [ Javascript 문법 ] (즉, actionBtn 요소에 클릭이벤트 발생시, 실행시킬 함수가 교대로 교체되어 연계되도록 구성)
+            actionBtn.innerText = 'Download Recording';
+            actionBtn.removeEventListener('click', handleStop);
+            actionBtn.addEventListener('click', handleDownload);
 
-const handleStop = () => {
-    // [ Javascript 문법 ] .removeEventListener() 및 .addEventListner() 통해 Toggle 방식으로 동작하도록 UI 와 Event 구성
-    // [ Javascript 문법 ] (즉, actionBtn 요소에 클릭이벤트 발생시, 실행시킬 함수가 교대로 교체되어 연계되도록 구성)
-    actionBtn.innerText = 'Download Recording';
-    actionBtn.removeEventListener('click', handleStop);
-    actionBtn.addEventListener('click', handleDownload);
-
-    // [ Web API & Javascript 문법 ] handleStop 함수에 recorder.stop(); 코드를 배치하여 녹화 중지 버튼 누르면 녹화 종료되도록 코드 수정함
-    // [ Web API & Javascript 문법 ] 즉, 녹화 시작 버튼 누르고 10초 경과 후 setTimeout(() => { recorder.stop(); }, 10000) 코드 통해 녹화 종료시키는 방식은 폐기함
-    // [ Javascript 문법 ] MediaRecorder 값을 받는 recorder 변수를 여러 함수에서 용도에 맞게 사용하기 위해 전역 변수인 let recorder; 형태로 코드 최상단에 선언하는 방식으로 개선함
-    recorder.stop();
-}
+            // [ Web API & Javascript 문법 ] handleStop 함수에 recorder.stop(); 코드를 배치하여 녹화 중지 버튼 누르면 녹화 종료되도록 코드 수정함
+            // [ Web API & Javascript 문법 ] 즉, 녹화 시작 버튼 누르고 10초 경과 후 setTimeout(() => { recorder.stop(); }, 10000) 코드 통해 녹화 종료시키는 방식은 폐기함
+            // [ Javascript 문법 ] MediaRecorder 값을 받는 recorder 변수를 여러 함수에서 용도에 맞게 사용하기 위해 전역 변수인 let recorder; 형태로 코드 최상단에 선언하는 방식으로 개선함
+            recorder.stop();
+        }
+        */
 
 const handleStart = () => {
 
     // [ Javascript 문법 ] .removeEventListener() 및 .addEventListner() 통해 Toggle 방식으로 동작하도록 UI 와 Event 구성
     // [ Javascript 문법 ] (즉, actionBtn 요소에 클릭이벤트 발생시, 실행시킬 함수가 교대로 교체되어 연계되도록 구성)
-    actionBtn.innerText = 'Stop Recording';
+            // actionBtn.innerText = 'Stop Recording';
+
+    actionBtn.innerText = '5s Recording Now';
+    actionBtn.disabled = true;
     actionBtn.removeEventListener('click', handleStart);
-    actionBtn.addEventListener('click', handleStop);
+            // [ Web API & FFmpeg.WASM 문법 ] 영상 녹화 길이가 길어질수록 사용자 디바이스 리소스 기반으로 하는 FFmpeg.WASM 통한 파일 변환(webm -> mp4) 작업이 오래 걸리므로, setTimout() 통해 녹화 길이를 5초로 제한시켰고, 따라서 handleStop() 함수는 불필요해짐
+            // actionBtn.addEventListener('click', handleStop);
     
     // [ Web API 문법 ] 녹화 후 저장되게 만들거니까 녹화 작업 먼저 수행해야 함
     // [ Web API 문법 ] new MediaRecorder(stream) 통해 카메라 데이터 스트림 stream 값을 MediaRecorder 에 넣어줌
     // [ Javascript 문법 ] stream 변수에 든 카메라 데이터 스트림값을 여러 함수에서 각 용도에 맞게 사용해야 하므로, 특정한 함수 내에서 선언/정의 상태였던 const stream = await navigator.mediaDevices.getUserMedia({}) 를 전역변수 let stream 형태로 선언하고, stream = await navigator.mediaDevices.getUserMedia({}) 형태로 정의함
     // [ Web API 문법 ] MediaRecorder 객체 내의 state: "inactive" 상태이지만, stream 은 받아 오고 있는 상태(즉, 녹화할 준비가 되어 있으나 비활성 상태)
     // [ Javascript 문법 ] MediaRecorder 값을 받는 recorder 변수를 여러 함수에서 용도에 맞게 사용하기 위해 전역 변수인 let recorder; 형태로 코드 최상단에 선언하는 방식으로 개선함
-    recorder = new MediaRecorder(stream);
+    recorder = new MediaRecorder(stream, { mimeType: "video/webm"});
+    // recorder = new MediaRecorder(stream);
     // [ FFmpeg & Web API 문법 ] 브라우저단 비호환으로 폐기된 코드 recorder = new MediaRecorder(stream, { mimeType: "video/mp4"});
     
     // [ Web API 문버 ] recorder.stop(); 통해 dataavailable 이벤트(즉, MediaRecorder 전용 이벤트 중 하나) 가 Web API 구조적으로 자동 실행됨
@@ -267,6 +275,13 @@ const handleStart = () => {
         // [ Web API 문법 ] video.loop = true; 통해 영상 반복 재생
         video.loop = true;
         video.play();
+
+        // [ Web API & FFmpeg.WASM 문법 ] 영상 녹화 길이가 길어질수록 사용자 디바이스 리소스 기반으로 하는 FFmpeg.WASM 통한 파일 변환(webm -> mp4) 작업이 오래 걸리므로, setTimout() 통해 녹화 길이를 5초로 제한시켰고, 따라서 handleStop() 함수는 불필요해짐
+        // [ Web API 문법 ] setTimeout() 통해 5초 후 녹화 자동 종료되며, setTimeout() 내부의 recorder.stop(); 통해 dataavailable 이벤트(즉, MediaRecorder 전용 이벤트 중 하나) 가 Web API 구조적으로 자동 실행됨
+        // [ Web API 문법 ] dataavailable 이벤트는 .ondataavailable 핸들러 통해 다룰 수 있으며, .ondataavailable 핸들러 내부에서 actionBtn 버튼에 대해 handleDownload 이벤트 동작하도록 연결시킴
+        actionBtn.innerText = 'Download';
+        actionBtn.disabled = false;
+        actionBtn.addEventListener('click', handleDownload);
     }
 
     // 자체보완함 --- ★★★ --- Stop Recording 버튼 누른 후, handleStop() 함수 내의 recorder.stop(); 통해 Web API 구조적으로 dataavailable 이벤트 발생하며, 녹화된 영상을 .ondataavailable 이벤트 핸들러 통해서 다루게 되는데 이 핸들러 내부에 작성한 video.loop = true; video.play(); 코드 통해 녹화된 결과물 영상을 반복 재생해서 보여줌
@@ -280,12 +295,13 @@ const handleStart = () => {
     recorder.start();
         // console.log('recorder.js --- recoreder --- ',recorder);
 
-        // [ Web API 문법 ] recorder.start(); 후속으로 동작하는 setTimeout() 통해 10초 간 녹화한 후 setTimeout() 내부의 recorder.stop(); 통해 녹화를 마침
-        // [ Web API 문법 ] recorder.stop(); 통해 dataavailable 이벤트(즉, MediaRecorder 전용 이벤트 중 하나) 가 Web API 구조적으로 자동 실행됨
-        // [ Web API 문법 ] dataavailable 이벤트 내에는 녹화된 최종 비디오 데이터 값이 Web API 구조적으로 포함되어 있음
-        // setTimeout(() => {
-        //     recorder.stop();
-        // }, 10000)
+    // [ Web API 문법 ] recorder.start(); 후속으로 동작하는 setTimeout() 통해 5초 간 녹화한 후 setTimeout() 내부의 recorder.stop(); 통해 녹화를 마침
+    // [ Web API 문법 ] recorder.stop(); 통해 dataavailable 이벤트(즉, MediaRecorder 전용 이벤트 중 하나) 가 Web API 구조적으로 자동 실행됨
+    // [ Web API 문법 ] dataavailable 이벤트 내에는 녹화된 최종 비디오 데이터 값이 Web API 구조적으로 포함되어 있음
+    // [ Web API & FFmpeg.WASM 문법 ] 영상 녹화 길이가 길어질수록 사용자 디바이스 리소스 기반으로 하는 FFmpeg.WASM 통한 파일 변환(webm -> mp4) 작업이 오래 걸리므로, setTimout() 통해 녹화 길이를 5초로 제한시켰고, 따라서 handleStop() 함수는 불필요해짐
+    setTimeout(() => {
+        recorder.stop();
+    }, 5000);
 }
 
 const init = async () => {
@@ -294,7 +310,8 @@ const init = async () => {
     // [ regenerator-runtime 문법 ] 프론트엔드단 코드 async / await 적용 위해 설치 필요? (? 그때는 필요했고 지금은 없어도 된다?)
     stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: true,
+        // video: true,
+        video: {width: 1024, height: 576},
         // video: {width: 640, height: 480},
         // video: { facingMode: 'user'}
     });
