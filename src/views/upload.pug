@@ -4,47 +4,47 @@
 extends base.pug
 
 block content
+  div.upload__container
+    div.upload__video
+      //- [ HTML 문법 ] recoder.js 내의 video.srcObject = stream; video.play(); 코드 통해 카메라 화면 보여주기
+      //- [ Pug 문법 ] 비디오의 source 속성값을 video(src='') 형태와 같이 명시하지 않는 이유는 watch.pug 에서와는 다르게 recorder.js 내의 await navigator.mediaDevices.getUserMedia({}) 코드 통해 얻어지는 카메라 데이터 스트림값이 비디오의 source 로 활용될 것이기 때문
+      video#preview
 
-  div
-    //- [ HTML 문법 ] recoder.js 내의 video.srcObject = stream; video.play(); 코드 통해 카메라 화면 보여주기
-    //- [ Pug 문법 ] 비디오의 source 속성값을 video(src='') 형태와 같이 명시하지 않는 이유는 watch.pug 에서와는 다르게 recorder.js 내의 await navigator.mediaDevices.getUserMedia({}) 코드 통해 얻어지는 카메라 데이터 스트림값이 비디오의 source 로 활용될 것이기 때문
-    video#preview
+      //- [ HTML 문법 ] 카메라 녹화 기능 동작시키는 프론트엔드단 버튼
+      //- button#flip-button Front/Rear
+      button#actionBtn.social__btn Start Recording
 
-    //- [ HTML 문법 ] 카메라 녹화 기능 동작시키는 프론트엔드단 버튼
-    //- button#flip-button Front/Rear
-    button#actionBtn Start Recording
+    //- videoController.js 코드 내의 postUpload 컨트롤러에서 try {} catch {} 문법으로 잡아낸 오류가 있을 경우, upload.pug 템플릿에서 에러 메시지를 받을 수 있도록 { errorMessage: error._message } 형태로 보내줌
+    if errorMessage
+      span=errorMessage
+      //- span All fields are required
 
-  //- videoController.js 코드 내의 postUpload 컨트롤러에서 try {} catch {} 문법으로 잡아낸 오류가 있을 경우, upload.pug 템플릿에서 에러 메시지를 받을 수 있도록 { errorMessage: error._message } 형태로 보내줌
-  if errorMessage
-    span=errorMessage
-    //- span All fields are required
+    //- [ Multer 라이브러리 문법 ] Multer는 파일 업로드를 위해 사용되는 multipart/form-data 를 다루기 위한 node.js 의 미들웨어 입니다. 효율성을 최대화 하기 위해 busboy 를 기반으로 하고 있습니다.
+    //- [ Multer 라이브러리 문법 ] 주: Multer는 multipart (multipart/form-data)가 아닌 폼에서는 동작하지 않습니다.
+    //- [ Multer 라이브러리 문법 ] 업로드 하는 파일의 이름을 랜덤파일명으로 생성해서 처리함(장점: 서로 다른 두 사용자가 파일명만 동일한 서로 다른 내용의 파일을 업로드 하더라도 덮어씌워지는 사태 방지함)  
+    form(method='POST', enctype='multipart/form-data')
+      //- [ Pug 라이브러리 문법 ] 들여쓰기 주의: Inconsistent indentation. Expecting either 2 or 8 spaces/tabs.
+      //- 수명만료 form(method="POST")
 
-  //- [ Multer 라이브러리 문법 ] Multer는 파일 업로드를 위해 사용되는 multipart/form-data 를 다루기 위한 node.js 의 미들웨어 입니다. 효율성을 최대화 하기 위해 busboy 를 기반으로 하고 있습니다.
-  //- [ Multer 라이브러리 문법 ] 주: Multer는 multipart (multipart/form-data)가 아닌 폼에서는 동작하지 않습니다.
-  //- [ Multer 라이브러리 문법 ] 업로드 하는 파일의 이름을 랜덤파일명으로 생성해서 처리함(장점: 서로 다른 두 사용자가 파일명만 동일한 서로 다른 내용의 파일을 업로드 하더라도 덮어씌워지는 사태 방지함)  
-  form(method='POST', enctype='multipart/form-data')
-    //- [ Pug 라이브러리 문법 ] 들여쓰기 주의: Inconsistent indentation. Expecting either 2 or 8 spaces/tabs.
-    //- 수명만료 form(method="POST")
+      label(for='thumbSection') Thumbnail File
+      input(id='thumbSection', name='thumbByMulter', type='file', accept='image/*', required)
 
-    label(for='thumbSection') Thumbnail File
-    input(id='thumbSection', name='thumbByMulter', type='file', accept='image/*', required)
-
-    //- [ HTML 문법 ] <label> 을 <input> 요소와 연관시키려면, <input> 에 id 속성을 넣어야합니다. 그런 다음 <label> 에 id 와 같은 값의 for 속성을 넣어야합니다. 
-    //- [ HTML 문법 ] 또는, <label> 안에 <input> 을 중첩시킬 수 있습니다. 이 경우 연관이 암시적이므로 for 및 id속성이 필요없습니다.
-    label(for='videoSection') Video File    
-    //- [ HTML 문법 ] input( required ) 속성 명시해서 파일 지정해야만 input(type='submit') 태그의 업로드 버튼이 동작하도록 제한함
-    input(id='videoSection', name='videoByMulter', type='file', accept='video/*', required)
+      //- [ HTML 문법 ] <label> 을 <input> 요소와 연관시키려면, <input> 에 id 속성을 넣어야합니다. 그런 다음 <label> 에 id 와 같은 값의 for 속성을 넣어야합니다. 
+      //- [ HTML 문법 ] 또는, <label> 안에 <input> 을 중첩시킬 수 있습니다. 이 경우 연관이 암시적이므로 for 및 id속성이 필요없습니다.
+      label(for='videoSection') Video File    
+      //- [ HTML 문법 ] input( required ) 속성 명시해서 파일 지정해야만 input(type='submit') 태그의 업로드 버튼이 동작하도록 제한함
+      input(id='videoSection', name='videoByMulter', type='file', accept='video/*', required)
+      
+      //- HTML input reference 안에 minlength, maxlength 기능이 있음
+      //- maxlength 속성을 가진 input 태그는 maxlength 값 이상의 글자수는 타이핑 불가
+      //- PUG 파일(upload.pug)의 HTML form에서도 minlength, maxlength 설정할 수 있는데 굳이 왜 db 스키마에서도 설정해야 할까? 
+      //- 정답은 둘 다 해야함(upload.pug 페이지는 사용자가 개발자 도구로 HTML 재편집해 글자 수 제한이 풀릴 수 있음 / 이런 사용자로부터 사이트를 보호해야 하므로 db 스키마에도 글자 수 제한을 설정해야 함)
+      input(name="titleVideoUploadInput", type="text", placeholder="Title", maxlength=80, required)
+      input(name="description", type="text", placeholder="Description", minlength=10, required)
+      input(name="hashtags", type="text", placeholder="Hashtags, separated by comma.", required)
+      
+      input(type="submit" value="Upload Video")
     
-    //- HTML input reference 안에 minlength, maxlength 기능이 있음
-    //- maxlength 속성을 가진 input 태그는 maxlength 값 이상의 글자수는 타이핑 불가
-    //- PUG 파일(upload.pug)의 HTML form에서도 minlength, maxlength 설정할 수 있는데 굳이 왜 db 스키마에서도 설정해야 할까? 
-    //- 정답은 둘 다 해야함(upload.pug 페이지는 사용자가 개발자 도구로 HTML 재편집해 글자 수 제한이 풀릴 수 있음 / 이런 사용자로부터 사이트를 보호해야 하므로 db 스키마에도 글자 수 제한을 설정해야 함)
-    input(name="titleVideoUploadInput", type="text", placeholder="Title", maxlength=80, required)
-    input(name="description", type="text", placeholder="Description", minlength=10, required)
-    input(name="hashtags", type="text", placeholder="Hashtags, separated by comma.", required)
-    
-    input(type="submit" value="Upload Video")
-  
 block scripts
   //- [ Web API 문법 ] 스트림 데이터 다루는 코드가 담긴 recorder.js 파일을 upload.pug 에서 호출하여 카메라 녹화 기능 적용
   //- [ Web API 문법 ] 즉, await navigator.mediaDevices.getUserMedia({ audio: true, video: true,})
