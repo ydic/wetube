@@ -305,10 +305,20 @@ export const postUpload = async (req, res) => {
     userDbResult: { _id },
   } = req.session;
 
-  // [ Javascript ES6 문법 ] Multer 가 제공해주는 req.file 값에서 file 자체가 아닌 file 의 경로가 필요하므로 req.file.path 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.file;
-  const { path: fileUrl } = req.file;
-  // 혹은 import { path } from 'express/lib/application'; 코드로 임포트(vsc에서 자동기재처리) 한 다음 const { path } = req.file;
-  // 혹은 const file = req.file;
+	// [ Multer 문법 ] https://www.npmjs.com/package/multer
+	// [ Multer 문법 ] .fields(fields)
+	// [ Multer 문법 ] Accept a mix of files, specified by fields. ★ An object with arrays of files ★ will be stored in ★ req.files ★.
+	// [ Multer 문법 ] fields should be  ★ an array of objects with name and optionally a maxCount ★.
+	// [ Multer 문법 ] 오류 메시지 - thumbnail TypeError: Cannot read properties of undefined (reading 'path')
+	// [ Multer 문법 ] 오류 원인 - videoRouter.js 내의 .route('/upload') 주소에 관한 라우팅 설정시, 기존 단일 파일(즉, 영상 파일) POST 위한 .single() 문법으로는 복수 파일(즉, thumbnail 파일도 포함) POST 불가하므로 .fileds() 문법으로 라우팅 코드 개선함. 
+	// [ Multer 문법 ] 오류 원인 - 단, POST 하려는 path 값이 2개(즉, 영상파일용 & 썸네일용) 이므로 Multer 문법에서는 req.files (즉, 단일파일 전달용 req.file 이 아님) 사용하도록 명시되어 있음
+	// [ Javascript ES6 문법 ] Multer 가 제공해주는 req.file 값에서 file 자체가 아닌 file 의 경로가 필요하므로 req.file.path 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.files; (즉, 단일파일 전달용 req.file 이 아님) 
+				// const { path: fileUrl } = req.file;
+				// 혹은 import { path } from 'express/lib/application'; 코드로 임포트(vsc에서 자동기재처리) 한 다음 const { path } = req.file;
+				// 혹은 const file = req.file;
+	console.log('videoRouter.js --- Multer --- req.fileS ---', req.files);
+	// [ Multer 문법 ] 영상/썸네일 업로드 후 videoController.js 내의 postUPload 함수에서 감지되는 req.files 데이터의 생김새는 { thumbByMulter: [ { path: , 생략: } ], videoByMulter: [ { path: , 생략: } ] }
+	const { videoByMulter, thumbByMulter } = req.files;
 
   // Pug 코드의 form 태그 내의 input 태그에 name 속성으로 명명해 주어야 POST submit한 값이 key: value 형태로 req.body에서 포착 가능함
   const titleVideoUpload = req.body.titleVideoUploadInput;
@@ -327,9 +337,29 @@ export const postUpload = async (req, res) => {
 
       // [ Javascript ES6 문법 ] Multer 가 제공해주는 req.file 값에서 file 자체가 아닌 file 의 경로가 필요하므로 req.file.path 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.file;
       // [ Mongoose 문법 ] videoController.js 의 postUpload 함수 내의 Video.create{} 쿼리 코드가 동작하려면 video.js 의 Video 모델의 new mongoose.Schema({}) 스키마 내에 fileUrl: { type: String, required: true } 라고 정의되어 있어야 함
-      fileUrl,
-      // 혹은 fileUrl: path,
-      // 혹은 fileUrl: file.path,
+						// fileUrl,
+						// 혹은 fileUrl: path,
+						// 혹은 fileUrl: file.path,
+			// [ Multer 문법 ] 영상/썸네일 업로드 후 videoController.js 내의 postUPload 함수에서 감지되는 req.files 데이터의 생김새는 { thumbByMulter: [ { path: , 생략: } ], videoByMulter: [ { path: , 생략: } ] }
+			fileUrl: videoByMulter[0].path,
+			
+			/*
+			// [ mongoose & 정규식 RegEx 문법 ] 수강생삽질구간 #14.6 --- ★★★ --- 방법2. 섬네일이 안나와서 videoSchema.static() 기반으로 해본 결과입니다.
+
+			// [ mongoose & 정규식 RegEx 문법 ] 1. 섬네일 부분을 inspect 해보니 url의 path가 "uploads\videos\..." 이렇게 백슬래시로 되어있더군요. Linux 기반 운영체제들과는 달리 Windows의 path는 백슬래시를 사용한다는 것 같습니다.
+
+			// [ mongoose & 정규식 RegEx 문법 ] 2. 그래서 이전에 해시태그를 저장하기 전에 손봐주는 함수를 만들었던 것처럼, Video 모델에 다음과 같이 백슬래시를 슬래시로 바꾸어 주는 static함수를 만들고 업로드할 때 fileUrl과 thumbUrl에 적용해주었습니다.
+
+			// [ mongoose & 정규식 RegEx 문법 ] videoSchema.static("changePathFormula", (urlPath) => {
+			// return urlPath.replace(/\\/g, "/");
+			// });
+
+			// [ mongoose & 정규식 RegEx 문법 ] 3. 이렇게 일단 해결은 했지만, 근본적인 이유는 모르겠습니다. 왜냐하면 섬네일과 달리 영상과 아바타는 똑같이 백슬래시 url을 사용하는데도 불구하고 잘 작동했으니까요. 아시는 분이 있다면 공유해주시면 감사하겠습니다.
+			*/
+
+			// [ Javascript & 정규식 RegEx 문법 ] 수강생삽질구간 #14.6 --- ★★★ --- 방법1. Windows의 path는 백슬래시 (즉, \\ )를 사용
+						// thumbUrl: thumbByMulter[0].path,
+			thumbUrl: thumbByMulter[0].path.replace(/\\/g, '/'),
 
       // [ Mongoose 연계 문법 ] 기능01: (video.js 코드부터 참조요) 영상 재생 페이지에서 비디오 업로더 당사자가 아니면 Edit Video, Delete Video 접근하지 못하도록 버튼 숨김 처리하는 기능
       // 영상 업로드하는 사용자의 _id (즉, userController.js 의 PostJoin 함수 내의 await User.create({}) 쿼리문에 의한 Mongo DB 자체 부여값)를 전송

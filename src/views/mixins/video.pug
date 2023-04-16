@@ -5,7 +5,12 @@ mixin videoMixin(videoItem)
 
   //- #10.2 Styles Part Two 깃헙강의코드북붙했으니재확인요
   a(href=`/videos/${videoItem.id}`).video-mixin
-    div.video-mixin__thumb
+    //- [ Javascript & 정규식 RegEx 문법 ] 수강생삽질구간 #14.6 --- ★★★ --- 방법1. Windows의 path는 백슬래시 (즉, \\ )를 사용
+    //- [ Javascript & 정규식 RegEx 문법 ] videoController.js 내의 await Video.create({ thumbUrl: thumbByMulter[0].path.replace(/\\/g, '/'), 생략 })
+    //- #14.6 ??? 질문 - src 속성이 아닌 background-image 속성을 사용한 이유는 무엇? 이것이 유일한 적용 조합 방법인지?
+    div.video-mixin__thumb(
+      style=`background-image: url(/${videoItem.thumbUrl});background-size:cover;background-position:center;`
+    )
     div.video-mixin__data
         span.video-mixin__title=videoItem.title
         div.video-mixin__meta

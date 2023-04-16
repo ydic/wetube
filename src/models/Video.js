@@ -14,6 +14,8 @@ const videoSchema = new mongoose.Schema({
 
   // [ Mongoose 문법 ] videoController.js 의 postUpload 함수 내의 Video.create{} 쿼리 코드가 동작하려면 video.js 의 Video 모델의 new mongoose.Schema({}) 스키마 내에 fileUrl: { type: String, required: true } 라고 정의되어 있어야 함
   fileUrl: { type: String, required: true },
+
+  thumbUrl: { type: String, required: true },
       
   // [ Mongoose 문법 ] createdAt: Date 라고만 스키마를 만들고 { required: true } 속성을 기재하지 않으면 db 형식 코드(사용자 직접 입력하지 않는 자동 값 부여 내장항목 -예: Date)나 사용자 입력값에 대한 데이터 유효성 검사를 할 수 없음
   // [ Mongoose 문법 ] { required: true } 속성을 기재하면 내부 자동 부여 값(예-Date)이든 사용자 입력값이든 유효성 검사 가능해지고 오류가 있는 submit에 대해서는 db에 저장시키지 않음 ValidationError: Video validation failed: createdAt: Path `createdAt` is required.

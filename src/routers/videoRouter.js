@@ -46,7 +46,31 @@ videoRouter.route('/:id([0-9a-f]{24})/delete').all(protectorMiddleware).get(dele
 /////////////////////////////////////////////////////////////////
 // videoRouter.route('/:id([0-9a-f]{24})/delete').all(protectorMiddleware).get(deleteVideoElementFromUser, deleteVideo);
 
-
-videoRouter.route('/upload').all(protectorMiddleware).get(getUpload).post(videoUpload.single('videoByMulter'), postUpload);
+// [ Multer 문법 ] https://www.npmjs.com/package/multer
+// [ Multer 문법 ] .fields(fields)
+// [ Multer 문법 ] Accept a mix of files, specified by fields. ★ An object with arrays of files ★ will be stored in ★ req.files ★.
+// [ Multer 문법 ] fields should be  ★ an array of objects with name and optionally a maxCount ★.
+        // videoRouter.route('/upload').all(protectorMiddleware).get(getUpload).post(videoUpload.single('videoByMulter'), postUpload);
+videoRouter.route('/upload')
+	.all(protectorMiddleware)
+	.get(getUpload)
+	.post(
+		videoUpload.fields(
+			// [ Multer 문법 ] https://www.npmjs.com/package/multer
+			// [ Multer 문법 ] .fields(fields)
+			// [ Multer 문법 ] Accept a mix of files, specified by fields. ★ An object with arrays of files ★ will be stored in ★ req.files ★.
+			// [ Multer 문법 ] fields should be  ★ an array of objects with name and optionally a maxCount ★.
+			// [ Multer 문법 ] 오류 메시지 - thumbnail TypeError: Cannot read properties of undefined (reading 'path')
+			// [ Multer 문법 ] 오류 원인 - videoRouter.js 내의 .route('/upload') 주소에 관한 라우팅 설정시, 기존 단일 파일(즉, 영상 파일) POST 위한 .single() 문법으로는 복수 파일(즉, thumbnail 파일도 포함) POST 불가하므로 .fileds() 문법으로 라우팅 코드 개선함. 
+			// [ Multer 문법 ] 오류 원인 - 단, POST 하려는 path 값이 2개(즉, 영상파일용 & 썸네일용) 이므로 Multer 문법에서는 req.files (즉, 단일파일 전달용 req.file 이 아님) 사용하도록 명시되어 있음
+			// [ Javascript ES6 문법 ] Multer 가 제공해주는 req.file 값에서 file 자체가 아닌 file 의 경로가 필요하므로 req.file.path 에서 path 값을 받은 뒤에 ES6 문법을 활용해 fileUrl 이라고 바꿀 수 있음 const { path: fileUrl } = req.files; (즉, 단일파일 전달용 req.file 이 아님) 
+			// [ Multer 문법 ] 영상/썸네일 업로드 후 videoController.js 내의 postUPload 함수에서 감지되는 req.files 데이터의 생김새는 { thumbByMulter: [ { path: , 생략: } ], videoByMulter: [ { path: , 생략: } ] }
+			[
+				{ name: 'videoByMulter', maxCount: 1 },
+				{ name: 'thumbByMulter', maxCount: 1 }
+			]
+		),
+		postUpload
+		);
 
 export default videoRouter;
