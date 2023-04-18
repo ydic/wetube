@@ -28,9 +28,9 @@ export const localsMiddleware = (req, res, next) => {
   // [ 시큐어 보안 코딩 ] 비로그인 상태의 사용자가 로그인 된 사용자에게만 보이는 Edit-Profile 하이퍼링크조차 브라우저에 나타나지 않는 상황에서 사용자 정보 변경 페이지 URL 값을(즉, /users/edit) 직접 주소입력창에 입력하여 진입 시도할 때, 해당 URL 경로에 대한 접근을 제한시켜야 함(예- 리다이렉트 시키기)
   // [ 시큐어 보안 코딩 & Express-session 라이브러리 연계 문법 ] loggedInUserDb 에 접근하려는데 비로그인 상태이면 발생하는 에러에 대해 req.session.userDbResult || {}; 코드는 or 조건자와 빈 오브젝트(즉, {}, empty object) 를 덧붙여서 session 내의 user 값이 비어있는 상태일 때(즉, 사이트 방문자가 비로그인 상태일 때) loggedInUser 값이 undefined 여서 발생하게 되는 cannot read property '무언가' of undefined 오류를 방지할 수 있음
   res.locals.loggedInUserDb = req.session.userDbResult || {};
-        // console.log('로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult);
+        console.log('◆◆◆ middlewares.js --- 로그인할 때 생성되는 res.session.userDbResult---------', req.session.userDbResult);
   
-console.log('★★★★★★★★ res.locals.loggedInUserDb ///////////////',res.locals.loggedInUserDb )
+console.log('◆◆◆ middlewares.js --- res.locals.loggedInUserDb --- ',res.locals.loggedInUserDb )
 
   // * * * * 주의: next()를 호출하지 않으면 웹사이트가 정상 작동하지 않음
   next()
@@ -43,6 +43,10 @@ export const protectorMiddleware = (req, res, next) => {
     // [ 시큐어 보안 코딩 ] middleware 함수 성격이 있으므로 로그인 사용자(즉, loggedIn 값이 true)를 next() 처리하여 다음 작업으로 통과시킴
     return next();
   } else {
+    // [ express-flash 문법 ] req.flash() 통해 비로그인 사용자에게 페이지 접근 제한 알림 메시지 표시하여 상황 알림 및 로그인 요청
+    // [ express-flash 문법 ] 템플릿 (즉, Pug) 단에서 messages.직접작명한메시지유형명칭 으로 이 값을 받아서 표시해 주어야 브라우저 화면에 메시지 나타남
+    req.flash('error', 'Login in first.')
+
     // [ 시큐어 보안 코딩 ] 비로그인 사용자를 /login 페이지로 redirect 함
     // [문법 오타 오류] TypeError: res.redierct is not a function
     return res.redirect('/login');
@@ -54,6 +58,10 @@ export const publicOnlyMiddleware = (req, res, next) => {
   if(!req.session.loggedIn){
     return next();
   } else {
+    // [ express-flash 문법 ] req.flash() 통해 로그인 사용자에게 페이지 접근 제한 알림 메시지 표시하여 상황 알림
+    // [ express-flash 문법 ] 템플릿 (즉, Pug) 단에서 messages.직접작명한메시지유형명칭 으로 이 값을 받아서 표시해 주어야 브라우저 화면에 메시지 나타남
+    req.flash('error', 'This content is not authorized for logged-in users.')
+
     return res.redirect('/');
   }
 }

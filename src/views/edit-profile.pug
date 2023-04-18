@@ -17,10 +17,12 @@ block content
   //- 자체보완완료 --- ★★★ --- User.js 모델 내의 socialOnly : false 인 사용자는 avatarUrl : 항목에 담기는 값의 총 글자수가 48자(예- uploads\avatars\89a7577a465d529796065b886a8cd7ff ) 로 고정되어 있어서 48자 여부(사이트직접가입계정/GitHub계정)에 따라 아바타이미지 불러오는 주소값을 다르게 식별하도록 처리함
   //- 자체보완완료 --- ★★★ --- 기반코드1 middlewares.js 내의 export const avatarUpload = multer({ dest: 'uploads/avatars/', limits: { fileSize: 3000000, }, });
   //- 자체보완완료 --- ★★★ --- 기반코드2 edit-profile.pug 내의 label(for='avatarSection') Avatar 와 input(id='avatarSection', name='avatarByMulter', type='file', accept='image/*')
-  if loggedInUserDb.avatarUrl.length == 48
-    img(src='/' + loggedInUserDb.avatarUrl, width='100', height='100')
-  else
-    img(src=loggedInUserDb.avatarUrl, width='100', height='100')
+  //- 자체보완완료 --- ◆◆◆ 2차 추가 보완 --- 자체 홈페이지 통해 가입한 사용자가 프로필 변경 페이지 접근시 Cannot read properties of undefined (reading 'length') 오류 발생했는데, 신규 가입자라서 가입 당시의 POST 사항에 User.js 내의 suerSchema 에 avatarUrl: String, 항목 자체가 다뤄지지 않은 구조이므로 if loggedInUserDb.avatarUrl 확인부터 먼저 거쳐야 함
+  if loggedInUserDb.avatarUrl
+    if loggedInUserDb.avatarUrl.length == 48
+      img(src='/' + loggedInUserDb.avatarUrl, width='100', height='100')
+    else
+      img(src=loggedInUserDb.avatarUrl, width='100', height='100')
 
   //- [ Pug 라이브러리 문법 ] POST 요청으로 사용자 입력값을 전송할 때 form(method='POST') 형식 내에 action 속성을 명시하지 않을 경우, 같은 URL 주소로 POST 요청을 보내려는 것을 브라우저는 알고 있음
   //- join.pug 의 form(method='POST') 이하 코드 부문 일부 재활용

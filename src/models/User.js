@@ -56,9 +56,11 @@ userSchema.pre('save', async function(){
     console.log('User.js --- user.js bcrypt 해싱전',this.password);
     this.password = await bcrypt.hash(this.password, 5);
     console.log('User.js --- user.js bcrypt 해싱후',this.password);
+    console.log('◆◆◆ User.js --- userSchema.pre(\'save\', async function(){}) 코드 동작함');
   }
 })
 
+// ReferenceError: hashingPassword is not defined
 // userSchema.pre("save", hashingPassword);
 
 // userSchema.static('hashingPassword', function(password){

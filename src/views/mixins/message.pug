@@ -1,0 +1,7 @@
+//- [Pug 문법] mixin을 통해 각 페이지마다 같은 형태의 HTML을 보여주면서 다른 데이터를 제공할 수 있도록 해줌
+//- [Pug 문법] mixin 모델 자체 제작하는 문법은 mixin 작명한mixin모델명(파리미터명) 형태로 만들어야 함
+//- [ Pug 문법 & express-flash 문법 ] 예시) include mixins/message 경로와 같이 자체 제작 및 작명한 mixin 모델인 messageMixin 모델을 Pug 템플릿 단에서 include mixins/message 코드 상단 기입 후   +messageMixin(파라미터명) 형태의 Pug 문법으로 불러와 재사용함
+//- [ Pug 문법 & express-flash 문법 ] mixin (즉, message.pug) 기법과 SCSS (즉, styles.scss) 통해 서버단에서 생성한 req.flash() 데이터가 템플릿단에서 알림 형태로 시각화 표시되도록 만듦
+mixin messageMixin(kind,text)
+	div.message(class=kind)
+		span=text

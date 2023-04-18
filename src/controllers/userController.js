@@ -4,7 +4,7 @@
 // User.js에서 export default User; 한 것을 import 함
 // import User, { hashingPassword } from '../models/User';
 import User from "../models/User";
-// import Video from '../models/video';
+// import Video from '../models/Video';
 
 // [ node-fetch 라이브러리 문법] 브라우저의 JS에서는 fetch 함수 있지만 서버의 nodejs는 없다는 점(에러 문구: fetch is not defined)에서 다른 플랫폼임을 확인할 수 있음.
 // [ node-fetch 라이브러리 문법] node-fetch 라이브러리 설치를 통해 서버의 nodejs 에서도 관련 기능 사용 가능해짐
@@ -75,13 +75,13 @@ export const postJoin = async (req, res) => {
 
   try {
     await User.create({
-      // [ MongoDB 문법 ] Mongo Shell에서 .create() 결과물 확인하기 (명령어 순서: mongo / show dbs / use wetube / show collections / db.users.find() 명령어로 데이터 조회하면 사용자 비밀번호가 실제 입력값 그대로 노출되는 문제를 확인할 수 있음. 따라서 bctypt 라이브러리에 기반한 hash 함수(일방향 함수이므로 출력값으로 입력값 알 수 없음. 같은 입력값으로는 항상 같은 출력값 나옴)를 비밀번호에 적용하여 db에 비밀번호가 hash 상태로 저장되도록 보안성 강화요
+      // [ MongoDB 문법 ] Mongo Shell에서 .create() 결과물 확인하기 (명령어 순서: mongo / show dbs / use wetube / show collections / db.users.find() 명령어로 데이터 조회하면 사용자 비밀번호가 실제 입력값 그대로 노출되는 문제를 확인할 수 있음. 따라서 bcrypt 라이브러리에 기반한 hash 함수(일방향 함수이므로 출력값으로 입력값 알 수 없음. 같은 입력값으로는 항상 같은 출력값 나옴)를 비밀번호에 적용하여 db에 비밀번호가 hash 상태로 저장되도록 보안성 강화요
       // [ MongoDB 문법 ] Mongo Shell에서 데이터 지우는 명령어는 db.콜렉션명.remove({}) (질문: 리눅스의 rm -f 같이 실행권한 강력한 명령어인 것인가?)
       name,
       email,
       username,
       password,
-      // password: await User.hashingPassword(password),
+      // password: await User.hashingPassword(password), // 기반 코드 - User.js 의 userSchema.static('hashingPassword', ) 
       // password: hashingPassword(password),
       location,
     });
@@ -501,6 +501,11 @@ export const postEdit = async (req, res) => {
     // [ Express-session 라이브러리 문법 ★★★ ] session 은 로그인 할 때 한 번만 작성되도록 코딩함. 로그인 이후에는 session 을 건드리지 않기 떄문에 로그인 했을 때 읽어들인 userDbResult 값의 모습으로 그대로 잔류하는 상태.
     // [ Express-session 라이브러리 문법 ★★★ ] userController.js 의 postJoin 함수 내에서 req.session.userDbResult = userDbResult; 코드에서와 같이 session 에 userDbResult 를 넣도록 코딩한 상태이므로, wetube DB 에서 userDbResult 오브젝트를 업데이트 했으면 그 값이 그대로 반영되어 담겨지는 session 자체도 업데이트 해주어야 함
     req.session.userDbResult = updatedUser;
+    
+    // [ epxress-flash 문법 ] req.flash() 통해 사용자에게 프로필 변경 POST 요청 처리 성공 알림 메시지 표시하여 상황 알림
+    // [ express-flash 문법 ] 템플릿 (즉, Pug) 단에서 messages.직접작명한메시지유형명칭 으로 이 값을 받아서 표시해 주어야 브라우저 화면에 메시지 나타남
+    req.flash('success', 'Changes saved.');
+
     return res.redirect("/users/edit");
   } catch (error) {
     return res.status(400).render("edit-profile", {
@@ -517,6 +522,11 @@ export const getChangePassword = (req, res) => {
 
   //- [ Github OAuth API 연계 문법 ] Github OAuth 방식으로 wetube DB 에 계정 만든 사용자는 Wetube DB 내에 비밀번호 값이 없으므로 비밀번호 변경 페이지 자체를 보여주지 말아야 함
   if (req.session.userDbResult.socialOnly === true) {
+
+    // [ epxress-flash 문법 ] req.flash() 통해 Github 계정을 통해 가입한 사용자에게 비밀번호 변경 요청 처리 불가 알림 메시지 표시하여 상황 알림
+    // [ express-flash 문법 ] 템플릿 (즉, Pug) 단에서 messages.직접작명한메시지유형명칭 으로 이 값을 받아서 표시해 주어야 브라우저 화면에 메시지 나타남
+    req.flash('error', 'Users logged in with Github can\'t change password.');
+
     return res.redirect("/");
   }
   // [ Pug 라이브러리 문법 ] views 폴더 이하에 pug 파일이 너무 많아져서 폴더로 카테고리화 하기 위해 views 폴더 이하에 users 폴더를 만들고 그 안에 change-password.pug 를 생성함
@@ -524,7 +534,9 @@ export const getChangePassword = (req, res) => {
   return res.render("users/change-password", { pageTitle: "Change Password" });
 };
 
-export const postChangePassword = async (req, res) => {
+export const postChangePassword =  async (req, res) => {
+  console.log('◆◆◆ postChangePassword --- req.body ---', req.body);
+
   // [ Mongo DB 명령어] mongo / show dbs / use wetube / show collections / db.sessions.remove({}) / db.users.remove({}) / db.users.find({})
 
   const {
@@ -540,12 +552,14 @@ export const postChangePassword = async (req, res) => {
       userDbResult: { _id },
     },
 
-    // 작업 01단계: edit-profile.pug 의 from(method='POST') 이하 input 태그값에서 넘어온 값들
+    // 작업 01단계: edit-profile.pug 의 form(method='POST') 이하 input 태그값에서 넘어온 값들
     body: { oldPassword: oldPassword, newPassword, newPasswordConfirmation },
   } = req;
 
   // 작업 02단계: 로그인한 사용자의 session 에서 _id 값을 이용해 wetube DB 로부터 사용자 데이터 받아옴
   const user = await User.findById(_id);
+
+  console.log('◆◆◆ postChangePassword --- await User.findById(_id); ---', user);
 
   // userController.js 의 postLogin 함수 내의 wetube DB 와 사용자 입력 비밀번호 일치여부 코드와 유사한 구조
   // [ Bcrypt 라이브러리 문법 ] postLogin 컨트롤러에서 로그인 처리를 위해 bcrypt.compare() 내장함수로 사용자 입력 비밀번호와 DB Hash 비밀번호 값이 동일한지 비교하기 위함
@@ -558,10 +572,13 @@ export const postChangePassword = async (req, res) => {
 
   // 방식B - [ Bcrypt 라이브러리 & Mongoose 연계 문법] oldPassword 값은 change-password.pug 내의 input 값이 넘어온 것이고, password 값은 postChangePassword 함수 내에서 await User.findById(_id) 로부터 가져온 사용자의 비밀번호 값임(즉, wetube DB 에 저장되어 있는 사용자의 비밀번호 값)
   const matchedPassword = await bcrypt.compare(oldPassword, user.password);
+  console.log('◆◆◆ postChangePassword --- bcrypt.compare(oldPassword, user.password); --- ', matchedPassword);
+
   if (!matchedPassword) {
     // [ Pug 라이브러리 문법 ] views 폴더 이하에 pug 파일이 너무 많아져서 폴더로 카테고리화 하기 위해 views 폴더 이하에 users 폴더를 만들고 그 안에 change-password.pug 를 생성함
     // [ Pug 라이브러리 문법 ] return res.render('users/change-password', {생략}) 코드의 users/change-password 경로는 userRouter.js 내의 userRouter.route('/change-password').생략 코드와는 별개이며 pug 엔진이 참조하는 views 폴더 이하의 users 폴더 안에 있는 change-password.pug 를 가리킴
     // [ Express 라이브러리 문법 ] return res.render() 함수로 errorMessage 키값을 pug 템플릿에 전달하는 것은 사용자에게는 비밀번호 불일치 상황 이해시켰지만 브라우저는 여전히 오류 상황을 몰라 비밀번호 기기내 저장 팝업을 띄우므로 status(400) 코드를 첨가하여 브라우저도 오류 상황 인지하도록 코딩해야 함
+    // TypeError: Cannot set properties of undefined (setting 'password')
     return res.status(400).render("users/change-password", {
       pageTitle: "Change Password",
       errorMessage: "The current password is incorrect.",
@@ -579,42 +596,61 @@ export const postChangePassword = async (req, res) => {
     });
   }
 
-  // 버전 AAA postChangePassword WITHOUT PRE('SAVE', ) ★★★★★★★★★★★★★★★★★★
+  // // 버전 AAA postChangePassword WITHOUT PRE('SAVE', ) ★★★★★★★★★★★★★★★★★★
   // const passwordUpdatedUser = await User.findByIdAndUpdate(_id, { password: await User.hashingPassword(newPassword) }, { new: true})
-  // console.log('pohstChangePassword --- passwordUpdatedUser ----', passwordUpdatedUser)
-  // req.session.loggedInUser.password = passwordUpdatedUser.password;
-  // console.log('req.session.loggedInUser = passwordUpdatedUser --------', req.session.loggedInUser)
+  // console.log('◆◆◆ pohstChangePassword --- passwordUpdatedUser ----', passwordUpdatedUser);
+  // // req.session.loggedInUser.password = passwordUpdatedUser.password;
+  // req.session.userDbResult.password = passwordUpdatedUser.password;
+  // console.log('◆◆◆ req.session.userDbResult.password = passwordUpdatedUser --------', req.session.userDbResult.password);
 
   // 버전 BBB postChangePassword WITH PRE('SAVE', ) ★★★★★★★★★★★★★★★★★★
-  const passwordUpdatedUser = await User.findByIdAndUpdate(_id, { password: newPassword }, { new: true})
-  await passwordUpdatedUser.save()
-  req.session.loggedInUser.password = passwordUpdatedUser.password;
+  // ??? ◆◆◆ 강좌 재확인요 ◆◆◆ --- 사용자가 변경한 비밀번호가 await User.findByIdAndUpdate() 통해 DB 에 저장될 때, hash 기법이 적용되지 않은 채로 비밀번호 원본값이 저장됨
+  // ??? ◆◆◆ 강좌 재확인요 ◆◆◆ --- await passwordUpdatedUser.save(); 통해서 User.js 의 userSchema.pre('save', ) 함수가 동작할 것이라고 예상했으나, .findById() 가 아닌 .findByIdAndUpdate() 문법 때문인지 hash 함수를 거치지 않았음
+  // const passwordUpdatedUser = await User.findByIdAndUpdate(_id, { password: newPassword }, { new: true})
+  // console.log('◆◆◆ postChangePassword --- passwordUpdatedUser --- ', passwordUpdatedUser)
+  // await passwordUpdatedUser.save();
 
-  // 버전 CCC postChangePassword WITH PRE('SAVE', ) ★★★★★★★★★★★★★★★★★★
+      // req.session.loggedInUser.password = passwordUpdatedUser.password;
+  // req.session.userDbResult.password = passwordUpdatedUser.password;
+
+
+  // // 버전 CCC postChangePassword WITH PRE('SAVE', ) ★★★★★★★★★★★★★★★★★★
   // const existingUser = await User.findById({_id})
   // existingUser.password = newPassword;
+  // console.log('◆◆◆ postChangePassword --- existingUser.password --- ', existingUser.password);
   // await existingUser.save();
-  // req.session.loggedInUser.password = existingUser.password;
+  // // TypeError: Cannot set properties of undefined (setting 'password')
+  // // req.session.loggedInUser.password = existingUser.password;
+  // req.session.userDbResult.password = existingUser.password;
+  
+  console.log('◆◆◆ postChangePassword --- req.session --- ', req.session);
+  console.log('◆◆◆ postChangePassword --- req.session.userDbResult --- ', req.session.userDbResult);
+  
+  // console.log('◆◆◆ postChangePassword --- req.session.loggedInUser.password --- ', req.session.loggedInUser.password);
 
   // 작업 05단계: [ Express-session & Mongoose & Bcrpyt 연계 문법 ] userController.js 의 postChangePassword 함수 내에서 session 속에 들어있는 사용자 식별값인 _id 값을 불러와서 그 사용자의 password 값에 newPassword 값을 대입해 비밀번호를 변경함
   // 방식A - 로그인한 사용자의 session 으로부터 사용자를 식별해 password 값에 newPassword 값을 대입하고자 await User.findById(_id) 코드로 wetube DB 검색함
-  console.log("old password -----", user.password);
+  // console.log("old password -----", user.password);
   user.password = newPassword;
 
   // [ Bcrpyt 라이브러리 문법 ] 사용자에 의해 변경된 비밀번호를 wetube DB 에 업데이트 하기 전에 User.js 의 userSchema.pre('save', async function(){생략} 코드를 이용해 hash 적용시킴
-  console.log(
-    "userController.js --- new unhashed password -----",
-    user.password
-  );
+  // console.log(
+  //   "userController.js --- new unhashed password -----",
+  //   user.password
+  // );
 
   // 작업 06단계: [ Javascript 문법 ] DB 에 데이터를 저장하는 데는 시간이 걸리므로 async 함수 내에 await 명시요
   await user.save();
 
   // 방식A - [ Express-session & Bcrypt 연계 문법 ] 변경된 비밀번호에 대해 hash 처리 된 상태의 값인 user.password(즉, 현재값)를 req.session.user.password(즉,그때의 값)에도 반영시켜 session 속에 들어있는 password 값을 변경된 값으로 최신화시켜야 함
-  // req.session.userDbResult.password = user.password;
+  req.session.userDbResult.password = user.password;
 
-  console.log("userController.js --- new password -----", user.password);
+  // console.log("userController.js --- new password -----", user.password);
   // send notification
+
+  // [ epxress-flash 문법 ] req.flash() 통해 홈페이지 통해 직접 가입한 사용자에게 비밀번호 변경 요청 처리 성공 알림 메시지 표시하여 상황 알림
+  // [ express-flash 문법 ] 템플릿 (즉, Pug) 단에서 messages.직접작명한메시지유형명칭 으로 이 값을 받아서 표시해 주어야 브라우저 화면에 메시지 나타남
+  req.flash('info', 'Password updated.');
 
   // 작업 07단계: wetube DB 상에서 비밀번호 변경 작업이 완료되었다면 사용자를 로그아웃시켜 변경된 비밀번호로 재로그인 하도록 redirect 시킴
   return res.redirect("/users/logout");
@@ -624,8 +660,20 @@ export const postChangePassword = async (req, res) => {
 export const remove = (req, res) => res.send("Remove User ctrl");
 
 export const logout = (req, res) => {
-  // [ Express-session 라이브러리 연계 문법 ] 실질적인 로그아웃을 위해서는 req.session.destroy() 함수를 통해 세션을 종료시켜야 함
-  req.session.destroy();
+
+      // [ Express-session 라이브러리 연계 문법 ] 실질적인 로그아웃을 위해서는 req.session.destroy() 함수를 통해 세션을 종료시켜야 함
+      // req.session.destroy();
+  
+  // - when I used "req.flash" after "req.session.destroy()",
+  // the error was occurred because of destroyed session(Error: req.flash() requires sessions)
+  // - If we use req.flash() we can't destroy sessions, instead we have to empty the req.session.user and req.session.isLoggedIn = false
+  req.session.loggedIn = false;
+  req.session.userDbResult = null;
+  
+  // [ epxress-flash 문법 ] req.flash() 통해 로그아웃 요청한 사용자에게 요청 처리 성공 알림 메시지 표시하여 상황 알림
+  // [ express-flash 문법 ] 템플릿 (즉, Pug) 단에서 messages.직접작명한메시지유형명칭 으로 이 값을 받아서 표시해 주어야 브라우저 화면에 메시지 나타남
+  req.flash('info', 'Bye Bye');
+  
   return res.redirect("/");
 };
 

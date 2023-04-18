@@ -44,3 +44,46 @@ main {
   margin: 0 auto;
   margin-top: 50px;
 }
+
+@keyframes goAway {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-70px);
+    opacity: 0;
+  }
+}
+
+// [ Pug 문법 & express-flash 문법 ] mixin (즉, message.pug) 기법과 SCSS (즉, styles.scss) 통해 서버단에서 생성한 req.flash() 데이터가 템플릿단에서 알림 형태로 시각화 표시되도록 만듦
+.message {
+  position: absolute;
+  top: 70px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  max-width: 440px;
+  padding: 10px 20px;
+  border-radius: 80px;
+
+  text-align: center;
+  font-size: 1.1rem;
+
+  // [ CSS 문법 ] animation: forwads 속성 - The final property value (as defined in the last @keyframes at-rule) is maintained after the animation completes.
+  animation: goAway .7s ease-in-out forwards;
+  animation-delay: 3s;
+
+  &.error {
+    background-color: tomato;
+    color: white;
+  }
+  &.info {
+    background-color: goldenrod;
+    color: white;
+  }
+  &.success {
+    background-color: seagreen;
+    color: white;
+  }
+}

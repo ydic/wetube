@@ -1,5 +1,8 @@
 //- extends base.pug를 명시한 pug파일들에 html 기본 구성 골격을 리턴해줌
 
+//- [ Pug 문법 & express-flash 문법 ] 예시) include mixins/message 경로와 같이 자체 제작 및 작명한 mixin 모델인 messageMixin 모델을 Pug 템플릿 단에서 include mixins/message 코드 상단 기입 후   +messageMixin(파라미터명) 형태의 Pug 문법으로 불러와 재사용함
+include mixins/message
+
 doctype html 
 //- html(lang="en")
 html(lang="ko")
@@ -23,6 +26,20 @@ html(lang="ko")
     link(rel="stylesheet" href="/static/css/styles.css")
 
   body
+
+    //- [ express-flash 문법 ] Access the messages in your views via locals.messages (.jade in this case):
+    //- [ Pug 문법 & express-flash 문법 ] express-flash 통해 템플릿(즉, Pug 의 views) 단에서 사용 가능한 messages locals 만들어짐
+    //- [ Pug 문법 & express-flash 문법 ] mixin (즉, message.pug) 기법과 SCSS (즉, styles.scss) 통해 서버단에서 생성한 req.flash() 데이터가 템플릿단에서 알림 형태로 시각화 표시되도록 만듦
+    if messages.error
+      //- span= messages.error
+      +messageMixin('error', messages.error)
+    if messages.info
+      //- span= messages.info
+      +messageMixin('info', messages.info)
+    if messages.success
+      //- span= messages.success
+      +messageMixin('success', messages.success)
+
     //- [Pug 문법] include를 통해 모든 pug 페이지(extends)에 동일한 header 태그를 생성함
     //- [ CSS & saas-loader ] Pug 전용 /views 폴더에서 mixins 폴더나 partials 폴더 내에 생성한 파일명과 동일한 이름으로 SCSS 쪽에도 (즉, /client/scss/components/ 쪽에도) 파일을 만들어 놓은 후에 CSS 작업요 
     include partials/header

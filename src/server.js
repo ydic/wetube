@@ -11,6 +11,11 @@ import morgan from "morgan";
 // [ Express-session 라이브러리 문법 ] session과 cookie 설정을 위한 라이브러리 설치(npm i express-session) 및 호출
 import session from "express-session";
 
+// [ express-flash 문법 ] https://www.npmjs.com/package/express-flash
+// [ express-flash 문법 ] express-flash 라이브러리 통해 템플릿 상에서 사용자에게 메시지를 표시할 수 있음 (즉, session 기반이라 한 사용자에게만 표시)
+// [ express-flash 문법 ] express-flash 라이브러리 동작을 위해서 사전 설정되어 있어야 하는 기반 라이브러리는 cookieParser / session (즉, express-session)
+import flash from "express-flash";
+
 // [ connect-mongo 라이브러리 문법 ]
 import MongoStore from "connect-mongo";
 
@@ -96,6 +101,11 @@ app.use(
     })
   );
 
+// [ express-flash 문법 ] https://www.npmjs.com/package/express-flash
+// [ express-flash 문법 ] express-flash 라이브러리 통해 템플릿 상에서 사용자에게 메시지를 표시할 수 있음 (즉, session 기반이라 한 사용자에게만 표시)
+// [ express-flash 문법 ] express-flash 라이브러리 동작을 위해서 사전 설정되어 있어야 하는 기반 라이브러리는 cookieParser / session (즉, express-session)
+app.use(flash());
+
 // [ Express-session 라이브러리 연계 문법 ] locals를 통해 누가 로그인했는지 공유함 (Pug와 Express가 서로 res.locals 값을 공유할 수 있도록(즉, res.render 없이도 Pug 템플릿 쪽으로 변수롤 전역적으로 보낼 수 있음) 기본 설정되어 있음)
 // 주의: server.js에서 localsMiddleware가 코드 순서상 Express-session middleware ( 즉, app.use(session({}) )다음에 오기 때문에 가능함
 // 주의: middlewares.js의 localMiddleware 함수는 session 오브젝트를 받아와야 그 값을 기반으로 res.locals. 값을 생성해 Pug 템플릿에서도 전역으로 값을 받아와 사용 가능해짐
@@ -144,6 +154,10 @@ app.use("/static", express.static("assets"));
           return res.send(`aaa ${req.session.id}\n${req.session.potato}`);
         })
         */
+
+app.get('*', (req, res) => {
+  return res.render("404", { pageTitle: "Page not found." });
+});
 
 //  초기화 담당하는 init.js에서 express 라이브러리 액세스 할 수 있도록 export 해줌
 export default app;

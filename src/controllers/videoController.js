@@ -5,7 +5,7 @@
 
 // Video.js에서 export default Video; 한 것을 import 함
 import User from "../models/User";
-import Video from "../models/video";
+import Video from "../models/Video";
 
 // Controller 모듈 코드 내의 res.render를 통해 views 폴더 이하의 pug파일을 html 코드로 render하여 받아옴
 // express 엔진은 NodeJS를 실행시켜주는 package.json 파일 위치(cwd) 기준으로 views 폴더(src/views)를 바라보기 때문에 별도의 import, export 불필요
@@ -52,7 +52,7 @@ export const home = async (req, res) => {
       .sort({ createdAt: "desc" })
       .populate("owner");
 
-    console.log("videoController.js ---- home ---- videos", videos);
+    // console.log("videoController.js ---- home ---- videos", videos);
 
     return res.render("home", { pageTitle: "Home", realArrayVideos: videos });
   } catch {
@@ -194,6 +194,11 @@ export const getEdit = async (req, res) => {
   // [ 시큐어 보안 코딩 & Javascript ] console.log(typeof video.owner, typeof req.session.userDbResult._id); 확인해보니 video.owner 는 Object 형식이고 req.session.userDbResult._id 는 String 형식
   // [ 시큐어 보안 코딩 & Javascript ] 조건문의 양변을 String 타입으로 변환 처리요 if(String(video.owner) !== String(_id)){}
   if (String(video.owner) !== String(_id)) {
+
+  // [ epxress-flash 문법 ] req.flash() 통해 해당 게시물 게시자가 아닌 사용자에게 GET 요청 처리 불가 알림 메시지 표시하여 상황 알림
+  // [ express-flash 문법 ] 템플릿 (즉, Pug) 단에서 messages.직접작명한메시지유형명칭 으로 이 값을 받아서 표시해 주어야 브라우저 화면에 메시지 나타남
+    req.flash('error', 'You are not the owner of the video.');
+
     // 표기효율성 증진용
     // if(video.owner !== _id){
     return res.status(403).redirect("/");
@@ -258,6 +263,10 @@ export const postEdit = async (req, res) => {
     userDbResult: { _id },
   } = req.session; // 표기효율성 증진용
   if (String(video.owner) !== String(_id)) {
+    // [ epxress-flash 문법 ] req.flash() 통해 해당 게시물 게시하지 않은 사용자에게 POST 요청 처리 불가 알림 메시지 표시하여 상황 알림
+    // [ express-flash 문법 ] 템플릿 (즉, Pug) 단에서 messages.직접작명한메시지유형명칭 으로 이 값을 받아서 표시해 주어야 브라우저 화면에 메시지 나타남
+    req.flash('error', 'You are not the owner of the video.');
+
     // 표기효율성 증진용
     // if(video.owner !== _id){
     return res.status(403).redirect("/");
@@ -266,6 +275,10 @@ export const postEdit = async (req, res) => {
   // [ Mongoose 문법 ] <db model>.findByIdAndUpdate 내장함수를 이용해 _id값에 해당하는 db데이터에 대해 update 처리함
   // [ Mongoose 문법 ] 주의: .findByIdAndUpdate 기능을 위한 Pre Middleware는 없음 / findByIdAndUpdate는 findOneAndUpdate를 호출함 / findOneAndUpdate를 위한 Middleware는 있음 / findOneAndUpdate는 save hook을 호출하는 기능은 없으며 update 하려는 문서에 접근할 수 없음 /
   await Video.findByIdAndUpdate(idVideo, handlePostEdit);
+
+  // [ epxress-flash 문법 ] req.flash() 통해 해당 게시물 게시한 사용자에게 POST 요청 처리 성공 알림 메시지 표시하여 상황 알림
+  // [ express-flash 문법 ] 템플릿 (즉, Pug) 단에서 messages.직접작명한메시지유형명칭 으로 이 값을 받아서 표시해 주어야 브라우저 화면에 메시지 나타남
+  req.flash('success', 'Changes saved.');
 
   console.log(req.body);
   return res.redirect(`/videos/${idVideo}`);
