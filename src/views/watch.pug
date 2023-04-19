@@ -87,6 +87,14 @@ block content
     br
     a(href=`${video.id}/delete`) Delete Video &rarr;
 
+  //- [ Express 문법 ] 오류 내용 - Uncaught TypeError: Cannot read properties of null (reading 'querySelector')
+  //- [ Express 문법 ] 오류 원인 - watch.pug 단에서 if loggedin 조건문 값이 false 인 경우(즉, 비로그인 상태) ID속성인 #commentForm 속성이 브라우저단에 나타나지 않도록 설정한 상황에서 commentSection.js 에서 .querySelector('#commentForm'); 동작하여 오류 발생
+  if loggedIn
+    div.video__comments
+      form.video__comment-form#commentForm
+        textarea(cols='30', rows='10', placeholder='Write a nice comment..')
+        button Add Comment
+
 //- [ WebPack 문법 & Pug 문법 ] ★★★★★ webpack.config.js 에서 bundle 처리된 코드 결과물이 브라우저단에 반영된 상태는 아니므로 pug페이지들에 html 기본 구성 골격을 리턴해 주는 extends base.pug 파일 내에서 block 태그(예- block scripts)를 만들어 각 pug페이지별 용도에 맞게 script(src="") 형식의 코드를 통해 목적에 맞는 bundle 처리된 코드를 pug 페이지 내로 불러와야 함
 //- 본 구간에서 들여쓰기 하면 본 위치 상단에 적힌 코드인 block content 에 종속되는 block scripts 가 되어버리므로 들여쓰기 없어야 함
 //- [Pug 문법] block을 통해 base.pug 레이아웃 기반으로 html 내용 재구성
@@ -94,3 +102,6 @@ block scripts
   //- [ WebPack & 시큐어 보안 코딩 & Express 라이브러리 문법 ] webpack.config.js 설정을 마쳤다면 server.js 에서 express.static('노출시키려는 폴더명') 코드로 Express를 통해 assets 폴더 공개하기 (즉, 기본적으로 폴더들은 비공개이므로)
   //- [ WebPack & 시큐어 보안 코딩 & Express 라이브러리 문법 ] /static/어쩌구 페이지 주소로 접근 요청할 경우 server.js 에서 설정해 놓은 assets app.use("/static", express.static("assets")); 라우터에 의해 assets 폴더가 공개되어 있으므로 그 폴더로 접근시켜줌
   script(src="/static/js/videoPlayer.js")
+
+  //- [ Pug 문법 ] watch.pug 에 commentSection.js 불러오기
+  script(src="/static/js/commentSection.js")
