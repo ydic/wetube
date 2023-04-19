@@ -32,7 +32,10 @@ const userSchema = new mongoose.Schema({
   // [ Mongoose 연계 문법 ] 1개의 영상에 대한 소유주가 1명이지만 소유주는 여러 영상을 소유할 수 있으므로 array 형태로 스키마 추가함
   // [ Mongoose 문법 ] videos 의 type 유형은 ObjectId 유형인데 Javascript 기반에서는 ObjectId 라는 유형을 인식하지 못하므로 Mongoose 라이브러리를 활용해 ObjectId 라는 속성을 추출 및 연계하여 type: mongoose.Schema.Types.ObjectId 형태로 인식시킴
   // [ Mongoose 문법 ] ref: 'Video' 라고 지정함으로써 Mongoose 에게 videos 의 ObjectId 라는 값은 Video 모델로부터 온다고(즉, 참조된다고) 알려주게 됨
-  videos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }]
+  videos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
+
+  // [ mongoose 문법 ] 사용자 본인이 작성한 댓글(즉, type: mongoose.Schema.Types.ObjectId) 에 대한 정보를 ref: 'Comment' 모델에서 참조
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
 });
 
 // [ Mongoose 문법 ] join.pug의 input 태그에서 submit한 내용이 User.create() 함수에 의해 처리되기 전에 .pre('save', function(){}) 미들웨어 코드로 비밀번호 hash 상태로 변환시킴

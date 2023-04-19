@@ -37,6 +37,9 @@ const videoSchema = new mongoose.Schema({
   // [ Mongoose 문법 ] owner 의 type 유형은 ObjectId 유형인데 Javascript 기반에서는 ObjectId 라는 유형을 인식하지 못하므로 Mongoose 라이브러리를 활용해 ObjectId 라는 속성을 추출 및 연계하여 type: mongoose.Schema.Types.ObjectId 형태로 인식시킴
   // [ Mongoose 문법 ] ref: 'User' 라고 지정함으로써 Mongoose 에게 owner 의 ObjectId 라는 값은 User 모델로부터 온다고(즉, 참조된다고) 알려주게 됨
   owner: { type: mongoose.Schema.Types.ObjectId, require: true, ref: 'User'},
+
+  // [ mongoose 문법 ] 영상에 달린 댓글(즉, type: mongoose.Schema.Types.ObjectId) 에 대한 정보를 ref: 'Comment' 모델에서 참조
+  comments: [{ type: mongoose.Schema.Types.ObjectId, require: true, ref: 'Comment'}],
 });
 
 // [ Mongoose 문법 ] 주의: 미들웨어(Middleware) 코드는 model 코드 이전에 작성되어야 함

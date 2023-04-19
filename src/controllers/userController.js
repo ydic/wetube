@@ -684,7 +684,7 @@ export const see = async (req, res) => {
   // [ Express 라이브러리 연계 문법 ] userRouter.js 의 userRouter.get("/:id", see); 라우팅 코드로부터 전달받은 id 파라미터 값(즉, URL 로부터 가져온 값)을 가져와야 함
   const { id } = req.params;
 
-  // [ Mongoose 연계 문법 ] URL 에 있는 id 파리미터를 이용해 사용자를 찾아야 함 (즉, My Profile 페이지 연결은 비로그인 상태에서도 전체공개 페이지이기 때문에 session 내의 _id 값(즉, req.session.userDbResult._id) 으로 사용자 정보를 찾지 않음)
+  // [ Mongoose 연계 문법 ] URL 에 있는 id 파라미터를 이용해 사용자를 찾아야 함 (즉, My Profile 페이지 연결은 비로그인 상태에서도 전체공개 페이지이기 때문에 session 내의 _id 값(즉, req.session.userDbResult._id) 으로 사용자 정보를 찾지 않음)
   // [ Mongoose 연계 문법 ] Relationship 작업B - 2차버전간결코드 <즉, Mongoose 의 .populate('videos') 곁들인> ) 1차버전장황코드 DB 초기화 선행요 / 사용자가 업로드한 모든 video 목록 보여주기: User 모델에 video list(즉, 여러 개의 video 목록) 양단 연결하는 array 형식의 스키마 추가요
   // [ Mongo DB & Mongoose 연계 문법 ★★★] 이처럼 Video 모델과 User 모델을 연결하는 스키마와 controller 를 만들려면 우선적으로 mongo 콘솔 명령어 db.users.remove({}) 와 db.videos.remove({}) 를 실행해 두 개의 collection (즉, users 와 videos) 를 모두 삭제(즉, 초기화) 해야 함
   // [ Mongoose 문법 ] userController.js 의 see 함수 내의 const userProfileDbResult = await User.findById(id) 코드였을 때는 userProfileDbResult.videos 에 _id 값(String 형태)만 담기는 형태였는데 .populate('videos') 속성을 추가로 연결하면 videos 에 video 모델 스키마에 기반한 DB 값(array 형태의 Object 값들)이 담기게 됨
