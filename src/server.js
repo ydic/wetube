@@ -59,9 +59,24 @@ app.use(logger);
 
 // [ Express 문법 ] express 스스로는 form의 body(즉, value)를 처리할 줄 모름.
 // [ Express 문법 ] route들을 사용하기 전에 middleware를 사용해야 함
-// [ Express 문법 ] server.js에서 express.urlencoded() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 form을 처리하고 싶다고 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
+// [ Express 문법 ] server.js에서 express.urlencoded() 내장함수를 middleware로써 기능하도록 app.use(urlencoded( { extended: true } )); 라고 코딩하여 express에게 ★ form을 처리하고 싶다고 ★ 알려주면 Javascript 형식으로 변형시켜줘서 우리가 사용할 수 있게 됨
 // [ express ] This object will contain key-value pairs, where the value can be a string or array (when extended is false), or any type (when extended is true).
 app.use(express.urlencoded({ extended: true }));
+
+// [ Express & Javascript 문법 ] fetch() 통해 서버 통신하려면 JSON.stringify() 통해 데이터가 JSON 자료형으로 변환되어야 하고, JSON.parse() 통해 본래 자료형으로 재변환 되어야 함 (*주의 - app.use(express.json()); 미들웨어 통해 JSON.parse() 기능 대체 가능)
+// [ Express & Javascript 문법 ] ★★★ JSON 자료형은 Object 또는 Array 자료형에 따옴표를 친 형태라서 문자취급 받음
+// [ Express & Javascript 문법 ] JSON.parse() 함수로 따옴표를 제거시키면 브라우저단에서 데이터 인식 가능함 (*주의 - app.use(express.json()); 미들웨어 통해 JSON.parse() 기능 대체 가능)
+      // [ Express & Javascript 문법 ] express.text() - This is a built-in middleware function in Express. It parses incoming request payloads into a string and is based on body-parser.
+      // [ Express & Javascript 문법 ] express.text() - https://expressjs.com/en/api.html#express.text
+      // [ Express 문법 ] 핵심1/4 - 한 개의 내용물만 fetch() POST 요청하려는 경우라면, commentSection.js 에서 fetch( , { method: , body: text } ) 형태의 코드를 통해 사용자 댓글(즉, textarea 태그) 입력값을 Javascript Object 자료형이 아닌 String 자료형으로 fetch() 해야만 요청 페이로드 Request Payload 에 사용자 댓글 입력값 텍스트가 온전하게 담김
+// [ Express 문법 ] 핵심2/4 - Express 자체적으로는 텍스트 자료형으로 생긴 요청 페이로드 request payload 를 인식 및 처리할 줄 모름.
+      // [ Express 문법 ] 핵심3/4 - 한 개의 내용물만 fetch() POST 요청하려는 경우라면, server.js 의 app.use(express.text()); 미들웨어 거치도록 만들어서 사용자가 프론트엔드단에서 입력한 값이 서버측 req.body 에서 조회 가능함 (즉, 본 미들웨어 코드가 없으면, req.body 에 수신되는 데이터 전혀 없음)
+      // app.use(express.text());
+// [ Express 문법 ] https://expressjs.com/en/api.html#express.json
+// [ Express 문법 ] This is a built-in middleware function in Express. It parses incoming requests with JSON payloads and is based on body-parser.
+// [ Express 문법 ] Returns middleware that only parses JSON and only looks at requests where the Content-Type header matches the type option.
+// [ Express 문법 ] 핵심4/4 - headers: { 'Content-Type': 'application/json', } 명시하여 fetch() 통한 POST 요청 데이터의 자료형이 JSON 형식이라는 것을 server.js 의 app.use(express.json()); 미들웨어 코드에게 알려줘야만 JSON.stringify() 됐던 값이 본래의 Javascript Object 자료형으로 재변환된 후에 req.body 에서 사용자 입력값이 조회 가능함
+app.use(express.json());
 
 // console.log('server.js ------', process.env.COOKIE_SECRET);
 
@@ -127,9 +142,6 @@ app.use(localsMiddleware);
           })
         })
         */
-
-
-
 
 // route들을 사용하기 전에 middleware를 사용해야 함
 app.use("/", rootRouter);

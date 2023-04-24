@@ -562,3 +562,17 @@ export const deleteVideo = async (req, res) => {
 
   return res.redirect("/");
 };
+
+export const createComment = (req, res) => {
+  console.log('videoControllers.js --- createComment --- req.params ---', req.params);
+
+  // [ Web API & Express 문법 ] req.body 조회시 확인되는 값이 없으며(스포 - 미들웨어 코드 필요함 / server.js 에 app.use(express.text()); ), 요청 페이로드 Request Payload 자리에 [object Object] 라는 값이 담겨 있음 (즉, fetch() 통신은 JSON 형식 기반인데, fetch() 코드에 Javascript Object 자료형 값을 주입할 경우, [object Object] 형태로 자동 변환됨)
+  // [ Web API & Express 문법 ] 개발자도구 F12 > 네트워크 > comment 파일 > 페이로드 > 요청 페이로드 [object Object] 이 들어있음
+  // [ Web API & Express 문법 ] form 기반 입력값의 경우, req.body 에서 사용자 입력값을 수신하려면 server.js 의 app.use(express.urlencoded({ extended: true })); 라는 미들웨어 코드가 필요함
+  // [ Web API & Express 문법 ] commentSection.js 의 handleSubmit() 함수 내에서 fetch() 통한 POST 요청시 사용자가 댓글란에 입력한 값을 오브젝트 형태로 전송(즉, fetch( , method: , body: { text }); ) 했기 때문에, 요청 페이로드 Request Payload 자리에 string 형태의 [object Object] 라는 값이 담겨 있음 ( 기본 동작 체계 - 프론트엔드단에서 서버단으로 POST 요청시 데이터 자료형이 string 형으로 자동 변형됨)
+  // [ Web API & Express 문법 ] 따라서 fetch() 통한 POST 요청시, object 자료형(즉, body: { text } ) 이 아니라 string 자료형(즉, body: text } 으로 서버에 전달해야 [object Object] 라는 값이 아닌 사용자가 POST 한 댓글 원문 텍스트를 Request Payload 영역에서 수신할 수 있음
+
+  console.log('videoControllers.js --- createComment --- req.body ---', req.body);
+
+  return res.end();
+}

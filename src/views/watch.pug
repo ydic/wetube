@@ -104,4 +104,11 @@ block scripts
   script(src="/static/js/videoPlayer.js")
 
   //- [ Pug 문법 ] watch.pug 에 commentSection.js 불러오기
+  //- [ Pug & Javascript 문법 ] if loggedIn 조건문 통해 로그인 상태에서만 watch.pug 단의 댓글 작성용 form 이 화면에 표시되도록 설정함
+  //- [ Javascript 문법 ] 비로그인 상태면 if loggedIn 조건문 충족되지 않는 상황에서 script(src="/static/js/commentSection.js") 통해 Pug 단의 댓글 작성용 form 에 대해 DOM 기반으로 처리하려다 보니 오류 메시지 발생함
+  //- [ Javascript 문법 ] Uncaught TypeError: Cannot read properties of null (reading 'querySelector')
+  //- [ Javascript 문법 ] Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')
+  //- [ Javascript 문법 ] 로그인 여부를 기준으로 form 에 대해 Pug 단과 Javascript 단에서 동작 처리를 달리할 수 있도록 코드 구성			
+  //- if loggedIn //- [ form 취급 방안A ] 로그인 사용자에 한해 Pug 단에서 form 에 대한 DOM 다루는 commentSection.js 파일 참조 허용
+  //- [ form 취급 방안B ] 를 채택함 / [ form 취급 방안A ] 을 미채택함
   script(src="/static/js/commentSection.js")
