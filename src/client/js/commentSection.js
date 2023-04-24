@@ -56,7 +56,8 @@ const handleSubmit = (event) => {
 		)
 	});
 
-	
+	// [ Javascript 문법 ] fetch() 통한 POST 요청 후, textarea 내의 사용자 입력값을 비우기
+	textarea.value = '';
 
 }
 
