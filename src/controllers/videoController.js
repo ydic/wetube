@@ -103,7 +103,8 @@ export const watch = async (req, res) => {
   // const video = await Video.findById(idVideo)
   // [ Mongoose 문법 ] videoController.js 의 watch 함수 내의 const video = await Video.findById(idVideo) 코드였을 때는 video.owner 에 _id 값(String 형태)만 담기는 형태였는데 .populate('owner') 속성을 추가로 연결하면 owner 에 user 모델 스키마에 기반한 DB 값(Object 형태)이 담기게 됨
   // [ Mongoose 문법 ] 즉, .populate('owner') 코드를 추가로 연결하면 Mongoose 가 video 를 찾고 그 안에서 owner 도 찾아 줌
-  const video = await Video.findById(idVideo).populate("owner");
+  // [ mongoose 문법 ] video.comments.push(postedComment._id); 쿼리와 video.save(); 쿼리 코드 통해 댓글 단 특정 영상의 comments 배열에 댓글ID 값을 배열의 요소로 저장하면 ---> videoController.js 의 watch 함수에서 const video = await Video.findById(idVideo).populate("owner").populate("comments"); 코드 통해 comments collection 으로부터 댓글ID(즉, _id) / 댓글작성자(즉, owner) / 댓글 달린 영상ID(즉, video) / 댓글내용(즉, text) 값을 .populate("comments") 해올 수 있음
+  const video = await Video.findById(idVideo).populate("owner").populate("comments");
 
   console.log(
     "videoController.js ------ watch ----- video >>>>>> Pug -----",
@@ -598,6 +599,18 @@ export const createComment = async (req, res) => {
   })
 
   console.log('videoControllers.js --- createComment --- postedComment ---', postedComment);
+
+  const video = await Video.findById(id);
+  console.log('videoControllers.js --- createComment --- await Video.findById(id); ---', video);
+
+  if(!video){
+    // [ Express 문법 ] .sendStatus() 는 상태코드 보낸 후 Request 를 종료함
+    return res.sendStatus(404);
+  }
+
+  // [ mongoose 문법 ] video.comments.push(postedComment._id); 쿼리와 video.save(); 쿼리 코드 통해 댓글 단 특정 영상의 comments 배열에 댓글ID 값을 배열의 요소로 저장하면 ---> videoController.js 의 watch 함수에서 const video = await Video.findById(idVideo).populate("owner").populate("comments"); 코드 통해 comments collection 으로부터 댓글ID(즉, _id) / 댓글작성자(즉, owner) / 댓글 달린 영상ID(즉, video) / 댓글내용(즉, text) 값을 .populate("comments") 해올 수 있음
+  video.comments.push(postedComment._id);
+  video.save();
 
   return res.sendStatus(201); // 상태코드 - 201 Created
 }
