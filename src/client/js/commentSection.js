@@ -7,48 +7,83 @@ const form = document.querySelector('#commentForm');
 
 const videoContainer = document.querySelector('#videoContainer');
 
+// [ Javascript 문법 ] document.querySelectorAll() 통해 사용자 본인이 작성한 모든 댓글들에 대한 삭제 버튼들이 NodeList 자료형 배열에 배열의 요소로 담김
+const commentDeleteBtn = document.querySelectorAll('.video__comment-deleteBtn');
+console.log('commentSection.js --- 기본 상태에서 commentDeleteBtn 조회시--- ', commentDeleteBtn);
+
+const RequestDeleteComment = async (event) => {
+
+	console.log('commentSection.js --- RequestDeleteComment 함수 내에서의 commentDeleteBtn 조회시--- ', commentDeleteBtn);
+	console.log('commentSection.js --- commentDeleteBtn --- 삭제버튼누름 --- event.target.parentElement', event.target.parentElement);
+
+	// [ Javascript 문법 ] 자바스크립트 상에서 videoContainer.dataset.videoid; 코드 통해 watch.pug 내의 div#videoContainer(data-videoid=video._id) 속성을 읽어와	해당 영상ID 값을 DELETE 요청하는 라우트 코드(즉, apiRouter.js 의 apiRouter.delete() 코드) 에 활용함
+	const videoId = videoContainer.dataset.videoid;
+
+	// [ Javascript 문법 ] event.target.parentElement.dataset; 통해 삭제 버튼의 부모 요소 태그(즉, li.video__comment(data-id=comment._id) 코드)를 프론트엔드단에서의 삭제 대상으로 특정함
+	const commentIdToDelete = event.target.parentElement.dataset;
+	
+	const response = await fetch(`/api/videos/${videoId}/comment`, {
+		method: 'DELETE',
+
+		// [ Express 문법 ] headers: { 'Content-Type': 'application/json', } 명시하여 fetch() 통한 DELETE 요청 데이터의 자료형이 JSON 형식이라는 것을 server.js 의 app.use(express.json()); 미들웨어 코드에게 알려줘야만 프론트엔드단에서 보내는 fetch( , { body: JSON.stringify(값)}) 값이 서버단의 req.body 에서 조회 가능함
+		headers: {
+			'Content-Type': 'application/json',
+		},
+
+		// [ Express 문법 ] fetch() 통한 POST 요청하려는 데이터를 JSON.stringify() 통해 string 자료형으로 변환한 상태여서 Express 에서 JSON 자료형이 아닌 텍스트 자료형으로 인식하기에 req.body 에서 조회 불가하므로, headers: { 'Content-Type': 'application/json', } 명시하여 이 문제를 해결
+		body: JSON.stringify(commentIdToDelete),
+	});
+	
+	console.log('commentSections.js --- response.status --- ', response.status);
+	
+	// [ Express & Javascript 문법 ] videoController.js 의 deleteComment 함수 속 await Comment.findByIdAndDelete(id); 통해 댓글 삭제 성공시 서버단에서 return res.sendStatus(200); 상태코드를 보내줌
+	// [ Express & Javascript 문법 ] 프론트엔드단에서 상태코드 200 확인되면, 클릭 이벤트 발생한 요소의 부모 요소.remove(); 통해 페이크 댓글을 브라우저에 표시되지 않도록 지움
+	if(response.status == 200) {
+
+		const element = event.target.parentElement;
+	
+		console.log('commentSection.js --- if(response.status === 202) --- event.target.parentElement; ---', event.target.parentElement);
+		
+		element.remove();
+	}
+}
+
+// [ Javascript 문법 ] document.querySelectorAll() 통해 사용자 본인이 작성한 모든 댓글들에 대한 삭제 버튼들이 NodeList 자료형 배열에 배열의 요소로 담김
+// [ Javascript 문법 ] .forEach((btn)=>{ btn.addEventListener('click', ) }); 통해 NodeList 자료형 배열의 각 요소들(즉, 삭제 버튼)에 클릭 이벤트 리스너를 부착하여 서버단으로 DELETE 요청 보내주는 RequestDeleteComment 함수가 실행될 수 있도록 만듦
+commentDeleteBtn.forEach((btn)=>{
+	// btn.addEventListener('click', ()=>{console.log('이거 삭제하려고 방금 클릭했음', btn, btn.parentElement.dataset)});
+	btn.addEventListener('click', RequestDeleteComment);
+});
+
 // [ Javascript 문법 ] 프론트엔드(watch.pug)단에 페이크 댓글 만드는 함수
-const addComment = (text) => {
-		// const divUlElement = document.querySelector('.video__comments ul');
-		// console.log('divUlElement ★ ---', divUlElement);
+const addComment = (text, newCommentId) => {
+
 		const videoComments = document.querySelector(".video__comments ul");
 		
-		// const li = document.createElement('li');
 		const newComment = document.createElement("li");
 
-		// li.classList.add('video__comment');
 		newComment.className = "video__comment";
+		
+		// [ Javascript 문법 ] newComment.dataset.id 통해 브라우저단 HTML 상에 <li data-id="newCommentId값"></li> 형태로 페이크 댓글ID 부여 가능함
+			// newComment.dataset.id = newCommentId; // [ Javascript 문법 ] .dataset.id = 는 단일용도
+		newComment.setAttribute('data-id', `${newCommentId}`); // [ Javascript 문법 ] .setAttribute() 는 다용도
 
-		// const spanX = document.createElement('span');
 		const span2 = document.createElement("span");
-  
-		// spanX.innerText = '❌';
+		span2.classList.add('video__comment-deleteBtn');
 		span2.innerText = "❌";
-
-		// li.appendChild(spanX);
 		newComment.appendChild(span2);
 
-		// const iconFa = document.createElement('i');
 		const icon = document.createElement("i");
-
-		// iconFa.classList.add('fas');
-		// iconFa.classList.add('fa-comment');
 		icon.className = "fas fa-comment";
-
-		// li.appendChild(iconFa);
 		newComment.appendChild(icon);
-		
-		// const spanText = document.createElement('span');
+
 		const span = document.createElement("span");
-
-		// spanText.innerText = `${text}`;
 		span.innerText = ` ${text}`;
-
-		// li.appendChild(spanText);
 		newComment.appendChild(span);
 
-		// divUlElement.prepend(li);
 		videoComments.prepend(newComment);
+
+		newComment.addEventListener('click', RequestDeleteComment);
 }
 
 const handleSubmit = async (event) => {
@@ -117,8 +152,11 @@ const handleSubmit = async (event) => {
 	if(status === 201){
 		// console.log('create fake comment');
 
-		// [ Javascript 문법 ] 프론트엔드(watch.pug)단에 페이크 댓글 만드는 함수
-		addComment(text);
+		// [ Javascript & Web API 문법 ] videoController.js 의 postedComment 함수 통해 DB 에 댓글 POST 성공시, return res.status(201).json({ newCommentId: postedComment._id }); 코드 통해 페이크 댓글 만드는 데 필요한 댓글ID 가 담긴 JSON 자료형 데이터를 서버가 응답해주면, 프론트엔드단에서 await response.json(); 통해 그 데이터를 인식함
+		const { newCommentId } = await response.json();
+
+		// [ Javascript 문법 ] 프론트엔드(watch.pug)단에 페이크 댓글 만드는 함수 호출
+		addComment(text, newCommentId);
 	}
 
 	// [ Javascript 문법 ] fetch() 통한 POST 요청 후, textarea 내의 사용자 입력값을 비우기

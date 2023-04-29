@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerView, createComment } from '../controllers/videoController';
+import { registerView, createComment, deleteComment } from '../controllers/videoController';
 
 // [ Web API & Express 문법 ] API 통신 기법은 백엔드가 템플릿을 렌더링 하지 않더라도 프론트엔드와 백엔드 간의 통신하는 방법
 const apiRouter = express.Router();
@@ -9,5 +9,8 @@ const apiRouter = express.Router();
 apiRouter.post('/videos/:id([0-9a-f]{24})/view', registerView)
 
 apiRouter.post('/videos/:id([0-9a-f]{24})/comment', createComment)
+
+// [ Express 문법 ] watch.pug 에 대한 commentSection.js 내의 RequestDeleteComment 함수에서 fetch() 통한 DELETE 요청 발생시 서버단의 videoController.js 의 deleteComment 함수 실행으로 연결해주는 라우터
+apiRouter.delete('/videos/:id([0-9a-f]{24})/comment', deleteComment)
 
 export default apiRouter;

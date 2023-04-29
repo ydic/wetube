@@ -103,8 +103,17 @@ block content
     ul
       //- [ Javascript 문법 ] reverse() 통해 배열 순서를 반전함 (즉, 최신 댓글순 상위 정렬)
       each comment in video.comments.reverse()
-        li.video__comment
-          span ❌
+        //- [ MongoDB & Express-session 문법 ] 댓글 작성자(즉, comment.owner) 값과 로그인한 사용자 식별ID (즉, middlewares.js 의 res.locals.loggedInUserDb = req.session.userDbResult || {}; 코드에 기반한 loggedInUserdb._id 값) 값을 확인하는 용도로 브라우저단에 출력해봄
+        //- span=`comment.owner: ${comment.owner}`
+        //- br
+        //- span=`loggedInUserDb._id: ${loggedInUserDb._id}`
+        //- br
+        //- [ Javascript ] data-id=comment._id 속성 통해 사용자가 댓글 삭제하는 DELETE 요청시 댓글ID 식별 가능함
+        li.video__comment(data-id=comment._id)
+          
+          //- [ 시큐어 보안 코딩 & Express-session 문법 ] if comment.owner == loggedInUserDb._id 통해, 로그인한 사용자(즉, loggedInUserDb._id)가 댓글 작성자(즉, comment.owner)로 확인되면, 본인이 작성한 댓글에 한해 삭제할 수 있는 버튼 보여줌
+          if comment.owner == loggedInUserDb._id
+            span.video__comment-deleteBtn ❌
           i.fas.fa-comment
           span #{comment.text}
 

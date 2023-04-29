@@ -612,5 +612,37 @@ export const createComment = async (req, res) => {
   video.comments.push(postedComment._id);
   video.save();
 
-  return res.sendStatus(201); // 상태코드 - 201 Created
+  // 상태코드 - 201 Created
+        // return res.sendStatus(201); 
+  // [ Web API 문법 ] 오류 현상 예시 - res.sendStatus() 에 .json() 결착시 ERR_CONNECTION_RESET 201 (Created) 오류 발생함
+  // [ Web API 문법 ] 오류 원인 - res.sendStatus() 메서드가 응답 본문을 설정하지 않기 때문입니다. 
+  // [ Web API 문법 ] 오류 원인 - 따라서 res.sendStatus() 메서드는 상태 코드를 설정하고 응답 본문을 전달하지 않는 간단한 방법으로 사용됩니다. 
+  // [ Web API 문법 ] 오류 원인 - res.status() 메서드를 사용하여 상태 코드와 응답 본문을 모두 설정해야합니다.
+  // [ Javascript 문법 ] return res.status().json({}) 통해 백엔드단에서 프론트엔드단으로 응답시 데이터 전달 가능함
+  // [ Web API & Express 문법 ] 댓글 등록 후, 개발자도구 F12 > 네트워크 > comment 파일 > 미리보기 > 서버로부터 받은 응답 속에서 Object 데이터 (즉, {newCommentId: "644caf74d391735c76ae502a"} 형태의 Object ) 를 확인할 수 있음
+  // return res.status(201).json({ newCommentId: postedComment._id });
+  return res.status(201).json({ newCommentId: postedComment._id });
+}
+
+export const deleteComment = async (req, res) => {
+  console.log('videoController.js --- deleteComment --- req.body ---', req.body);
+  // [ Javascript & Web API 문법 ] commentSection.js 의 RequestDeleteComment 속의 const commentIdToDelete = event.target.parentElement.dataset; 통해 삭제 버튼의 부요 요소 속성에서 댓글ID 를 얻은 후, fetch() 통한 DELETE 요청에 해당 댓글ID 를 담아서 서버단에 전달함 (즉, fetch( 중략, body: JSON.stringify(commentIdToDelete), ) 코드)
+  const {
+    body: { id },
+  } = req;
+
+  // [ mongoose 문법 ] await Comment.findByIdAndDelete(id); 통해 프론트엔드단에서 fetch() 통한 DELETE 요청에 보낸 댓글ID 를 받아 해당 댓글을 DB 에서 삭제함
+  const comment = await Comment.findByIdAndDelete(id);
+  
+  console.log('videoController.js --- deleteComment --- await Comment.findByIdAndDelete(id); --- ', comment);  
+  
+  if(!comment){
+    return res.sendStatus(404);
+  } else {
+    
+  // [ Web API 문법 ] 오류 현상 예시 - res.sendStatus() 에 .json() 결착시 ERR_CONNECTION_RESET 201 (Created) 오류 발생함
+  // [ Web API 문법 ] 오류 원인 - res.sendStatus() 메서드가 응답 본문을 설정하지 않기 때문입니다. 
+  // [ Web API 문법 ] 오류 원인 - 따라서 res.sendStatus() 메서드는 상태 코드를 설정하고 응답 본문을 전달하지 않는 간단한 방법으로 사용됩니다. 
+  return res.sendStatus(200);
+  }
 }
